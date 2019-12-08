@@ -28,7 +28,13 @@ function makePeachesAdminMenuPage() {
 }
 
 function renderAdmin(){
-	echo '<div id="peachesMain"></div>';
+	$CF7_PLUGIN_NAME = "contact-form-7/wp-contact-form-7.php";
+
+	if (is_plugin_active($CF7_PLUGIN_NAME)) {
+		echo '<div id="peachesMain"></div>';
+	} else {
+		echo '<strong>' . __('Peaches works only when Contact Form 7 is installed and activated.') . '</strong>';
+	}
 }
 
 function loadAdminJs() {
@@ -49,15 +55,40 @@ function initAdminPage() {
 	//) );
 }
 
-add_action('admin_menu', 'makePeachesAdminMenuPage');
+function actionCF7Submit( $instance, $result ) {
+	$cases = ['spam', 'mail_sent', 'mail_failed'];
 
-function addPeaches() {
-	wp_enqueue_script('vuejs');
-	return '<div id="peachesMain"></div>';
+	if ( 
+		empty( $result['status'] ) ||
+		!in_array( $result['status'], $cases ) 
+	) {
+		error_log('Validation failed, results not stored. Status: ' . $result['status'] ?? 'empty');
+		return;
+	}
+
+	$submission = WPCF7_Submission::get_instance();
+	if ( 
+		!$submission ||
+		!$posted_data = $submission->get_posted_data() 
+	) {
+		error_log('No posted data');
+		return;
+	}
+
+	//TODO: Here the $posted_data can be serialised
+	error_log('Posted data:' . print_r($posted_data, 1));
 }
 
+add_action('admin_menu', 'makePeachesAdminMenuPage');
+add_action( 'wpcf7_submit', 'actionCF7Submit', 10, 2 );
+
 /**
- * Comment in for usage in frontend through shortcode
- * add_action('wp_enqueue_scripts', 'registerVueScripts');
- * add_shortcode("peaches4cf7", 'addPeaches');
- */
+*  Comment in for usage in frontend through shortcode
+*
+*  function addPeaches() {
+*  	wp_enqueue_script('vuejs');
+*  	return '<div id="peachesMain"></div>';
+*  }
+* add_action('wp_enqueue_scripts', 'registerVueScripts');
+* add_shortcode("peaches4cf7", 'addPeaches');
+*/
