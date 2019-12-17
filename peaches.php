@@ -8,12 +8,25 @@
 function registerVueScripts() {
 	//TODO: Intorduce setting that build is loaded in dev environment and that for production its linked from the place were its created
 	wp_register_script( 
-		'vuejs', 
-		'http://localhost:8080/dist/build.js',
+		'vue_vendors', 
+		'http://localhost:8080/js/chunk-vendors.js',
 		false, //no dependencies
 		'0.0.1',
 		true //in the footer otherwise it Vue triggered too early
 	);
+	wp_register_script( 
+		'vuejs', 
+		'http://localhost:8080/js/app.js',
+		['vue_vendors'],
+		'0.0.1',
+		true //in the footer otherwise it Vue triggered too early
+	);
+
+	wp_enqueue_script('vue_vendors');
+	wp_enqueue_script('vuejs');
+
+    wp_enqueue_style('vuetify_styles_font', 'https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900');
+    wp_enqueue_style('vuetify_styles', 'https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css');
 }
 
 function makePeachesAdminMenuPage() {
@@ -31,7 +44,7 @@ function renderAdmin(){
 	$CF7_PLUGIN_NAME = "contact-form-7/wp-contact-form-7.php";
 
 	if (is_plugin_active($CF7_PLUGIN_NAME)) {
-		echo '<div id="peachesMain"></div>';
+		echo '<div id="app"></div>';
 	} else {
 		echo '<strong>' . __('Peaches works only when Contact Form 7 is installed and activated.') . '</strong>';
 	}
@@ -43,7 +56,6 @@ function loadAdminJs() {
 
 function initAdminPage() {
 	registerVueScripts();
-	wp_enqueue_script('vuejs');
 	
 	//Send localized data to the script
 	//wp_localize_script( $this->wpsitemonitor, 'WPSITEMONITOR_ADMIN_TEXTS', array(
