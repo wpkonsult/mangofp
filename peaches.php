@@ -56,15 +56,16 @@ function loadAdminJs() {
 
 function initAdminPage() {
 	registerVueScripts();
-	
-	//Send localized data to the script
-	//wp_localize_script( $this->wpsitemonitor, 'WPSITEMONITOR_ADMIN_TEXTS', array(
-	//	'ajaxurl' => admin_url( 'admin-ajax.php' ),
-	//	'id' => esc_html__('Id', 'wpsitemonitor'),
-	//	'category' => esc_html__('Category', 'wpsitemonitor'),
-	//	'name' => esc_html__('Name', 'wpsitemonitor'),
-	//	'value' => esc_html__('Value', 'wpsitemonitor')
-	//) );
+     //Send localized data to the script
+     error_log('Seame paika ressursse');
+    wp_localize_script(
+        'vuejs', 
+        'RESOURCES',
+        [
+            //'adminUrl' => esc_url_raw( rest_url() . 'peaches'),
+            'adminUrl' => get_rest_url( null, '/peaches', 'rest')
+        ]
+    );
 }
 
 function actionCF7Submit( $instance, $result ) {
@@ -91,8 +92,17 @@ function actionCF7Submit( $instance, $result ) {
 	error_log('Posted data:' . print_r($posted_data, 1));
 }
 
+function registerRestRoutes() {
+    require_once plugin_dir_path(__FILE__) . 'AdminRoutes.php';
+
+    $adminRoutes = new AdminRoutes();
+    $adminRoutes->registerRestRoutes();   
+}
+
 add_action('admin_menu', 'makePeachesAdminMenuPage');
 add_action( 'wpcf7_submit', 'actionCF7Submit', 10, 2 );
+add_action( 'rest_api_init', 'registerRestRoutes' );
+		
 
 /**
 *  Comment in for usage in frontend through shortcode
