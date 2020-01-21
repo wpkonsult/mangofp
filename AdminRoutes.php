@@ -4,7 +4,8 @@ class AdminRoutes {
     private $routes;
     public function __construct() {
         $this->routes = [
-            [ 'endpoint' => '/labels', 'method' => 'GET', 'callback' => 'getLabels'],
+            ['endpoint' => '/labels', 'method' => 'GET', 'callback' => 'getLabels'],
+            ['endpoint' => '/messages', 'method' => 'GET', 'callback' => 'getMessages'],
         ];
         $version='1';
     }
@@ -40,5 +41,64 @@ class AdminRoutes {
                 [ 'id' => '011', 'name' => 'Sketchup edasijõudnutele' ],
         ];
         return new WP_REST_Response( ['labels' => $labels], 200 );
+    }
+
+    public function getMessages() {
+        $messages = [
+                [
+                    'id' => '1',
+                    'form' => 1,
+                    'labelId' => '009',
+                    'code' => 'NEW',
+                    'state' => 'Uus',
+                    'email' => 'kati.kaalikas@test.com',
+                    'name' => 'Kati',
+                    'content' => [
+                        'name' => 'Kati Kaalikas',
+                        'message' => 'Tahan teha ilusaid asju'
+                    ],
+                ],
+                [
+                    'id' => '2',
+                    'form' => 1,
+                    'labelId' => '009',
+                    'code' => 'NEW',
+                    'state' => 'Uus',
+                    'email' => 'mati.kaalikas@test.com',
+                    'name' => 'Mati',
+                    'content' => [
+                        'name' => 'Mati Kaalikas',
+                        'message' => 'Mul on vaja aiakuur joonestada'
+                    ],
+                ],
+                [
+                    'id' => '3',
+                    'form' => 2,
+                    'labelId' => '010',
+                    'code' => 'WAIT4ACCEPT',
+                    'state' => 'Aeg pakutud',
+                    'email' => 'uudo.uugamets@test.com',
+                    'name' => 'Uudo',
+                    'content' => [
+                        'name' => 'Uudo Uugamets',
+                        'message' => 'Tahan tulla Sketchupi kursusele, aga aeg ei sobi'
+                    ]
+                ],
+                [
+                    'id' => '4',
+                    'form' => 2,
+                    'labelId' => '009',
+                    'code' => 'NEW',
+                    'state' => 'Uus',
+                    'email' => 'mati.kaalikas@test.com',
+                    'name' => 'Mati',
+                    'content' => [
+                        'name' => 'Mati Kaalikas',
+                        'message' => 'Ja sketchupiga tahaks kah koerakuuti joonistada'
+                    ],
+                ],
+        ];
+
+        return new WP_REST_Response( ['messages' => $messages], 200 );
     }
 }
