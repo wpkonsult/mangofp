@@ -1,11 +1,35 @@
 <?php
 
+function __generateUuid() {
+        return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            // 32 bits for "time_low"
+            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
+    
+            // 16 bits for "time_mid"
+            mt_rand( 0, 0xffff ),
+    
+            // 16 bits for "time_hi_and_version",
+            // four most significant bits holds version number 4
+            mt_rand( 0, 0x0fff ) | 0x4000,
+    
+            // 16 bits, 8 bits for "clk_seq_hi_res",
+            // 8 bits for "clk_seq_low",
+            // two most significant bits holds zero and one for variant DCE1.1
+            mt_rand( 0, 0x3fff ) | 0x8000,
+    
+            // 48 bits for "node"
+            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
+        );
+    }
+
 class AdminRoutes {
     private $routes;
     public function __construct() {
         $this->routes = [
             ['endpoint' => '/labels', 'method' => 'GET', 'callback' => 'getLabels'],
             ['endpoint' => '/messages', 'method' => 'GET', 'callback' => 'getMessages'],
+            ['endpoint' => '/messages', 'method' => 'POST', 'callback' => 'postMessage'],
+            ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'PUT', 'callback' => 'putMessage'],
         ];
         $version='1';
     }
@@ -46,7 +70,7 @@ class AdminRoutes {
     public function getMessages() {
         $messages = [
                 [
-                    'id' => '1',
+                    'id' => __generateUuid(),
                     'form' => 1,
                     'labelId' => '009',
                     'code' => 'NEW',
@@ -59,7 +83,7 @@ class AdminRoutes {
                     ],
                 ],
                 [
-                    'id' => '2',
+                    'id' => __generateUuid(),
                     'form' => 1,
                     'labelId' => '009',
                     'code' => 'NEW',
@@ -72,7 +96,7 @@ class AdminRoutes {
                     ],
                 ],
                 [
-                    'id' => '3',
+                    'id' => __generateUuid(),
                     'form' => 2,
                     'labelId' => '010',
                     'code' => 'WAIT4ACCEPT',
@@ -85,7 +109,7 @@ class AdminRoutes {
                     ]
                 ],
                 [
-                    'id' => '4',
+                    'id' => __generateUuid(),
                     'form' => 2,
                     'labelId' => '009',
                     'code' => 'NEW',
@@ -100,5 +124,13 @@ class AdminRoutes {
         ];
 
         return new WP_REST_Response( ['messages' => $messages], 200 );
+    }
+
+    public function postMessage($request) {
+        error_log('Data submitted for update: ' . json_encode($request->get_params(), true));
+    }
+    
+    public function putMessage($request) {
+        error_log('Data submitted for put: ' . json_encode($request->get_params(), true));
     }
 }
