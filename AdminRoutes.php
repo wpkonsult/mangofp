@@ -22,6 +22,63 @@ function __generateUuid() {
         );
     }
 
+function __getMessages() {
+    return [
+                [
+                    'id' => '001', //__generateUuid(),
+                    'form' => 1,
+                    'labelId' => '009',
+                    'code' => 'NEW',
+                    'state' => 'Uus',
+                    'email' => 'kati.kaalikas@test.com',
+                    'name' => 'Kati',
+                    'content' => [
+                        'name' => 'Kati Kaalikas',
+                        'message' => 'Tahan teha ilusaid asju'
+                    ],
+                ],
+                [
+                    'id' => '002', //__generateUuid(),
+                    'form' => 1,
+                    'labelId' => '009',
+                    'code' => 'NEW',
+                    'state' => 'Uus',
+                    'email' => 'mati.kaalikas@test.com',
+                    'name' => 'Mati',
+                    'content' => [
+                        'name' => 'Mati Kaalikas',
+                        'message' => 'Mul on vaja aiakuur joonestada'
+                    ],
+                ],
+                [
+                    'id' => '003', //__generateUuid(),
+                    'form' => 2,
+                    'labelId' => '010',
+                    'code' => 'WAIT4ACCEPT',
+                    'state' => 'Aeg pakutud',
+                    'email' => 'uudo.uugamets@test.com',
+                    'name' => 'Uudo',
+                    'content' => [
+                        'name' => 'Uudo Uugamets',
+                        'message' => 'Tahan tulla Sketchupi kursusele, aga aeg ei sobi'
+                    ]
+                ],
+                [
+                    'id' => '004', //__generateUuid(),
+                    'form' => 2,
+                    'labelId' => '009',
+                    'code' => 'NEW',
+                    'state' => 'Uus',
+                    'email' => 'mati.kaalikas@test.com',
+                    'name' => 'Mati',
+                    'content' => [
+                        'name' => 'Mati Kaalikas',
+                        'message' => 'Ja sketchupiga tahaks kah koerakuuti joonistada'
+                    ],
+                ],
+        ];
+}
+
 class AdminRoutes {
     private $routes;
     public function __construct() {
@@ -68,61 +125,7 @@ class AdminRoutes {
     }
 
     public function getMessages() {
-        $messages = [
-                [
-                    'id' => __generateUuid(),
-                    'form' => 1,
-                    'labelId' => '009',
-                    'code' => 'NEW',
-                    'state' => 'Uus',
-                    'email' => 'kati.kaalikas@test.com',
-                    'name' => 'Kati',
-                    'content' => [
-                        'name' => 'Kati Kaalikas',
-                        'message' => 'Tahan teha ilusaid asju'
-                    ],
-                ],
-                [
-                    'id' => __generateUuid(),
-                    'form' => 1,
-                    'labelId' => '009',
-                    'code' => 'NEW',
-                    'state' => 'Uus',
-                    'email' => 'mati.kaalikas@test.com',
-                    'name' => 'Mati',
-                    'content' => [
-                        'name' => 'Mati Kaalikas',
-                        'message' => 'Mul on vaja aiakuur joonestada'
-                    ],
-                ],
-                [
-                    'id' => __generateUuid(),
-                    'form' => 2,
-                    'labelId' => '010',
-                    'code' => 'WAIT4ACCEPT',
-                    'state' => 'Aeg pakutud',
-                    'email' => 'uudo.uugamets@test.com',
-                    'name' => 'Uudo',
-                    'content' => [
-                        'name' => 'Uudo Uugamets',
-                        'message' => 'Tahan tulla Sketchupi kursusele, aga aeg ei sobi'
-                    ]
-                ],
-                [
-                    'id' => __generateUuid(),
-                    'form' => 2,
-                    'labelId' => '009',
-                    'code' => 'NEW',
-                    'state' => 'Uus',
-                    'email' => 'mati.kaalikas@test.com',
-                    'name' => 'Mati',
-                    'content' => [
-                        'name' => 'Mati Kaalikas',
-                        'message' => 'Ja sketchupiga tahaks kah koerakuuti joonistada'
-                    ],
-                ],
-        ];
-
+        $messages = __getMessages();
         return new WP_REST_Response( ['messages' => $messages], 200 );
     }
 
@@ -131,6 +134,39 @@ class AdminRoutes {
     }
     
     public function putMessage($request) {
+        $UPDATEABLE_FIELDS = [
+            'labelId',
+            'email',
+            'code'
+        ];
         error_log('Data submitted for put: ' . json_encode($request->get_params(), true));
+        $messages = __getMessages();
+        $params = json_decode(json_encode($request->get_params()), true);
+        $message = null;
+        foreach ($messages as $elem) {
+            if ($elem['id'] == $params['uuid']) {
+                $message = $elem;
+                break;
+            }
+        }
+        if (!$message) {
+            $error = new WP_REST_Response( ['error' => 'Message not found'] ); 
+            $error->set_status(404);
+            return $error;
+        }
+
+        $paramsMessage = $params['message'];
+        
+        foreach($UPDATEABLE_FIELDS as $field) {
+            if (isset($paramsMessage[$field])) {
+                $message[$field] = $paramsMessage[$field];
+            }
+        }
+
+        error_log('Will send back: ' . json_encode($message, true));
+
+        return new WP_REST_Response( ['message' => $message], 200 );
+
+        
     }
 }
