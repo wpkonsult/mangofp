@@ -1,6 +1,6 @@
 <?php
 /**
- *  Plugin name: Peaches
+ *  Plugin name: Mango Form Processing
  *  Description: User defined states and their management for Contact Form 7 results
  */
 
@@ -31,8 +31,8 @@ function registerVueScripts() {
 
 function makePeachesAdminMenuPage() {
 	$page_hook_suffix = add_menu_page(
-		'Peaches Plugin Page',
-		'Peaches4CF7',
+		'MangoFP Plugin Page',
+		'MangoFormProcessing',
 		'manage_options',
 		'peaches-admin',
 		'renderAdmin'
@@ -55,9 +55,9 @@ function loadAdminJs() {
 }
 
 function initAdminPage() {
-	registerVueScripts();
-     //Send localized data to the script
-     error_log('Seame paika ressursse');
+    registerVueScripts();
+    //Send localized data to the script
+    error_log('MangoFP starts ...');
     wp_localize_script(
         'vuejs', 
         'RESOURCES',
@@ -89,19 +89,39 @@ function actionCF7Submit( $instance, $result ) {
 	}
 
 	//TODO: Here the $posted_data can be serialised
-	error_log('Posted data:' . print_r($posted_data, 1));
+    error_log('Posted data:' . print_r($posted_data, 1));
+    error_log('Title:' . wp_title( '&raquo;', true, '' ) );
 }
 
 function registerRestRoutes() {
-    require_once plugin_dir_path(__FILE__) . 'AdminRoutes.php';
-
     $adminRoutes = new AdminRoutes();
     $adminRoutes->registerRestRoutes();   
 }
 
+function activateMFP() {
+    MessagesData::installDatabase();
+}
+
+function checkForDatabaseUpdates() {
+    MessagesData::installDatabase();
+}
+
+function deactivateMFP() {
+    require_once plugin_dir_path(__FILE__) . 'data/MessagesData.php';
+    MessagesData::removeDatabase();
+}
+
+
+require_once plugin_dir_path(__FILE__) . 'AdminRoutes.php';
+require_once plugin_dir_path(__FILE__) . 'data/MessagesData.php';
+
 add_action('admin_menu', 'makePeachesAdminMenuPage');
 add_action( 'wpcf7_submit', 'actionCF7Submit', 10, 2 );
 add_action( 'rest_api_init', 'registerRestRoutes' );
+add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
+
+register_activation_hook( __FILE__, 'activateMFP' );
+register_deactivation_hook( __FILE__, 'deactivateMFP' );
 		
 
 /**
