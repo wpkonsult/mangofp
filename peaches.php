@@ -12,14 +12,14 @@ function registerVueScripts() {
 		'http://localhost:8080/js/chunk-vendors.js',
 		false, //no dependencies
 		'0.0.1',
-		true //in the footer otherwise it Vue triggered too early
+		true //in the footer otherwise Vue triggers it too early
 	);
 	wp_register_script( 
 		'vuejs', 
 		'http://localhost:8080/js/app.js',
 		['vue_vendors'],
 		'0.0.1',
-		true //in the footer otherwise it Vue triggered too early
+		true //in the footer otherwise Vue triggers it too early
 	);
 
 	wp_enqueue_script('vue_vendors');
@@ -107,13 +107,10 @@ function checkForDatabaseUpdates() {
 }
 
 function deactivateMFP() {
-    require_once plugin_dir_path(__FILE__) . 'data/MessagesData.php';
     MessagesData::removeDatabase();
 }
 
-
-require_once plugin_dir_path(__FILE__) . 'AdminRoutes.php';
-require_once plugin_dir_path(__FILE__) . 'data/MessagesData.php';
+require_once plugin_dir_path(__FILE__) . 'autoload.php';
 
 add_action('admin_menu', 'makePeachesAdminMenuPage');
 add_action( 'wpcf7_submit', 'actionCF7Submit', 10, 2 );

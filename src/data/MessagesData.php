@@ -46,5 +46,37 @@ class MessagesData {
 		$sql = "DROP TABLE IF EXISTS $table_name";
 		$wpdb->query($sql);
 		delete_option( self::VERSION_PARAM_NAME );
-	}    
+	} 
+
+/*
+    public static function storeMessage( $message ) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::TABLE_MESSAGES;
+
+		if (!$) {
+			return false;
+		}
+
+		$data = array (
+			'create_time' => $logItem->getDateTime()->format('Y-m-d H:i:s '),
+			'target_id' => $logItem->getTargetId(),
+			'target_url' => $logItem->getTargetUrl(),
+			'ping_status' => $logItem->getStatus(),
+			'details' => $logItem->getDetailsJson(),
+			'ping_message' => $logItem->getPingMessage(),
+			'ping_duration' => $logItem->getDuration(),
+			'record_level' => $logItem->getlevel()
+		);
+
+		$result = $wpdb->insert($table_name, $data);
+		if ($result != 1) {
+			error_log('Insert failed');
+			return false;
+		}
+
+		$logItem->setId($wpdb->insert_id);
+
+		return $logItem->getId();
+	} 
+    */  
 }
