@@ -15,7 +15,7 @@ class MockOutput implements iOutput {
             'status' => iOutput::RESULT_ERROR,
             'error' => [
                 'code'=> $errorCode,
-                'message' => $errorMessage
+                'message' => $message
             ]
         ];
     }

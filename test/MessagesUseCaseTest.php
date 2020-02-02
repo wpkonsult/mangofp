@@ -6,12 +6,7 @@ use MangoFp\UseCases\MessageUseCase;
 class MessagesUseCaseTest extends TestCase {
     protected $storage;
     protected $output;
-    protected $controller;
-    //protected function setUp() {
-    //    $this->storage = new Mockups\MockStorage();
-    //    $this->output = new Mockups\MockOutput();
-    //}
- 
+    
     public function testvalidateContentAndInsertAsNewMessage() {
         $this->storage = new MockStorage();
         $this->output = new MockOutput();
@@ -34,9 +29,37 @@ class MessagesUseCaseTest extends TestCase {
 
         $result = $useCase->validateContentAndInsertAsNewMessage($content);
         $this->assertEquals(
-            $result['payload'],
-            []
+            array_merge($result['payload'], ['id' => 'testid']),
+            [
+                'id' => 'testid',
+                'form' => '19',
+                'labelId' => '',
+                'code' => 'NEW',
+                'state' => 'New',
+                'email' => 'test@test.com',
+                'name' => 'Test Name',
+                'label' => 'Title',
+                'content' => json_encode([
+                    'your-phone' => '+341234 12341234 1234123',
+                    'your-message' => 'Test message',
+                    'acceptance-231' => 1,
+                ])
+            ]
         );
+
+        $this->storage->setExpectedResult('insertMessage', false);
+        $result = $useCase->validateContentAndInsertAsNewMessage($content);
+        $this->assertEquals(
+            $result,
+            [
+                'status' => 'RESULT_ERROR',
+                'error' => [
+                    'code' => 'ERROR_FAILED',
+                    'message' => 'ERROR: unable to insert message'
+                ]
+            ]
+        );
+        
 
     }
 }

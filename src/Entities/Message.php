@@ -25,17 +25,28 @@ function __generateUuid() {
 
 class Message {
     private $data;
+    private $attributeMapping = [
+        'name' => 'your-name',
+        'email' => 'your-email',
+        'label' => 'post_title',
+        'form' => '_wpcf7'
+    ];
+    private $blacklistedAttributes = [
+        '_wpcf7_version',
+        '_wpcf7_locale',
+        '_wpcf7_unit_tag',
+        '_wpcf7_container_post',
+    ];
+
     function __construct() {
         $this->data = [
             'id' => __generateUuid(),
-            'create_time' => (new DateTime())->format('Y-m-d H:i:s '),
+            'create_time' => (new \DateTime())->format('Y-m-d H:i:s '),
+            'form' => '',
+            'status_code' => 'NEW',
+            'email' => '',
+            'name' => '',
             'label' => '',
-            'label_id' => '',
-            'status_code' => '',
-            'email' => '',
-            'person_code' => '',
-            'email' => '',
-            'person_name' => '',
             'content' => '',
             'raw_data' => null
         ];
@@ -54,7 +65,34 @@ class Message {
             }
         }
         if ($modified) {
-            $this->data['modify_time'] = (new DateTime())->format('Y-m-d H:i:s ');
+            $this->data['modify_time'] = (new \DateTime())->format('Y-m-d H:i:s ');
         }
+        return $this;
+    }
+
+    public function setFromRawData(array $rawData) {
+        $data = [];
+        $content = [];
+        $primaries = \array_flip($this->attributeMapping);
+
+        foreach ($rawData as $key => $value) {
+            if (\in_array($key, $this->blacklistedAttributes)) {
+                continue;
+            }
+            if (isset($primaries[$key])) {
+                $primaryKey = $primaries[$key];
+                $data[$primaryKey] = $value;
+                //$data['debug'] = print_r($primaries, true);
+            } else {
+                $content[$key] = $value; 
+            }
+        }
+
+        //$data['debug'] = \json_encode();
+
+        $data['content'] = \json_encode($content);
+        $data['raw_data'] = \json_encode($rawData);
+        $this->data = \array_merge($this->data, $data);
+        return $this;
     }
 }

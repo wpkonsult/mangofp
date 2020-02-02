@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use MangoFp\Entities\Message;
 
 class MessageTest extends TestCase {
     public function testGetAsArray() {
