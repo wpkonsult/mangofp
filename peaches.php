@@ -1,4 +1,6 @@
 <?php
+
+namespace MangoFp;
 /**
  *  Plugin name: Mango Form Processing
  *  Description: User defined states and their management for Contact Form 7 results
@@ -69,28 +71,7 @@ function initAdminPage() {
 }
 
 function actionCF7Submit( $instance, $result ) {
-	$cases = ['spam', 'mail_sent', 'mail_failed'];
-
-	if ( 
-		empty( $result['status'] ) ||
-		!in_array( $result['status'], $cases ) 
-	) {
-		error_log('Validation failed, results not stored. Status: ' . $result['status'] ?? 'empty');
-		return;
-	}
-
-	$submission = WPCF7_Submission::get_instance();
-	if ( 
-		!$submission ||
-		!$posted_data = $submission->get_posted_data() 
-	) {
-		error_log('No posted data');
-		return;
-	}
-
-	//TODO: Here the $posted_data can be serialised
-    error_log('Posted data:' . print_r($posted_data, 1));
-    error_log('Title:' . wp_title( '&raquo;', true, '' ) );
+    return CF7Connector::actionCF7Submit($instance, $result);
 }
 
 function registerRestRoutes() {
@@ -99,15 +80,15 @@ function registerRestRoutes() {
 }
 
 function activateMFP() {
-    MessagesData::installDatabase();
+    MessagesDB::installDatabase();
 }
 
 function checkForDatabaseUpdates() {
-    MessagesData::installDatabase();
+    MessagesDB::installDatabase();
 }
 
 function deactivateMFP() {
-    MessagesData::removeDatabase();
+    MessagesDB::removeDatabase();
 }
 
 require_once plugin_dir_path(__FILE__) . 'autoload.php';
@@ -115,7 +96,7 @@ require_once plugin_dir_path(__FILE__) . 'autoload.php';
 add_action('admin_menu', 'makePeachesAdminMenuPage');
 add_action( 'wpcf7_submit', 'actionCF7Submit', 10, 2 );
 add_action( 'rest_api_init', 'registerRestRoutes' );
-add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
+//add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
 
 register_activation_hook( __FILE__, 'activateMFP' );
 register_deactivation_hook( __FILE__, 'deactivateMFP' );

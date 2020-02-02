@@ -1,4 +1,6 @@
 <?php
+namespace MangoFp\Entities;
+
 function __generateUuid() {
         return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
             // 32 bits for "time_low"
@@ -20,7 +22,6 @@ function __generateUuid() {
             mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
         );
 }
-
 
 class Message {
     private $data;

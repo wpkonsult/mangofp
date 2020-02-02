@@ -1,5 +1,7 @@
 <?php
-class MessagesData {
+namespace MangoFp;
+
+class MessagesDB {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
 	const VERSION = '0.0.2';
 	const TABLE_MESSAGES = 'mangofp_messages';

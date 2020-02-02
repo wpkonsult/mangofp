@@ -1,6 +1,8 @@
 <?php
 
-function __getMessages() {
+namespace MangoFp;
+
+function _getMessages() {
     return [
                 [
                     'id' => '001', //__generateUuid(),
@@ -103,7 +105,7 @@ class AdminRoutes {
     }
 
     public function getMessages() {
-        $messages = __getMessages();
+        $messages = _getMessages();
         return new WP_REST_Response( ['messages' => $messages], 200 );
     }
 
@@ -118,7 +120,7 @@ class AdminRoutes {
             'code'
         ];
         error_log('Data submitted for put: ' . json_encode($request->get_params(), true));
-        $messages = __getMessages();
+        $messages = _getMessages();
         $params = json_decode(json_encode($request->get_params()), true);
         $message = null;
         foreach ($messages as $elem) {

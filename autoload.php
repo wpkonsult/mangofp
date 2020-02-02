@@ -7,10 +7,17 @@ spl_autoload_register(
         static $classes = null;
         if ($classes === null) {
             $classes = array(
-                'adminroutes' => '/src/controllers/AdminRoutes.php',
-                'message' => '/src/entities/Message.php',
-                'messagesdata' => '/src/data/MessagesData.php',
-                'messagetest' => '/test/MessageTest.php'
+                'mangofp\\adminroutes' => '/src/Adapters/AdminRoutes.php',
+                'mangofp\\cf7connector' => '/src/Adapters/CF7Connector.php',
+                'mangofp\\messagesdb' => '/src/Adapters/MessagesDB.php',
+                'mangofp\\usecases\\ioutput' => '/src/UseCases/iOutput.php',
+                'mangofp\\usecases\\istorage' => '/src/UseCases/iStorage.php',
+                'mangofp\\usecases\\messageusecase' => '/src/UseCases/MessageUseCase.php',
+                'message' => '/src/Entities/Message.php',
+                'messagesusecasetest' => '/test/MessagesUseCaseTest.php',
+                'messagetest' => '/test/MessageTest.php',
+                'mockoutput' => '/test/Mockups/MockOutput.php',
+                'mockstorage' => '/test/Mockups/MockStorage.php'
             );
         }
         $cn = strtolower($class);
