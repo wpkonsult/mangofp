@@ -17,6 +17,7 @@ class MessageUseCase {
         $data = $message->getDataAsArray();
         //TODO: store label and fetch labelId, send it back
         //TODO: Fetch state for code and send it back
+        
         return $this->output->outputResult([
             'id' => $data['id'],
             'form' => $data['form'],

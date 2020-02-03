@@ -101,12 +101,12 @@ class AdminRoutes {
                 [ 'id' => '010', 'name' => 'Sketchup' ],
                 [ 'id' => '011', 'name' => 'Sketchup edasijõudnutele' ],
         ];
-        return new WP_REST_Response( ['labels' => $labels], 200 );
+        return new \WP_REST_Response( ['labels' => $labels], 200 );
     }
 
     public function getMessages() {
         $messages = _getMessages();
-        return new WP_REST_Response( ['messages' => $messages], 200 );
+        return new \WP_REST_Response( ['messages' => $messages], 200 );
     }
 
     public function postMessage($request) {
@@ -130,7 +130,7 @@ class AdminRoutes {
             }
         }
         if (!$message) {
-            $error = new WP_REST_Response( ['error' => 'Message not found'] ); 
+            $error = new \WP_REST_Response( ['error' => 'Message not found'] ); 
             $error->set_status(404);
             return $error;
         }
@@ -145,7 +145,7 @@ class AdminRoutes {
 
         error_log('Will send back: ' . json_encode($message, true));
 
-        return new WP_REST_Response( ['message' => $message], 200 );
+        return new \WP_REST_Response( ['message' => $message], 200 );
 
         
     }

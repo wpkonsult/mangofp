@@ -9,6 +9,7 @@ spl_autoload_register(
             $classes = array(
                 'mangofp\\adminroutes' => '/src/Adapters/AdminRoutes.php',
                 'mangofp\\cf7connector' => '/src/Adapters/CF7Connector.php',
+                'mangofp\\entities\\baseentity' => '/src/Entities/BaseEntity.php',
                 'mangofp\\entities\\message' => '/src/Entities/Message.php',
                 'mangofp\\messagesdb' => '/src/Adapters/MessagesDB.php',
                 'mangofp\\usecases\\ioutput' => '/src/UseCases/iOutput.php',

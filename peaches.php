@@ -1,6 +1,6 @@
 <?php
 
-namespace MangoFp;
+//namespace MangoFp;
 /**
  *  Plugin name: Mango Form Processing
  *  Description: User defined states and their management for Contact Form 7 results
@@ -75,16 +75,16 @@ function actionCF7Submit( $instance, $result ) {
 }
 
 function registerRestRoutes() {
-    $adminRoutes = new AdminRoutes();
+    $adminRoutes = new MangoFp\AdminRoutes();
     $adminRoutes->registerRestRoutes();   
 }
 
 function activateMFP() {
-    MessagesDB::installDatabase();
+    MangoFp\MessagesDB::installDatabase();
 }
 
 function checkForDatabaseUpdates() {
-    MessagesDB::installDatabase();
+    MangoFp\MessagesDB::installDatabase();
 }
 
 function deactivateMFP() {
