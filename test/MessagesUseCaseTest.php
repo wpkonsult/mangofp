@@ -21,6 +21,7 @@ class MessagesUseCaseTest extends TestCase {
         $this->storage->method('fetchLabelByName')->willReturn($label);
         $this->storage->method('insertMessage')->willReturn(true);
         $this->storage->method('storeMessage')->willReturn(true);
+        $this->storage->method('getLabelTag')->willReturn('post_title');
 
         $useCase = new MessageUseCase($this->output, $this->storage);
         $content = [

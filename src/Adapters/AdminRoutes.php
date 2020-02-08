@@ -1,6 +1,7 @@
 <?php
 
 namespace MangoFp;
+use MangoFp\UseCases\iOutput;
 
 function _getMessages() {
     return [
@@ -59,7 +60,7 @@ function _getMessages() {
         ];
 }
 
-class AdminRoutes {
+class AdminRoutes implements iOutput {
     private $routes;
     public function __construct() {
         $this->routes = [
@@ -146,7 +147,28 @@ class AdminRoutes {
         error_log('Will send back: ' . json_encode($message, true));
 
         return new \WP_REST_Response( ['message' => $message], 200 );
+      
+    }
 
-        
+    public function outputResult(array $data) {
+        return new \WP_REST_Response([
+                'payload' => $data,
+                'status'=> iOutput::RESULT_SUCCESS 
+            ], 
+            200 
+        );
+    }
+
+    public function outputError(string $message, string $errorCode) {
+        $error = new \WP_REST_Response( [
+                'status' => iOutput::RESULT_ERROR,
+                'error' => [
+                    'code'=> $errorCode,
+                    'message' => $message
+                ]
+            ] 
+        ); 
+        $error->set_status(404);
+        return $error;
     }
 }

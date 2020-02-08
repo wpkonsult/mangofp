@@ -1,9 +1,12 @@
 <?php
 namespace MangoFp;
+use MangoFp\Entities\Message;
+use MangoFp\Entities\Label;
+use MangoFp\UseCases\iStorage;
 
-class MessagesDB {
+class MessagesDB implements iStorage {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
-	const VERSION = '0.0.4';
+	const VERSION = '0.0.2';
 	const TABLE_MESSAGES = 'mangofp_messages';
     const TABLE_LABELS = 'mangofp_labels';
 
@@ -15,25 +18,9 @@ class MessagesDB {
 		}
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
         $charset_collate = $wpdb->get_charset_collate();
-		$table_name = $wpdb->prefix . self::TABLE_MESSAGES;
-        $createSql = "CREATE TABLE $table_name (
-			id varchar(50) NOT NULL,
-			create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-			modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-			delete_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-            label varchar(100),
-            label_id varchar(20),
-            status_code varchar(20),
-            email varchar(100),
-            person_name varchar(100),
-            content varchar(4000),
-            rawdata varchar(4000),
-            UNIQUE KEY id (id)
-		) $charset_collate;";
-        dbDelta( $createSql );
-		
-        $table_name = $wpdb->prefix . self::TABLE_LABELS;
-        $createSql = "CREATE TABLE $table_name (
+		$table_messages = $wpdb->prefix . self::TABLE_MESSAGES;
+        $table_labels = $wpdb->prefix . self::TABLE_LABELS;
+        $createSql = "CREATE TABLE $table_labels (
 			id varchar(50) NOT NULL,
 			create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -44,7 +31,23 @@ class MessagesDB {
 		) $charset_collate;";
 		dbDelta( $createSql );
 
-		update_option( self::VERSION_PARAM_NAME, self::VERSION );
+        $createSql = "CREATE TABLE $table_messages (
+			id varchar(50) NOT NULL,
+			create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+			modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+			delete_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            label_id varchar(20),
+            status_code varchar(20),
+            email varchar(100),
+            person_name varchar(100),
+            content varchar(4000),
+            rawdata varchar(4000),
+            UNIQUE KEY id (id),
+            FOREIGN KEY (label_id) REFERENCES $table_labels(id)
+		) $charset_collate;";
+        dbDelta( $createSql );
+		
+        update_option( self::VERSION_PARAM_NAME, self::VERSION );
 	}
 
 	public static function removeDatabase() {
@@ -58,54 +61,75 @@ class MessagesDB {
 		delete_option( self::VERSION_PARAM_NAME );
 	}
 
+    public function getLabelTag() {
+        return 'pealkiri';
+    }
+
     public function storeMessage(Message $message) { return false; }
-    public function insertMessage(Message $message) { return false; }
+    public function insertMessage(Message $message) { 
+        global $wpdb;
+        $result = $wpdb->insert(
+            $wpdb->prefix . self::TABLE_MESSAGES, 
+            [
+                'id' => $message->get('id'),
+                'modify_time' => $message->get('modify_time'),
+                'create_time' => $message->get('create_time'),
+                'status_code' => $message->get('statusCode'),
+                //'label_id' => $message->get('labelId'),  <----- miks see ei salvestu?
+                'email' => $message->get('email'), 
+                'person_name' => $message->get('name'),
+                'content' => $message->get('content'), 
+                'rawdata' => $message->get('rawData')
+            ]
+        );
+		if ($result != 1) {
+			error_log('ERROR: Message Insert failed with data: ' . \json_encode($message->getDataAsArray()));
+			return false;
+		}
+        return true;
+    }
     public function messageExists(Message $message) { return false; }
     public function fetchMessage(string $id) { return false; }
     public function fetchSettings() { return false; }
+
+    public function insertLabel(Label $label) {
+        global $wpdb;
+        $result = $wpdb->insert(
+            $wpdb->prefix . self::TABLE_LABELS, 
+            [
+                'id' => $label->get('id'),
+                'label_name' => $label->get('labelName'),
+                'modify_time' => $label->get('modify_time'),
+                'create_time' => $label->get('create_time')
+            ]
+        );
+		if ($result != 1) {
+			error_log('ERROR: Label Insert failed with data: ' . \json_encode($label->getDataAsArray()));
+			return false;
+		}
+        return true;
+    }
 
     public function fetchLabelByName(string $labelName) {
         global $wpdb;
 		$table_name = $wpdb->prefix . self::TABLE_LABELS;
 		$request = $wpdb->prepare( 
-            "SELECT id, create_time, modify_tim, delete_time, label_name
+            "SELECT id, create_time, modify_time, delete_time, label_name
             FROM $table_name
             WHERE label_name LIKE '%s';
             ",
             [$labelName]
         );
-        $labelRow = $wpdb->get_results($request);
+        $labelRow = $wpdb->get_row($request, ARRAY_A);
+        if (!$labelRow) {
+            return null;
+        }
+        return (new Label())->setDataAsArray([
+            'id' => $labelRow['id'],
+            'labelName' => $labelRow['label_name'],
+            'create_time' => $labelRow['create_time'],
+            'delete_time' => $labelRow['delete_time'],
+            'modify_time' => $labelRow['modify_time']
+        ]);
     }
-
-/*
-    public static function storeMessage( $message ) {
-		global $wpdb;
-		$table_name = $wpdb->prefix . self::TABLE_MESSAGES;
-
-		if (!$) {
-			return false;
-		}
-
-		$data = array (
-			'create_time' => $logItem->getDateTime()->format('Y-m-d H:i:s '),
-			'target_id' => $logItem->getTargetId(),
-			'target_url' => $logItem->getTargetUrl(),
-			'ping_status' => $logItem->getStatus(),
-			'details' => $logItem->getDetailsJson(),
-			'ping_message' => $logItem->getPingMessage(),
-			'ping_duration' => $logItem->getDuration(),
-			'record_level' => $logItem->getlevel()
-		);
-
-		$result = $wpdb->insert($table_name, $data);
-		if ($result != 1) {
-			error_log('Insert failed');
-			return false;
-		}
-
-		$logItem->setId($wpdb->insert_id);
-
-		return $logItem->getId();
-	} 
-    */  
 }

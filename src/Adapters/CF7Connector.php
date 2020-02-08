@@ -11,7 +11,7 @@ class CF7Connector {
             empty( $result['status'] ) ||
             !in_array( $result['status'], $cases ) 
         ) {
-            error_log('Validation failed, results not stored. Status: ' . $result['status'] ?? 'empty');
+            error_log('Validation failed, results not stored. Status: ' . ($result['status'] ?? 'empty'));
             return;
         }
 
@@ -26,17 +26,11 @@ class CF7Connector {
 
         //TODO: Here the $posted_data can be serialised
         error_log('Posted data:' . print_r($posted_data, 1));
-        error_log('Title:' . \wp_title( '&raquo;', true, '' ) );
-
-        $table_name = $wpdb->prefix . 'mangofp_labels';
-		$request = $wpdb->prepare( 
-            "SELECT id, create_time, modify_time, delete_time, label_name
-            FROM $table_name
-            WHERE label_name LIKE '%s';
-            ",
-            ['test_label_mida_ei_ole']
+        $useCase = new UseCases\MessageUseCase(
+            new AdminRoutes(), 
+            new MessagesDB()
         );
-        $labelRow = $wpdb->get_row($request);
-        error_log('Fetched label: ' . print_r($labelRow, true));
+        $useCase->parseContentAndInsertToDatabase($posted_data);
+        
     }
 }

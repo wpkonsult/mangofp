@@ -32,6 +32,7 @@ class MockStorage implements iStorage {
         return isset($this->expectedResult['insertLabel']) ? $this->expectedResult['insertLabel'] : false;
     }
     public function getLabelTag() {
-        return isset($this->expectedResult['getLabelTag']) ? $this->expectedResult['getLabelTag'] : false;
+        return isset($this->expectedResult['getLabelTag']) ? $this->expectedResult['getLabelTag'] : 'post_title';
     }
+    
 }

@@ -96,12 +96,11 @@ require_once plugin_dir_path(__FILE__) . 'autoload.php';
 add_action('admin_menu', 'makePeachesAdminMenuPage');
 add_action( 'wpcf7_submit', 'actionCF7Submit', 10, 2 );
 add_action( 'rest_api_init', 'registerRestRoutes' );
-add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
+//add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
 
 register_activation_hook( __FILE__, 'activateMFP' );
 register_deactivation_hook( __FILE__, 'deactivateMFP' );
 		
-
 /**
 *  Comment in for usage in frontend through shortcode
 *

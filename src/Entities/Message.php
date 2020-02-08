@@ -11,7 +11,7 @@ class Message extends BaseEntity {
             'name' => '',
             'labelId' => '',
             'content' => '',
-            'rawData' => null
+            'rawData' => ''
         ]);
     }
 

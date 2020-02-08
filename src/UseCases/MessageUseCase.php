@@ -4,7 +4,6 @@ use MangoFp\Entities\Message;
 use MangoFp\Entities\Label;
 
 class MessageUseCase {
-    private $labelField = 'post_title';
     private $attributeMapping = [
         'name' => 'your-name',
         'email' => 'your-email',
@@ -36,14 +35,15 @@ class MessageUseCase {
         return $newLabel;
     }
 
-    public function parseContentAndInsertToDatabase(array $content) : array {
+    public function parseContentAndInsertToDatabase(array $content) {
         $data = [];
         $secondaries = [];
         $primaries = \array_flip($this->attributeMapping);
         $label = null;
+        $labelTag = $this->storage->getLabelTag();
 
         foreach ($content as $key => $value) {
-            if ($key === $this->labelField) {
+            if ($key === $labelTag) {
                 $label = $this->fetchExistingOrCreateNewLabelByName($value);
                 continue;
             }
@@ -61,6 +61,7 @@ class MessageUseCase {
         }
         $data['content'] = \json_encode($secondaries);
         $data['raw_data'] = \json_encode($content);
+        $data['labelId'] = $label ? $label->get('id') : '';
         $message = (new Message())->setDataAsArray($data);
 
         $res = $this->storage->insertMessage($message);
@@ -77,7 +78,7 @@ class MessageUseCase {
             'content' => $message->get('content'),
             'state' => 'New',
             'label' => $label ? $label->get('labelName') : '',
-            'labelId' => $label ? $label->get('id') : '',
+            'labelId' =>  $message->get('labelId'),
             'email' => $message->get('email'),
             'name' => $message->get('name')
         ]);
