@@ -71,7 +71,7 @@ function initAdminPage() {
 }
 
 function actionCF7Submit( $instance, $result ) {
-    return CF7Connector::actionCF7Submit($instance, $result);
+    return MangoFp\CF7Connector::actionCF7Submit($instance, $result);
 }
 
 function registerRestRoutes() {
@@ -88,7 +88,7 @@ function checkForDatabaseUpdates() {
 }
 
 function deactivateMFP() {
-    MessagesDB::removeDatabase();
+    MangoFp\MessagesDB::removeDatabase();
 }
 
 require_once plugin_dir_path(__FILE__) . 'autoload.php';
@@ -96,7 +96,7 @@ require_once plugin_dir_path(__FILE__) . 'autoload.php';
 add_action('admin_menu', 'makePeachesAdminMenuPage');
 add_action( 'wpcf7_submit', 'actionCF7Submit', 10, 2 );
 add_action( 'rest_api_init', 'registerRestRoutes' );
-//add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
+add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
 
 register_activation_hook( __FILE__, 'activateMFP' );
 register_deactivation_hook( __FILE__, 'deactivateMFP' );

@@ -1,12 +1,12 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use MangoFp\Entities\Message;
+use MangoFp\Entities\Label;
 
-class MessageTest extends TestCase {
+class LabelTest extends TestCase {
     public function testGetAsArray() {
-        $message = new Message();
-        $createdData = $message->getDataAsArray();
+        $label = new Label();
+        $createdData = $label->getDataAsArray();
         $this->assertNotEquals(
             $createdData['id'],
             '47f3e442-b58f-4c9a-8e91-240f94c76ef6'
@@ -16,12 +16,13 @@ class MessageTest extends TestCase {
             '2020-01-29 23:49:52'
         );
         
-        $message->setDataAsArray([
+        $label->setDataAsArray([
             'id' => '47f3e442-b58f-4c9a-8e91-240f94c76ef6',
             'create_time' => '2020-01-29 23:49:52',
-            'modify_time' => ''         
+            'modify_time' => '',
+            'labelName' => 'Test Label'         
         ]);
-        $changedData = $message->getDataAsArray();
+        $changedData = $label->getDataAsArray();
         $this->assertEquals(
             $changedData['id'],
             '47f3e442-b58f-4c9a-8e91-240f94c76ef6'
@@ -29,6 +30,10 @@ class MessageTest extends TestCase {
         $this->assertEquals(
             $changedData['create_time'],
             '2020-01-29 23:49:52'
+        );
+        $this->assertEquals(
+            $changedData['labelName'],
+            'Test Label'
         );
         $this->assertNotEquals(
             $changedData['modify_time'],

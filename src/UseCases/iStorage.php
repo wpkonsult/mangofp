@@ -1,6 +1,7 @@
 <?php
 namespace MangoFp\UseCases;
 use MangoFp\Entities\Message;
+use MangoFp\Entities\Label;
 
 interface iStorage {
     public function storeMessage(Message $message);
@@ -8,4 +9,7 @@ interface iStorage {
     public function messageExists(Message $message);
     public function fetchMessage(string $id);
     public function fetchSettings();
+    public function fetchLabelByName(string $labelName);
+    public function insertLabel(Label $label);
+    public function getLabelTag();
 }

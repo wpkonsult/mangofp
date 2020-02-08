@@ -3,6 +3,7 @@ namespace MangoFp\Entities;
 
 class BaseEntity {
     protected $data;
+    protected $className;
     protected function generateUuid() {
         return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
             // 32 bits for "time_low"
@@ -30,6 +31,7 @@ class BaseEntity {
             'id' => $this->generateUuid(),
             'create_time' => (new \DateTime())->format('Y-m-d H:i:s '),
         ];
+        $this->className = 'Base';
     }
 
     public function getDataAsArray() : array {
@@ -48,6 +50,13 @@ class BaseEntity {
             $this->data['modify_time'] = (new \DateTime())->format('Y-m-d H:i:s ');
         }
         return $this;
+    }
+
+    public function get(string $key) {
+        if (!isset($this->data[$key])) {
+            throw new \Error("{$this->className} does not have property $key");
+        }
+        return $this->data[$key];
     }
 
 }

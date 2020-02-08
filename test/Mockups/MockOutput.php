@@ -6,7 +6,7 @@ class MockOutput implements iOutput {
     public function outputResult(array $data) {
         return [
             'payload' => $data,
-            'status'=> iOutput::RESULT_SUCCESS
+            'status'=> iOutput::RESULT_SUCCESS 
         ];
     }
 
