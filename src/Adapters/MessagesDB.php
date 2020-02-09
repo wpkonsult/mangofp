@@ -36,7 +36,7 @@ class MessagesDB implements iStorage {
 			create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			delete_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-            label_id varchar(20),
+            label_id varchar(50),
             status_code varchar(20),
             email varchar(100),
             person_name varchar(100),
@@ -75,7 +75,7 @@ class MessagesDB implements iStorage {
                 'modify_time' => $message->get('modify_time'),
                 'create_time' => $message->get('create_time'),
                 'status_code' => $message->get('statusCode'),
-                //'label_id' => $message->get('labelId'),  <----- miks see ei salvestu?
+                'label_id' => $message->get('labelId'),
                 'email' => $message->get('email'), 
                 'person_name' => $message->get('name'),
                 'content' => $message->get('content'), 
@@ -90,6 +90,37 @@ class MessagesDB implements iStorage {
     }
     public function messageExists(Message $message) { return false; }
     public function fetchMessage(string $id) { return false; }
+    public function fetchMessages() { 
+        global $wpdb;
+		$table_name = $wpdb->prefix . self::TABLE_MESSAGES;
+		$messageRows = $wpdb->get_results(
+             "  SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata
+                FROM $table_name
+                ORDER BY status_code, create_time;
+            ", 
+            ARRAY_A
+        );
+        if (!$messageRows) {
+            return [];
+        }
+
+        $allMessages = [];
+        foreach ($messageRows as $messageRow) {
+            $allMessages[] = (new Message())->setDataAsArray([
+                'id' => $messageRow['id'],
+                'create_time' => $messageRow['create_time'],
+                'delete_time' => $messageRow['delete_time'],
+                'modify_time' => $messageRow['modify_time'],
+                'labelId' => $messageRow['label_id'],
+                'statusCode' => $messageRow['status_code'],
+                'email' => $messageRow['email'],
+                'name' => $messageRow['person_name'],
+                'content' => $messageRow['content'],
+                'rawData' => $messageRow['rawdata']
+            ]);
+        }
+        return $allMessages;           
+     }
     public function fetchSettings() { return false; }
 
     public function insertLabel(Label $label) {
@@ -132,4 +163,32 @@ class MessagesDB implements iStorage {
             'modify_time' => $labelRow['modify_time']
         ]);
     }
+
+    public function fetchLabels() {
+        global $wpdb;
+		$table_name = $wpdb->prefix . self::TABLE_LABELS;
+		$labelRows = $wpdb->get_results(
+             "  SELECT id, create_time, modify_time, delete_time, label_name
+                FROM $table_name
+                ORDER BY label_name;
+            ", 
+            ARRAY_A
+        );
+        if (!$labelRows) {
+            return [];
+        }
+
+        $labels = [];
+        foreach ($labelRows as $labelRow) {
+            $labels[] = (new Label())->setDataAsArray([
+                'id' => $labelRow['id'],
+                'labelName' => $labelRow['label_name'],
+                'create_time' => $labelRow['create_time'],
+                'delete_time' => $labelRow['delete_time'],
+                'modify_time' => $labelRow['modify_time']
+            ]);
+        }
+        return $labels;        
+    }
+
 }

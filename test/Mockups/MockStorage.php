@@ -19,6 +19,9 @@ class MockStorage implements iStorage {
     public function fetchMessage(string $id) {
         return isset($this->expectedResult['fetchMessage']) ? $this->expectedResult['fetchMessage'] : false;
     }
+    public function fetchMessages() {
+        return isset($this->expectedResult['fetchMessage']) ? $this->expectedResult['fetchMessage'] : false;
+    }
     public function fetchSettings() {
         return isset($this->expectedResult['fetchSettings']) ? $this->expectedResult['fetchSettings'] : false;
     }
@@ -33,6 +36,9 @@ class MockStorage implements iStorage {
     }
     public function getLabelTag() {
         return isset($this->expectedResult['getLabelTag']) ? $this->expectedResult['getLabelTag'] : 'post_title';
+    }
+    public function fetchLabels() {
+        return isset($this->expectedResult['fetchLabels']) ? $this->expectedResult['fetchLabels'] : [];
     }
     
 }

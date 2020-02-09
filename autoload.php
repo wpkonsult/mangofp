@@ -16,6 +16,7 @@ spl_autoload_register(
                 'mangofp\\messagesdb' => '/src/Adapters/MessagesDB.php',
                 'mangofp\\usecases\\ioutput' => '/src/UseCases/iOutput.php',
                 'mangofp\\usecases\\istorage' => '/src/UseCases/iStorage.php',
+                'mangofp\\usecases\\labelsusecase' => '/src/UseCases/LabelsUseCase.php',
                 'mangofp\\usecases\\messageusecase' => '/src/UseCases/MessageUseCase.php',
                 'messagesusecasetest' => '/test/MessagesUseCaseTest.php',
                 'messagetest' => '/test/MessageTest.php',

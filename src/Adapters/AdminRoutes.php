@@ -89,25 +89,22 @@ class AdminRoutes implements iOutput {
     }
 
     public function getLabels() {
-        $labels =  [
-                [ 'id' => '001', 'name' => 'Praktiline arvuti baaskoolitus' ],
-                [ 'id' => '002', 'name' => 'MS Office komplekskoolitus' ],
-                [ 'id' => '003', 'name' => 'Exceli baaskursus' ],
-                [ 'id' => '004', 'name' => 'Funktsioonid ja valemid Excelis' ],
-                [ 'id' => '005', 'name' => 'Fotograafia ABC' ],
-                [ 'id' => '006', 'name' => "PhotoShop'i algkoolitus" ],
-                [ 'id' => '007', 'name' => 'Tootefoto pildistamine ja töötlus' ],
-                [ 'id' => '008', 'name' => 'Esmaabi' ],
-                [ 'id' => '009', 'name' => 'Canva' ],
-                [ 'id' => '010', 'name' => 'Sketchup' ],
-                [ 'id' => '011', 'name' => 'Sketchup edasijõudnutele' ],
-        ];
-        return new \WP_REST_Response( ['labels' => $labels], 200 );
+        $useCase = new UseCases\LabelsUseCase(
+            $this, 
+            new MessagesDB()
+        );
+        return $useCase->fetchAllLabelsToOutput();
     }
 
     public function getMessages() {
-        $messages = _getMessages();
-        return new \WP_REST_Response( ['messages' => $messages], 200 );
+        //$messages = _getMessages();
+        //return new \WP_REST_Response( ['messages' => $messages], 200 );
+
+        $useCase = new UseCases\MessageUseCase(
+            $this, 
+            new MessagesDB()
+        );
+        return $useCase->fetchAllMessagesToOutput();
     }
 
     public function postMessage($request) {

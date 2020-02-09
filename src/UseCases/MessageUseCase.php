@@ -83,4 +83,27 @@ class MessageUseCase {
             'name' => $message->get('name')
         ]);
     }
+
+    public function fetchAllMessagesToOutput() {
+        $messages = $this->storage->fetchMessages();
+        
+        if (!$messages || !\is_array($messages)) {
+            return $this->output->outputError('ERROR: unable to read messages list', iOutput::ERROR_FAILED);
+        }
+
+        $data = [];
+        foreach ($messages as $message) {
+            $data[] = [
+            'id' => $message->get('id'),
+            'form' => $message->get('form'),
+            'code' => $message->get('statusCode'),
+            'content' => $message->get('content'),
+            'state' => 'NA',
+            'labelId' =>  $message->get('labelId'),
+            'email' => $message->get('email'),
+            'name' => $message->get('name')
+            ];
+        }
+        return $this->output->outputResult(['messages' => $data]);
+    }
 } 
