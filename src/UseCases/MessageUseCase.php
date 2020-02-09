@@ -14,6 +14,7 @@ class MessageUseCase {
         '_wpcf7_locale',
         '_wpcf7_unit_tag',
         '_wpcf7_container_post',
+        'vormiurl'
     ];    
 
     function __construct(iOutput $output, iStorage $storage) {
@@ -98,12 +99,54 @@ class MessageUseCase {
             'form' => $message->get('form'),
             'code' => $message->get('statusCode'),
             'content' => $message->get('content'),
-            'state' => 'NA',
             'labelId' =>  $message->get('labelId'),
             'email' => $message->get('email'),
             'name' => $message->get('name')
             ];
         }
         return $this->output->outputResult(['messages' => $data]);
+    }
+
+    public function updateMessageFieldsAndSubmitChangedMessage($params) {
+        $UPDATEABLE_FIELDS = [
+            'labelId' => 'labelId',
+            'email' => 'email',
+            'code' => 'statusCode'
+        ];
+
+        if (!isset($params['uuid'])) {
+            return $this->output->outputError('No message id in message update request', iOutput::ERROR_VALIDATION);
+        }
+        $messageObj =  $this->storage->fetchMessage($params['uuid']);
+        if (!$messageObj) {
+             return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
+        }
+
+        $messageData = $messageObj->getDataAsArray();
+        $paramsMessage = $params['message'];
+        foreach($UPDATEABLE_FIELDS as $key => $field) {
+            if (isset($paramsMessage[$key])) {
+                $messageData[$field] = $paramsMessage[$key];
+            }
+        }
+
+        $messageObj->setDataAsArray($messageData);
+        \error_log('Will update message: ' . print_r($messageObj->getDataAsArray(), 1));
+
+        $updatedMessage = $this->storage->storeMessage($messageObj);
+        if (!$updatedMessage) {
+            return $this->output->outputError('Message update failed', iOutput::ERROR_FAILED);
+        }
+
+        //TODO refactor mapping to be a function in output. then use it here and in fetching messages list
+        return $this->output->outputResult(['message' => [
+            'id' => $updatedMessage->get('id'),
+            'form' => $updatedMessage->get('form'),
+            'code' => $updatedMessage->get('statusCode'),
+            'content' => $updatedMessage->get('content'),
+            'labelId' =>  $updatedMessage->get('labelId'),
+            'email' => $updatedMessage->get('email'),
+            'name' => $updatedMessage->get('name')
+        ]]);
     }
 } 

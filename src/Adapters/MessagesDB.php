@@ -65,22 +65,30 @@ class MessagesDB implements iStorage {
         return 'pealkiri';
     }
 
-    public function storeMessage(Message $message) { return false; }
+    public function storeMessage(Message $message) {
+        global $wpdb;
+        if (!$message || !$message->get('id')) {
+            return null;
+        }
+        $result = $wpdb->update(
+            $wpdb->prefix . self::TABLE_MESSAGES, 
+            $this->parseMessageToDbData($message),
+            ['id' => $message->get('id')]
+        );
+		if (!$result) {
+			error_log('ERROR: Message Update failed with data: ' . \json_encode($message->getDataAsArray()));
+			return false;
+        }
+        if ($result > 1) {
+            throw new \Error('More than one message was updated!!!!');
+        }
+        return $message;
+    }
     public function insertMessage(Message $message) { 
         global $wpdb;
         $result = $wpdb->insert(
             $wpdb->prefix . self::TABLE_MESSAGES, 
-            [
-                'id' => $message->get('id'),
-                'modify_time' => $message->get('modify_time'),
-                'create_time' => $message->get('create_time'),
-                'status_code' => $message->get('statusCode'),
-                'label_id' => $message->get('labelId'),
-                'email' => $message->get('email'), 
-                'person_name' => $message->get('name'),
-                'content' => $message->get('content'), 
-                'rawdata' => $message->get('rawData')
-            ]
+            $this->parseMessageToDbData($message)
         );
 		if ($result != 1) {
 			error_log('ERROR: Message Insert failed with data: ' . \json_encode($message->getDataAsArray()));
@@ -89,7 +97,22 @@ class MessagesDB implements iStorage {
         return true;
     }
     public function messageExists(Message $message) { return false; }
-    public function fetchMessage(string $id) { return false; }
+    public function fetchMessage(string $id) {
+        global $wpdb;
+		$table_name = $wpdb->prefix . self::TABLE_MESSAGES;
+		$request = $wpdb->prepare( 
+            "SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata
+             FROM $table_name
+             WHERE id = '%s';
+            ",
+            [$id]
+        );
+        $messageRow = $wpdb->get_row($request, ARRAY_A);
+        if (!$messageRow) {
+            return null;
+        }
+        return $this->makeMessageWithDbData($messageRow);
+    }
     public function fetchMessages() { 
         global $wpdb;
 		$table_name = $wpdb->prefix . self::TABLE_MESSAGES;
@@ -106,18 +129,7 @@ class MessagesDB implements iStorage {
 
         $allMessages = [];
         foreach ($messageRows as $messageRow) {
-            $allMessages[] = (new Message())->setDataAsArray([
-                'id' => $messageRow['id'],
-                'create_time' => $messageRow['create_time'],
-                'delete_time' => $messageRow['delete_time'],
-                'modify_time' => $messageRow['modify_time'],
-                'labelId' => $messageRow['label_id'],
-                'statusCode' => $messageRow['status_code'],
-                'email' => $messageRow['email'],
-                'name' => $messageRow['person_name'],
-                'content' => $messageRow['content'],
-                'rawData' => $messageRow['rawdata']
-            ]);
+            $allMessages[] =  $this->makeMessageWithDbData($messageRow);
         }
         return $allMessages;           
      }
@@ -189,6 +201,35 @@ class MessagesDB implements iStorage {
             ]);
         }
         return $labels;        
+    }
+
+    protected function makeMessageWithDbData($messageRow) {
+        return (new Message())->setDataAsArray([
+            'id' => $messageRow['id'],
+            'create_time' => $messageRow['create_time'],
+            'delete_time' => $messageRow['delete_time'],
+            'modify_time' => $messageRow['modify_time'],
+            'labelId' => $messageRow['label_id'],
+            'statusCode' => $messageRow['status_code'],
+            'email' => $messageRow['email'],
+            'name' => $messageRow['person_name'],
+            'content' => $messageRow['content'],
+            'rawData' => $messageRow['rawdata']
+        ]);
+    }
+
+    protected function parseMessageToDbData(Message $message) {
+        return [
+            'id' => $message->get('id'),
+            'modify_time' => $message->get('modify_time'),
+            'create_time' => $message->get('create_time'),
+            'status_code' => $message->get('statusCode'),
+            'label_id' => $message->get('labelId'),
+            'email' => $message->get('email'), 
+            'person_name' => $message->get('name'),
+            'content' => $message->get('content'), 
+            'rawdata' => $message->get('rawData')
+        ];
     }
 
 }
