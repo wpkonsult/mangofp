@@ -6,19 +6,28 @@
  *  Description: User defined states and their management for Contact Form 7 results
  */
 
+function isDebug() {
+    return ( defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG );
+}
+
 //Register Scripts to use 
 function registerVueScripts() {
-	//TODO: Intorduce setting that build is loaded in dev environment and that for production its linked from the place were its created
-	wp_register_script( 
+	$chunk_vendors_js = plugin_dir_url( __FILE__ ) . 'assets/js/chunk-vendors.js';
+    $app_js = plugin_dir_url( __FILE__ ) . 'assets/js/app.js';
+    if (isDebug()) {
+        $chunk_vendors_js = 'http://localhost:8080/js/chunk-vendors.js';
+        $app_js = 'http://localhost:8080/js/app.js';
+    }
+    wp_register_script( 
 		'vue_vendors', 
-		'http://localhost:8080/js/chunk-vendors.js',
+		$chunk_vendors_js,
 		false, //no dependencies
 		'0.0.1',
 		true //in the footer otherwise Vue triggers it too early
 	);
 	wp_register_script( 
 		'vuejs', 
-		'http://localhost:8080/js/app.js',
+		$app_js,
 		['vue_vendors'],
 		'0.0.1',
 		true //in the footer otherwise Vue triggers it too early
@@ -26,6 +35,13 @@ function registerVueScripts() {
 
 	wp_enqueue_script('vue_vendors');
 	wp_enqueue_script('vuejs');
+
+    if (!isDebug()) {
+        wp_register_style( 'vue-vendor-styles',  plugin_dir_url( __FILE__ ) . 'assets/css/chunk-vendors.css' );
+        wp_enqueue_style( 'vue-vendor-styles' );
+        wp_register_style( 'vue-app-styles',  plugin_dir_url( __FILE__ ) . 'assets/css/app.css' );
+        wp_enqueue_style( 'vue-app-styles' );
+    }
 
     wp_enqueue_style('vuetify_styles_font', 'https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900');
     wp_enqueue_style('vuetify_styles', 'https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css');
