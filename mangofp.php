@@ -52,7 +52,7 @@ function makePeachesAdminMenuPage() {
 		'MangoFP Plugin Page',
 		'MangoFP',
 		'manage_options',
-		'peaches-admin',
+		'mangofp-admin',
 		'renderAdmin'
 	);
 	add_action( "load-{$page_hook_suffix}", 'loadAdminJs' );
@@ -80,7 +80,7 @@ function initAdminPage() {
         'vuejs', 
         'RESOURCES',
         [
-            //'adminUrl' => esc_url_raw( rest_url() . 'peaches'),
+            //'adminUrl' => esc_url_raw( rest_url() . 'mangofp'),
             'adminUrl' => get_rest_url( null, '/mangofp', 'rest')
         ]
     );
@@ -122,8 +122,8 @@ register_deactivation_hook( __FILE__, 'deactivateMFP' );
 *
 *  function addPeaches() {
 *  	wp_enqueue_script('vuejs');
-*  	return '<div id="peachesMain"></div>';
+*  	return '<div id="mangofpMain"></div>';
 *  }
 * add_action('wp_enqueue_scripts', 'registerVueScripts');
-* add_shortcode("peaches4cf7", 'addPeaches');
+* add_shortcode("mangofp4cf7", 'addPeaches');
 */

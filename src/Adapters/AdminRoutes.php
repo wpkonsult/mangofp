@@ -10,7 +10,7 @@ class AdminRoutes implements iOutput {
             ['endpoint' => '/labels', 'method' => 'GET', 'callback' => 'getLabels'],
             ['endpoint' => '/messages', 'method' => 'GET', 'callback' => 'getMessages'],
             ['endpoint' => '/messages', 'method' => 'POST', 'callback' => 'postMessage'],
-            ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'PUT', 'callback' => 'putMessage'],
+            ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'POST', 'callback' => 'putMessage'],
         ];
         $version='1';
     }
