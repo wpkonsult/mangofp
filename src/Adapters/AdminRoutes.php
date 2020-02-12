@@ -18,7 +18,7 @@ class AdminRoutes implements iOutput {
     public function registerRestRoutes() {
         foreach ($this->routes as $key => $route) {
             register_rest_route( 
-                'peaches', 
+                'mangofp', 
                 $route['endpoint'], 
                 [
                     'methods' => $route['method'], 

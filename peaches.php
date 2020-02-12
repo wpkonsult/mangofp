@@ -50,7 +50,7 @@ function registerVueScripts() {
 function makePeachesAdminMenuPage() {
 	$page_hook_suffix = add_menu_page(
 		'MangoFP Plugin Page',
-		'MangoFormProcessing',
+		'MangoFP',
 		'manage_options',
 		'peaches-admin',
 		'renderAdmin'
@@ -81,7 +81,7 @@ function initAdminPage() {
         'RESOURCES',
         [
             //'adminUrl' => esc_url_raw( rest_url() . 'peaches'),
-            'adminUrl' => get_rest_url( null, '/peaches', 'rest')
+            'adminUrl' => get_rest_url( null, '/mangofp', 'rest')
         ]
     );
 }
