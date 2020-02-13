@@ -3,3 +3,5 @@ assets/css/app.css
 assets/css/chunk-vendors.css
 assets/js/app.js
 assets/js/chunk-vendors.js
+stage/
+assets/
