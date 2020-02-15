@@ -3,7 +3,7 @@
 //namespace MangoFp;
 /**
  *  Plugin name: Mango Form Processing
- *  Description: User defined states and their management for Contact Form 7 results
+ *  Description: User defined states and their management for Contact Form 7 forms
  */
 
 function isDebug() {

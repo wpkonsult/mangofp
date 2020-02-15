@@ -12,7 +12,8 @@ class LabelsUseCase {
         $labels = $this->storage->fetchLabels();
         
         if (!$labels || !\is_array($labels)) {
-            return $this->output->outputError('ERROR: unable to read labels list', iOutput::ERROR_FAILED);
+            $labels = [];
+            //return $this->output->outputError('ERROR: unable to read labels list', iOutput::ERROR_FAILED);
         }
 
         $data = [];
