@@ -2,19 +2,9 @@
 namespace MangoFp;
 
 class CF7Connector {
-    public static function actionCF7Submit( $instance, $result ) {
+    public static function actionCF7Submit( $result ) {
         global $wpdb;
 		
-        $cases = ['spam', 'mail_sent', 'mail_failed'];
-
-        if ( 
-            empty( $result['status'] ) ||
-            !in_array( $result['status'], $cases ) 
-        ) {
-            error_log('Validation failed, results not stored. Status: ' . ($result['status'] ?? 'empty'));
-            return;
-        }
-
         $submission = \WPCF7_Submission::get_instance();
         if ( 
             !$submission ||
@@ -24,13 +14,11 @@ class CF7Connector {
             return;
         }
 
-        //TODO: Here the $posted_data can be serialised
         error_log('Posted data:' . print_r($posted_data, 1));
         $useCase = new UseCases\MessageUseCase(
             new AdminRoutes(), 
             new MessagesDB()
         );
         $useCase->parseContentAndInsertToDatabase($posted_data);
-        
     }
 }

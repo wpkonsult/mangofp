@@ -14,6 +14,12 @@ class MessageUseCase {
         '_wpcf7_locale',
         '_wpcf7_unit_tag',
         '_wpcf7_container_post',
+        '_wpcf7cf_hidden_group_fields',
+        '_wpcf7cf_hidden_groups',
+        '_wpcf7cf_visible_groups',
+        '_wpcf7cf_repeaters',
+        '_wpcf7cf_steps',
+        '_wpcf7cf_options',
         'vormiurl'
     ];    
 
@@ -88,7 +94,7 @@ class MessageUseCase {
     public function fetchAllMessagesToOutput() {
         $messages = $this->storage->fetchMessages();
         
-        if (!$messages || !\is_array($messages)) {
+        if (!\is_array($messages)) {
             return $this->output->outputError('ERROR: unable to read messages list', iOutput::ERROR_FAILED);
         }
 

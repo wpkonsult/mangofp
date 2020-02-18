@@ -3,7 +3,13 @@
 //namespace MangoFp;
 /**
  *  Plugin name: Mango Form Processing
- *  Description: User defined states and their management for Contact Form 7 forms
+ *  Description: Manage Contact Form 7 form submissions in Wordpress
+ *  @link               http://fpmango.com
+ *  @since              0.0.1
+ *  @package            MangoFp
+ *  Author:             Andres Järviste
+ *  Version:            0.0.1
+ *  Author URI:         https://fpmango.com
  */
 
 function isDebug() {
@@ -86,8 +92,8 @@ function initAdminPage() {
     );
 }
 
-function actionCF7Submit( $instance, $result ) {
-    return MangoFp\CF7Connector::actionCF7Submit($instance, $result);
+function actionCF7Submit( $result ) {
+    return MangoFp\CF7Connector::actionCF7Submit($result);
 }
 
 function registerRestRoutes() {
@@ -110,8 +116,8 @@ function deactivateMFP() {
 require_once plugin_dir_path(__FILE__) . 'autoload.php';
 
 add_action('admin_menu', 'makePeachesAdminMenuPage');
-add_action( 'wpcf7_submit', 'actionCF7Submit', 10, 2 );
-add_action( 'rest_api_init', 'registerRestRoutes' );
+add_action('wpcf7_before_send_mail','actionCF7Submit');
+add_action('rest_api_init', 'registerRestRoutes' );
 //add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
 
 register_activation_hook( __FILE__, 'activateMFP' );

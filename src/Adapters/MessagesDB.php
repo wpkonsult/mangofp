@@ -123,8 +123,8 @@ class MessagesDB implements iStorage {
             ", 
             ARRAY_A
         );
-        if (!$messageRows) {
-            return [];
+        if (!is_array($messageRows)) {
+            return null;
         }
 
         $allMessages = [];
