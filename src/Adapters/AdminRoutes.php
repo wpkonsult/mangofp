@@ -10,7 +10,7 @@ class AdminRoutes implements iOutput {
             ['endpoint' => '/labels', 'method' => 'GET', 'callback' => 'getLabels'],
             ['endpoint' => '/messages', 'method' => 'GET', 'callback' => 'getMessages'],
             ['endpoint' => '/messages', 'method' => 'POST', 'callback' => 'postMessage'],
-            ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'POST', 'callback' => 'putMessage'],
+            ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'POST', 'callback' => 'changeMessage'],
         ];
         $version='1';
     }
@@ -47,11 +47,11 @@ class AdminRoutes implements iOutput {
         return $useCase->fetchAllMessagesToOutput();
     }
 
-    public function postMessage($request) {
+    public function postMessages($request) {
         error_log('Data submitted for update: ' . json_encode($request->get_params(), true));
     }
     
-    public function putMessage($request) {
+    public function changeMessage($request) {
 
         //error_log('Data submitted for put: ' . json_encode($request->get_params(), true));
         $params = json_decode(json_encode($request->get_params()), true);
@@ -59,9 +59,13 @@ class AdminRoutes implements iOutput {
             $this, 
             new MessagesDB()
         );
-        return $useCase->updateMessageFieldsAndSubmitChangedMessage($params);
-    }
 
+        if (isset($params['email']) && $params['email']) {
+            return $useCase->sendEmailAndUpdateMessageAndReturnChangedMessage($params['email'], $params);
+        }
+        return $useCase->updateMessageAndReturnChangedMessage($params);
+
+    }
     public function outputResult(array $data) {
         return new \WP_REST_Response([
                 'payload' => $data,

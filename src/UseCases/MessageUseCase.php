@@ -20,7 +20,11 @@ class MessageUseCase {
         '_wpcf7cf_repeaters',
         '_wpcf7cf_steps',
         '_wpcf7cf_options',
-        'vormiurl'
+        'vormiurl',
+        'acceptance-824',
+        'acceptance-383',
+        'acceptance-231',
+        'acceptance-689'
     ];    
 
     function __construct(iOutput $output, iStorage $storage) {
@@ -55,7 +59,10 @@ class MessageUseCase {
                 continue;
             }
 
-            if (\in_array($key, $this->blacklistedAttributes)) {
+            if (
+                \in_array($key, $this->blacklistedAttributes) ||
+                !$value
+                ) {
                 continue;
             }
 
@@ -113,7 +120,7 @@ class MessageUseCase {
         return $this->output->outputResult(['messages' => $data]);
     }
 
-    public function updateMessageFieldsAndSubmitChangedMessage($params) {
+    public function updateMessageAndReturnChangedMessage($params) {
         $UPDATEABLE_FIELDS = [
             'labelId' => 'labelId',
             'email' => 'email',
@@ -123,6 +130,11 @@ class MessageUseCase {
         if (!isset($params['uuid'])) {
             return $this->output->outputError('No message id in message update request', iOutput::ERROR_VALIDATION);
         }
+
+        if (!isset($params['message'])) {
+            return $this->output->outputError('No data to be updated in the request', iOutput::ERROR_VALIDATION);
+        }
+
         $messageObj =  $this->storage->fetchMessage($params['uuid']);
         if (!$messageObj) {
              return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
@@ -154,5 +166,29 @@ class MessageUseCase {
             'email' => $updatedMessage->get('email'),
             'name' => $updatedMessage->get('name')
         ]]);
+    }
+
+    public function sendEmailAndUpdateMessageAndReturnChangedMessage($emailData, $params) {
+       if (
+           !isset($emailData['content']) ||
+           !isset($emailData['addresses']) ||
+           !isset($emailData['subject'])
+        ) {
+            \error_log('Unable to send email - email field(s) missing. Submitted: ' . \wp_json_encode( $emailData ));
+            return $this->output->outputError('Unable to send email - email field(s) missing', iOutput::ERROR_FAILED);
+        }
+        $to = $emailData['addresses'];
+        $subject = $emailData['subject'];
+        $body = $emailData['content'];
+        $headers = ['Content-Type: text/html; charset=UTF-8'];
+
+        $isSuccess = wp_mail( $to, $subject, $body, $headers );
+
+        if (!$isSuccess) {
+            \error_log('Unable to send email. Submitted: ' . \wp_json_encode( $emailData ));
+            return $this->output->outputError('Sending email failed', iOutput::ERROR_FAILED);
+        }
+
+        return $this->updateMessageAndReturnChangedMessage($params);
     }
 } 

@@ -119,7 +119,7 @@ class MessagesDB implements iStorage {
 		$messageRows = $wpdb->get_results(
              "  SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata
                 FROM $table_name
-                ORDER BY status_code, create_time;
+                ORDER BY status_code, create_time desc;
             ", 
             ARRAY_A
         );
