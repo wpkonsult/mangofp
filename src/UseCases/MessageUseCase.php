@@ -180,9 +180,15 @@ class MessageUseCase {
         $to = $emailData['addresses'];
         $subject = $emailData['subject'];
         $body = $emailData['content'];
-        $headers = ['Content-Type: text/html; charset=UTF-8'];
+        //$headers = ['Content-Type: text/html; charset=UTF-8'];
 
-        $isSuccess = wp_mail( $to, $subject, $body, $headers );
+        //do not send email from development environment
+        if (defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG) {
+            $isSuccess = true;
+        } else {
+            //refactor sending of email to the Adapter level
+            $isSuccess = wp_mail( $to, $subject, $body, $headers );
+        }
 
         if (!$isSuccess) {
             \error_log('Unable to send email. Submitted: ' . \wp_json_encode( $emailData ));

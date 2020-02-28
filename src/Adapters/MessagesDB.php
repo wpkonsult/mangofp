@@ -51,14 +51,14 @@ class MessagesDB implements iStorage {
 	}
 
 	public static function removeDatabase() {
-		global $wpdb;
-		$table_name = $wpdb->prefix . self::TABLE_MESSAGES;
-		$sql = "DROP TABLE IF EXISTS $table_name";
-		$wpdb->query($sql);
-		$table_name = $wpdb->prefix . self::TABLE_LABELS;
-		$sql = "DROP TABLE IF EXISTS $table_name";
-		$wpdb->query($sql);
-		delete_option( self::VERSION_PARAM_NAME );
+		//global $wpdb;
+		//$table_name = $wpdb->prefix . self::TABLE_MESSAGES;
+		//$sql = "DROP TABLE IF EXISTS $table_name";
+		//$wpdb->query($sql);
+		//$table_name = $wpdb->prefix . self::TABLE_LABELS;
+		//$sql = "DROP TABLE IF EXISTS $table_name";
+		//$wpdb->query($sql);
+		//delete_option( self::VERSION_PARAM_NAME );
 	}
 
     public function getLabelTag() {
