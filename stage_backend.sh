@@ -6,3 +6,8 @@ echo 'Staging backend'
 cp -rv ../mangofp/src ../mangofp/stage/
 cp -rv ../mangofp/mangofp.php ../mangofp/stage/
 cp -rv ../mangofp/autoload.php ../mangofp/stage/
+
+echo 'Copying language resources'
+mkdir -p  ../mangofp/stage/languages
+cp -rv /var/www/html/wpdev/wp-content/languages/loco/plugins/*.po ../mangofp/stage/languages/
+cp -rv /var/www/html/wpdev/wp-content/languages/loco/plugins/*.mo ../mangofp/stage/languages/

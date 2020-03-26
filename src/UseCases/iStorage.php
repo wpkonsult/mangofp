@@ -2,6 +2,7 @@
 namespace MangoFp\UseCases;
 use MangoFp\Entities\Message;
 use MangoFp\Entities\Label;
+use MangoFp\Entities\HistoryItem;
 
 interface iStorage {
     public function storeMessage(Message $message);
@@ -14,4 +15,6 @@ interface iStorage {
     public function insertLabel(Label $label);
     public function getLabelTag();
     public function fetchLabels();
+    public function insertHistoryItem(HistoryItem $historyItem);
+    public function fetchItemHistory(string $id);
 }

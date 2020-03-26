@@ -3,12 +3,10 @@ namespace MangoFp;
 
 class CF7Connector {
     public static function actionCF7Submit( $result ) {
-        global $wpdb;
-		
         $submission = \WPCF7_Submission::get_instance();
-        if ( 
+        if (
             !$submission ||
-            !$posted_data = $submission->get_posted_data() 
+            !$posted_data = $submission->get_posted_data()
         ) {
             error_log('No posted data');
             return;
@@ -16,7 +14,7 @@ class CF7Connector {
 
         error_log('Posted data:' . print_r($posted_data, 1));
         $useCase = new UseCases\MessageUseCase(
-            new AdminRoutes(), 
+            new AdminRoutes(),
             new MessagesDB()
         );
         $useCase->parseContentAndInsertToDatabase($posted_data);

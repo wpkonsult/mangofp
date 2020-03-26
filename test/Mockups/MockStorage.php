@@ -3,6 +3,7 @@
 use MangoFp\UseCases\iStorage;
 use MangoFp\Entities\Message;
 use MangoFp\Entities\Label;
+use MangoFp\Entities\HistoryItem;
 
 class MockStorage implements iStorage {
     protected $expectedResults = [];
@@ -39,6 +40,12 @@ class MockStorage implements iStorage {
     }
     public function fetchLabels() {
         return isset($this->expectedResult['fetchLabels']) ? $this->expectedResult['fetchLabels'] : [];
+    }
+    public function insertHistoryItem(HistoryItem $historyItem) {
+        return isset($this->expectedResult['insertHistoryItem']) ? $this->expectedResult['insertHistoryItem'] : [];
+    }
+    public function fetchItemHistory(string $id) {
+        return isset($this->expectedResult['fetchItemHistory']) ? $this->expectedResult['fetchItemHistory'] : [];
     }
     
 }

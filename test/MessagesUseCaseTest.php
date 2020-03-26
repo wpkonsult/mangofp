@@ -54,7 +54,6 @@ class MessagesUseCaseTest extends TestCase {
                 'content' => json_encode([
                     'your-phone' => '+341234 12341234 1234123',
                     'your-message' => 'Test message',
-                    'acceptance-231' => 1,
                 ])
             ]
         );
