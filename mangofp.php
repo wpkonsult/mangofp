@@ -3,20 +3,21 @@
 //namespace MangoFp;
 /**
  *  Plugin name: Mango Form Processing
- *  Description: Manage Contact Form 7 form submissions in Wordpress
+ *  Description: Manage Contact Form 7 contacts by process you define
  *  @link               http://fpmango.com
  *  @since              0.0.1
  *  @package            MangoFp
  *  Author:             Andres Järviste
- *  Version:            0.0.1
+ *  Version:            0.0.2
  *  Author URI:         https://fpmango.com
+ *  Domain Path:        /languages
  */
 
 function isDebug() {
     return ( defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG );
 }
 
-//Register Scripts to use 
+//Register Scripts to use
 function registerVueScripts() {
 	$chunk_vendors_js = plugin_dir_url( __FILE__ ) . 'assets/js/chunk-vendors.js';
     $app_js = plugin_dir_url( __FILE__ ) . 'assets/js/app.js';
@@ -24,23 +25,23 @@ function registerVueScripts() {
         $chunk_vendors_js = 'http://localhost:8080/js/chunk-vendors.js';
         $app_js = 'http://localhost:8080/js/app.js';
     }
-    wp_register_script( 
-		'vue_vendors', 
+    wp_register_script(
+		'mangofp_vue_vendors',
 		$chunk_vendors_js,
 		false, //no dependencies
 		'0.0.1',
 		true //in the footer otherwise Vue triggers it too early
 	);
-	wp_register_script( 
-		'vuejs', 
+	wp_register_script(
+		'mangofp_vuejs',
 		$app_js,
-		['vue_vendors'],
+		['mangofp_vue_vendors'],
 		'0.0.1',
 		true //in the footer otherwise Vue triggers it too early
 	);
 
-	wp_enqueue_script('vue_vendors');
-	wp_enqueue_script('vuejs');
+	wp_enqueue_script('mangofp_vue_vendors');
+	wp_enqueue_script('mangofp_vuejs');
 
     if (!isDebug()) {
         wp_register_style( 'vue-vendor-styles',  plugin_dir_url( __FILE__ ) . 'assets/css/chunk-vendors.css' );
@@ -70,12 +71,12 @@ function renderAdmin(){
 	if (is_plugin_active($CF7_PLUGIN_NAME)) {
 		echo '<div id="app"></div>';
 	} else {
-		echo '<strong>' . __('Peaches works only when Contact Form 7 is installed and activated.') . '</strong>';
+		echo '<strong>' . __('Mango Form Processor works only when Contact Form 7 is installed and activated.') . '</strong>';
 	}
 }
 
 function loadAdminJs() {
-	add_action('admin_enqueue_scripts', 'initAdminPage');
+    add_action('admin_enqueue_scripts', 'initAdminPage');
 }
 
 function initAdminPage() {
@@ -83,11 +84,11 @@ function initAdminPage() {
     //Send localized data to the script
     error_log('MangoFP starts ...');
     wp_localize_script(
-        'vuejs', 
-        'RESOURCES',
+        'mangofp_vuejs',
+        'MANGOFP_RESOURCES',
         [
-            //'adminUrl' => esc_url_raw( rest_url() . 'mangofp'),
-            'adminUrl' => get_rest_url( null, '/mangofp', 'rest')
+            'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
+            'strings' => MangoFp\Localization::getStrings()
         ]
     );
 }
@@ -98,7 +99,7 @@ function actionCF7Submit( $result ) {
 
 function registerRestRoutes() {
     $adminRoutes = new MangoFp\AdminRoutes();
-    $adminRoutes->registerRestRoutes();   
+    $adminRoutes->registerRestRoutes();
 }
 
 function activateMFP() {
@@ -113,23 +114,20 @@ function deactivateMFP() {
     MangoFp\MessagesDB::removeDatabase();
 }
 
+function loadTranslations() {
+    load_plugin_textdomain( 'mangofp', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+
+require_once(ABSPATH . 'wp-admin/includes/image.php');
+require_once(ABSPATH . 'wp-admin/includes/file.php');
+require_once(ABSPATH . 'wp-admin/includes/media.php');
 require_once plugin_dir_path(__FILE__) . 'autoload.php';
 
 add_action('admin_menu', 'makePeachesAdminMenuPage');
 add_action('wpcf7_before_send_mail','actionCF7Submit');
 add_action('rest_api_init', 'registerRestRoutes' );
 //add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
+add_action( 'init', 'loadTranslations');
 
 register_activation_hook( __FILE__, 'activateMFP' );
 register_deactivation_hook( __FILE__, 'deactivateMFP' );
-		
-/**
-*  Comment in for usage in frontend through shortcode
-*
-*  function addPeaches() {
-*  	wp_enqueue_script('vuejs');
-*  	return '<div id="mangofpMain"></div>';
-*  }
-* add_action('wp_enqueue_scripts', 'registerVueScripts');
-* add_shortcode("mangofp4cf7", 'addPeaches');
-*/

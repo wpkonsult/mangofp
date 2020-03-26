@@ -1,3 +1,4 @@
+node_modules
 test/.phpunit.result.cache
 assets/css/app.css
 assets/css/chunk-vendors.css
