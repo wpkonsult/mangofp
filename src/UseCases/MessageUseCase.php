@@ -2,6 +2,7 @@
 namespace MangoFp\UseCases;
 use MangoFp\Entities\Message;
 use MangoFp\Entities\Label;
+use MangoFp\Entities\HistoryItem;
 
 class MessageUseCase {
     private $attributeMapping = [
@@ -25,7 +26,7 @@ class MessageUseCase {
         'acceptance-383',
         'acceptance-231',
         'acceptance-689'
-    ];    
+    ];
 
     function __construct(iOutput $output, iStorage $storage) {
         $this->output = $output;
@@ -37,7 +38,7 @@ class MessageUseCase {
         if ($label) {
             return $label;
         }
-            
+
         $newLabel = (new Label())->setDataAsArray(['labelName' => $labelName]);
         $result = $this->storage->insertLabel($newLabel);
         if (!$result) {
@@ -70,7 +71,7 @@ class MessageUseCase {
                 $primaryKey = $primaries[$key];
                 $data[$primaryKey] = $value;
             } else {
-                $secondaries[$key] = $value; 
+                $secondaries[$key] = $value;
             }
         }
         $data['content'] = \json_encode($secondaries);
@@ -84,7 +85,7 @@ class MessageUseCase {
         }
         //TODO: store label and fetch labelId, send it back
         //TODO: Fetch state for code and send it back
-        
+
         return $this->output->outputResult([
             'id' => $message->get('id'),
             'form' => $message->get('form'),
@@ -100,7 +101,7 @@ class MessageUseCase {
 
     public function fetchAllMessagesToOutput() {
         $messages = $this->storage->fetchMessages();
-        
+
         if (!\is_array($messages)) {
             return $this->output->outputError('ERROR: unable to read messages list', iOutput::ERROR_FAILED);
         }
@@ -142,8 +143,17 @@ class MessageUseCase {
 
         $messageData = $messageObj->getDataAsArray();
         $paramsMessage = $params['message'];
+        $updatesHistory = [];
         foreach($UPDATEABLE_FIELDS as $key => $field) {
             if (isset($paramsMessage[$key])) {
+                $updatesHistory[] = (new HistoryItem())->setMessageChanges(
+                    $messageObj->get('id'), // item id
+                    'admin', //account
+                    $key, //change type
+                    $messageData[$field], // original content
+                    $paramsMessage[$key] // content
+                );
+
                 $messageData[$field] = $paramsMessage[$key];
             }
         }
@@ -156,16 +166,43 @@ class MessageUseCase {
             return $this->output->outputError('Message update failed', iOutput::ERROR_FAILED);
         }
 
-        //TODO refactor mapping to be a function in output. then use it here and in fetching messages list
-        return $this->output->outputResult(['message' => [
-            'id' => $updatedMessage->get('id'),
-            'form' => $updatedMessage->get('form'),
-            'code' => $updatedMessage->get('statusCode'),
-            'content' => $updatedMessage->get('content'),
-            'labelId' =>  $updatedMessage->get('labelId'),
-            'email' => $updatedMessage->get('email'),
-            'name' => $updatedMessage->get('name')
-        ]]);
+        foreach ($updatesHistory as $item) {
+            //TODO - add error  handling???
+            $this->storage->insertHistoryItem($item);
+        }
+        return $this->output->outputResult($this->makeMessageOutputData($updatedMessage));
+    }
+
+    public function getMessageDetailsAndReturn($params) {
+        $messageObj =  $this->storage->fetchMessage($params['uuid']);
+        if (!$messageObj) {
+             return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
+        }
+        return $this->output->outputResult($this->makeMessageOutputData($messageObj));
+    }
+
+    public function sendEmailAndReturnMessage($emailData, $id) {
+       if (
+           !isset($emailData['content']) ||
+           !isset($emailData['addresses']) ||
+           !isset($emailData['subject'])
+        ) {
+            \error_log('Unable to send email - email field(s) missing. Submitted: ' . \wp_json_encode( $emailData ));
+            return $this->output->outputError('Unable to send email - email field(s) missing', iOutput::ERROR_FAILED);
+        }
+
+        $messageObj =  $this->storage->fetchMessage($id);
+        if (!$messageObj) {
+             return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
+        }
+
+        $isSuccess = $this->submitEmail($emailData, $id);
+        if (!$isSuccess) {
+            \error_log('Unable to send email. Submitted: ' . \wp_json_encode( $emailData ));
+            return $this->output->outputError('Sending email failed', iOutput::ERROR_FAILED);
+        }
+
+        return $this->output->outputResult($this->makeMessageOutputData($messageObj));
     }
 
     public function sendEmailAndUpdateMessageAndReturnChangedMessage($emailData, $params) {
@@ -177,19 +214,8 @@ class MessageUseCase {
             \error_log('Unable to send email - email field(s) missing. Submitted: ' . \wp_json_encode( $emailData ));
             return $this->output->outputError('Unable to send email - email field(s) missing', iOutput::ERROR_FAILED);
         }
-        $to = $emailData['addresses'];
-        $subject = $emailData['subject'];
-        $body = $emailData['content'];
-        //$headers = ['Content-Type: text/html; charset=UTF-8'];
-
-        //do not send email from development environment
-        if (defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG) {
-            $isSuccess = true;
-        } else {
-            //refactor sending of email to the Adapter level
-            $isSuccess = wp_mail( $to, $subject, $body, $headers );
-        }
-
+        $code = isset($params['message']['code']) ? $params['message']['code'] : 'none';
+        $isSuccess = $this->submitEmail($emailData, $params['uuid'], $code);
         if (!$isSuccess) {
             \error_log('Unable to send email. Submitted: ' . \wp_json_encode( $emailData ));
             return $this->output->outputError('Sending email failed', iOutput::ERROR_FAILED);
@@ -197,4 +223,70 @@ class MessageUseCase {
 
         return $this->updateMessageAndReturnChangedMessage($params);
     }
-} 
+
+    protected function makeMessageOutputData(Message $message) {
+        return ['message' => [
+            'id' => $message->get('id'),
+            'form' => $message->get('form'),
+            'code' => $message->get('statusCode'),
+            'content' => $message->get('content'),
+            'labelId' =>  $message->get('labelId'),
+            'email' => $message->get('email'),
+            'name' => $message->get('name'),
+            'changeHistory' => $this->storage->fetchItemHistory($message->get('id'))
+        ]];
+    }
+
+    protected function submitEmail($emailData, $id, $code = 'none') {
+        $to = $emailData['addresses'];
+        $subject = $emailData['subject'];
+        $body = $emailData['content'];
+        $attachments = isset($emailData['attachments']) ? $emailData['attachments'] : [];
+        $success = false;
+        //do not send email from development environment
+        if (defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG) {
+            $success = true;
+        } else {
+            $addUploadDir = function($name) {
+                $uploadData = \wp_get_upload_dir();
+                return $uploadData['basedir'] . '/' . $name;
+            };
+
+            $addUploadUrl = function($name) {
+                $uploadData = \wp_get_upload_dir();
+                return $uploadData['baseurl'] . '/' . $name;
+            };
+
+            //TODO: refactor email sending to the Adapter level
+            if ($fullPathAttachments) {
+                $body = $body ;
+            }
+            $success = wp_mail(
+                $to,
+                $subject,
+                $body,
+                '', //TODO - add header to set reply address for incoming emails. e.g:  'Reply-To: Person Name <person.name@example.com>',
+                array_map($addUploadDir, $attachments)
+            );
+        }
+
+        if ($success) {
+            $historyItem = (new HistoryItem())->setEmailSent(
+                        $id, // item id
+                        'admin', //account
+                        $code, //change type
+                        [ // emailData
+                            'to' => $to,
+                            'subject' => $subject,
+                            'message' => $body . "\r\n\r\n" . "Attachments:\r\n" . implode(
+                                "\r\n", array_map($addUploadUrl, $attachments)
+                            ),
+                            'attachments' => json_encode($attachments)
+                        ]
+                    );
+            $this->storage->insertHistoryItem($historyItem);
+        }
+
+        return $success;
+    }
+}
