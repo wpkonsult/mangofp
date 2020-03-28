@@ -11,8 +11,18 @@ class Message extends BaseEntity {
             'name' => '',
             'labelId' => '',
             'content' => '',
-            'rawData' => ''
+            'rawData' => '',
+            'note' =>''
         ]);
+    }
+    function lastUpdated() {
+        if (
+            isset($this->data['modify_time']) &&
+            $this->data['modify_time']
+        ) {
+            return $this->data['modify_time'];
+        }
+        return $this->data['create_time'];
     }
 
 }

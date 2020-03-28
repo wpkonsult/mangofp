@@ -86,17 +86,7 @@ class MessageUseCase {
         //TODO: store label and fetch labelId, send it back
         //TODO: Fetch state for code and send it back
 
-        return $this->output->outputResult([
-            'id' => $message->get('id'),
-            'form' => $message->get('form'),
-            'code' => $message->get('statusCode'),
-            'content' => $message->get('content'),
-            'state' => 'New',
-            'label' => $label ? $label->get('labelName') : '',
-            'labelId' =>  $message->get('labelId'),
-            'email' => $message->get('email'),
-            'name' => $message->get('name')
-        ]);
+        return $this->output->outputResult($this->makeOneMessageOutputData($message));
     }
 
     public function fetchAllMessagesToOutput() {
@@ -108,15 +98,7 @@ class MessageUseCase {
 
         $data = [];
         foreach ($messages as $message) {
-            $data[] = [
-            'id' => $message->get('id'),
-            'form' => $message->get('form'),
-            'code' => $message->get('statusCode'),
-            'content' => $message->get('content'),
-            'labelId' =>  $message->get('labelId'),
-            'email' => $message->get('email'),
-            'name' => $message->get('name')
-            ];
+            $data[] = $this->makeMessageOutputData($message);
         }
         return $this->output->outputResult(['messages' => $data]);
     }
@@ -125,7 +107,8 @@ class MessageUseCase {
         $UPDATEABLE_FIELDS = [
             'labelId' => 'labelId',
             'email' => 'email',
-            'code' => 'statusCode'
+            'code' => 'statusCode',
+            'note' => 'note'
         ];
 
         if (!isset($params['uuid'])) {
@@ -170,7 +153,7 @@ class MessageUseCase {
             //TODO - add error  handling???
             $this->storage->insertHistoryItem($item);
         }
-        return $this->output->outputResult($this->makeMessageOutputData($updatedMessage));
+        return $this->output->outputResult($this->makeOneMessageOutputData($updatedMessage));
     }
 
     public function getMessageDetailsAndReturn($params) {
@@ -178,7 +161,7 @@ class MessageUseCase {
         if (!$messageObj) {
              return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
         }
-        return $this->output->outputResult($this->makeMessageOutputData($messageObj));
+        return $this->output->outputResult($this->makeOneMessageOutputData($messageObj));
     }
 
     public function sendEmailAndReturnMessage($emailData, $id) {
@@ -202,7 +185,7 @@ class MessageUseCase {
             return $this->output->outputError('Sending email failed', iOutput::ERROR_FAILED);
         }
 
-        return $this->output->outputResult($this->makeMessageOutputData($messageObj));
+        return $this->output->outputResult($this->makeOneMessageOutputData($messageObj));
     }
 
     public function sendEmailAndUpdateMessageAndReturnChangedMessage($emailData, $params) {
@@ -224,8 +207,14 @@ class MessageUseCase {
         return $this->updateMessageAndReturnChangedMessage($params);
     }
 
+    protected function makeOneMessageOutputData(Message $message) {
+        return [
+            'message' => $this->makeMessageOutputData($message)
+        ];
+    }
+
     protected function makeMessageOutputData(Message $message) {
-        return ['message' => [
+         return [
             'id' => $message->get('id'),
             'form' => $message->get('form'),
             'code' => $message->get('statusCode'),
@@ -233,8 +222,10 @@ class MessageUseCase {
             'labelId' =>  $message->get('labelId'),
             'email' => $message->get('email'),
             'name' => $message->get('name'),
+            'note' => $message->get('note'),
+            'lastUpdated' => $message->lastUpdated(),
             'changeHistory' => $this->storage->fetchItemHistory($message->get('id'))
-        ]];
+        ];
     }
 
     protected function submitEmail($emailData, $id, $code = 'none') {

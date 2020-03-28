@@ -7,7 +7,7 @@ use MangoFp\Entities\Label;
 class MessagesUseCaseTest extends TestCase {
     protected $storage;
     protected $output;
-    
+
     public function testParseContentAndInsertToDatabase() {
         $this->output = new MockOutput();
         $this->storage = $this->createStub(MockStorage::class);
@@ -16,7 +16,7 @@ class MessagesUseCaseTest extends TestCase {
             'id' => '47f3e442-b58f-4c9a-8e91-240f94c76ef6',
             'create_time' => '2020-01-29 23:49:52',
             'modify_time' => '',
-            'labelName' => 'Test Label'         
+            'labelName' => 'Test Label'
         ]);
         $this->storage->method('fetchLabelByName')->willReturn($label);
         $this->storage->method('insertMessage')->willReturn(true);
@@ -41,16 +41,16 @@ class MessagesUseCaseTest extends TestCase {
         $result = $useCase->parseContentAndInsertToDatabase($content);
         $this->assertEquals(false, isset($result['error']));
         $this->assertEquals(
-            array_merge($result['payload'], ['id' => 'testid']),
+            array_merge($result['payload']['message'], ['id' => 'testid']),
             [
                 'id' => 'testid',
                 'form' => '19',
                 'labelId' => '47f3e442-b58f-4c9a-8e91-240f94c76ef6',
                 'code' => 'NEW',
-                'state' => 'New',
                 'email' => 'test@test.com',
                 'name' => 'Test Name',
-                'label' => 'Test Label',
+                'note' => '',
+                'changeHistory' => null,
                 'content' => json_encode([
                     'your-phone' => '+341234 12341234 1234123',
                     'your-message' => 'Test message',
@@ -66,11 +66,11 @@ class MessagesUseCaseTest extends TestCase {
             'id' => '47f3e442-b58f-4c9a-8e91-240f94c76ef6',
             'create_time' => '2020-01-29 23:49:52',
             'modify_time' => '',
-            'labelName' => 'Test Label'         
+            'labelName' => 'Test Label'
         ]);
         $this->storage->method('fetchLabelByName')->willReturn($label);
         $this->storage->method('insertMessage')->willReturn(false);
-        
+
         $useCase = new MessageUseCase($this->output, $this->storage);
         $content = [
             '_wpcf7' => '19',
@@ -108,7 +108,7 @@ class MessagesUseCaseTest extends TestCase {
             'id' => '47f3e442-b58f-4c9a-8e91-240f94c76ef6',
             'create_time' => '2020-01-29 23:49:52',
             'modify_time' => '',
-            'labelName' => 'Test Label2'         
+            'labelName' => 'Test Label2'
         ]);
         $this->storage->method('fetchLabelByName')->willReturn($label);
         $this->storage->method('insertLabel')->willReturn(false);
@@ -121,7 +121,7 @@ class MessagesUseCaseTest extends TestCase {
                 'id' => '47f3e442-b58f-4c9a-8e91-240f94c76ef6',
                 'create_time' => '2020-01-29 23:49:52',
                 'modify_time' => '',
-                'labelName' => 'Test Label2' 
+                'labelName' => 'Test Label2'
             ]
         );
     }
@@ -130,7 +130,7 @@ class MessagesUseCaseTest extends TestCase {
         $this->storage = $this->createStub(MockStorage::class);
         $this->output = new MockOutput();
         $label = (new Label())->setDataAsArray([
-            'labelName' => 'Test Label3'         
+            'labelName' => 'Test Label3'
         ]);
         $this->storage->method('insertLabel')->willReturn($label);
         $this->storage->method('fetchLabelByName')->willReturn(false);

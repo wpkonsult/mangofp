@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mangofp 0.0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-26 17:44+0200\n"
+"POT-Creation-Date: 2020-03-27 19:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: mangofp.php:74
+#: mangofp.php:74 stage/mangofp.php:74
 msgid ""
 "Mango Form Processor works only when Contact Form 7 is installed and "
 "activated."
@@ -44,34 +44,61 @@ msgstr[1] ""
 msgid "yyyy-mm-dd"
 msgstr ""
 
-#: src/Adapters/Localization.php:7
+#: src/Adapters/Localization.php:7 stage/Adapters/Localization.php:7
+#: stage/src/Adapters/Localization.php:7
 msgid "Send"
 msgstr ""
 
-#: src/Adapters/Localization.php:8
+#: src/Adapters/Localization.php:8 stage/Adapters/Localization.php:8
+#: stage/src/Adapters/Localization.php:8
 msgid "State"
 msgstr ""
 
-#: src/Adapters/Localization.php:9
+#: src/Adapters/Localization.php:9 stage/Adapters/Localization.php:9
+#: stage/src/Adapters/Localization.php:9
 msgid "All"
 msgstr ""
 
-#: src/Adapters/Localization.php:10
+#: src/Adapters/Localization.php:10 stage/Adapters/Localization.php:10
+#: stage/src/Adapters/Localization.php:10
 msgid "Confirm"
 msgstr ""
 
-#: src/Adapters/Localization.php:11
+#: src/Adapters/Localization.php:11 stage/Adapters/Localization.php:11
+#: stage/src/Adapters/Localization.php:11
 msgid "Confirm and send"
 msgstr ""
 
-#: src/Adapters/Localization.php:12
+#: src/Adapters/Localization.php:12 stage/Adapters/Localization.php:12
+#: stage/src/Adapters/Localization.php:12
 msgid "Date"
 msgstr ""
 
-#: src/Adapters/Localization.php:13
+#: src/Adapters/Localization.php:13 stage/Adapters/Localization.php:13
+#: stage/src/Adapters/Localization.php:13
 msgid "Status"
 msgstr ""
 
 #: src/Adapters/Localization.php:14
+msgid "Label"
+msgstr ""
+
+#: src/Adapters/Localization.php:15
+msgid "Note"
+msgstr ""
+
+#: src/Adapters/Localization.php:16
+msgid "Name"
+msgstr ""
+
+#: src/Adapters/Localization.php:17
+msgid "Email"
+msgstr ""
+
+#: src/Adapters/Localization.php:18
+msgid "Updated"
+msgstr ""
+
+#: stage/Adapters/Localization.php:14 stage/src/Adapters/Localization.php:14
 msgid "To"
 msgstr ""

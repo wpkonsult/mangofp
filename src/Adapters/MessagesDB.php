@@ -7,7 +7,7 @@ use MangoFp\UseCases\iStorage;
 
 class MessagesDB implements iStorage {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
-    const VERSION = '2';
+    const VERSION = '3';
     const TABLE_MESSAGES = 'mangofp_messages';
     const TABLE_LABELS = 'mangofp_labels';
     const TABLE_HISTORY = 'mangofp_history';
@@ -45,6 +45,7 @@ class MessagesDB implements iStorage {
             status_code varchar(20),
             email varchar(100),
             person_name varchar(100),
+            note varchar(100),
             content varchar(4000),
             rawdata varchar(4000),
             UNIQUE KEY id (id),
@@ -72,7 +73,7 @@ class MessagesDB implements iStorage {
     public static function removeDatabase() {
         return true;
         //global $wpdb;
-//
+        //
         //$table_name = $wpdb->prefix . self::TABLE_MESSAGES;
         //$sql = "DROP TABLE IF EXISTS $table_name";
         //$wpdb->query($sql);
@@ -125,7 +126,7 @@ class MessagesDB implements iStorage {
         global $wpdb;
         $table_name = $wpdb->prefix . self::TABLE_MESSAGES;
         $request = $wpdb->prepare(
-            "SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata
+            "SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata, note
             FROM $table_name
             WHERE id = '%s';
             ",
@@ -141,7 +142,7 @@ class MessagesDB implements iStorage {
         global $wpdb;
         $table_name = $wpdb->prefix . self::TABLE_MESSAGES;
         $messageRows = $wpdb->get_results(
-            "  SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata
+            "  SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata, note
                 FROM $table_name
                 ORDER BY status_code, create_time desc;
             ",
@@ -274,7 +275,8 @@ class MessagesDB implements iStorage {
             'email' => $messageRow['email'],
             'name' => $messageRow['person_name'],
             'content' => $messageRow['content'],
-            'rawData' => $messageRow['rawdata']
+            'rawData' => $messageRow['rawdata'],
+            'note' => $messageRow['note']
         ]);
     }
 
@@ -288,7 +290,8 @@ class MessagesDB implements iStorage {
             'email' => $message->get('email'),
             'person_name' => $message->get('name'),
             'content' => $message->get('content'),
-            'rawdata' => $message->get('rawData')
+            'rawdata' => $message->get('rawData'),
+            'note' => $message->get('note'),
         ];
     }
 
