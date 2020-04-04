@@ -11,7 +11,13 @@ class Localization {
             'Confirm and send' => esc_html__('Confirm and send', $MANGOFP),
             'Date' => esc_html__('Date', $MANGOFP),
             'Status' => esc_html__('Status', $MANGOFP),
-            'To' => esc_html__('To', $MANGOFP)
+            'Label' => esc_html__('Label', $MANGOFP),
+            'Note' => esc_html__('Note', $MANGOFP),
+            'Name' => esc_html__('Name', $MANGOFP),
+            'Email' => esc_html__('Email', $MANGOFP),
+            'Updated' => esc_html__('Updated', $MANGOFP),
+            'Change' => esc_html__('Change', $MANGOFP)
         ];
     }
+
 }

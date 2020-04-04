@@ -15,12 +15,18 @@ class MessageTest extends TestCase {
             $createdData['create_time'],
             '2020-01-29 23:49:52'
         );
-        
+
+        $this->assertEquals(
+            $createdData['create_time'],
+            $message->lastUpdated()
+        );
+
         $message->setDataAsArray([
             'id' => '47f3e442-b58f-4c9a-8e91-240f94c76ef6',
             'create_time' => '2020-01-29 23:49:52',
-            'modify_time' => ''         
+            'modify_time' => ''
         ]);
+
         $changedData = $message->getDataAsArray();
         $this->assertEquals(
             $changedData['id'],
@@ -34,5 +40,11 @@ class MessageTest extends TestCase {
             $changedData['modify_time'],
             ''
         );
+
+        $this->assertEquals(
+            $changedData['modify_time'],
+            $message->lastUpdated()
+        );
+
     }
 }
