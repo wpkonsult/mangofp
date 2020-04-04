@@ -20,8 +20,8 @@ function isDebug() {
 //Register Scripts to use
 function registerVueScripts($page) {
     $page = '/' . $page;
-	$chunk_vendors_js = plugin_dir_url( __FILE__ ) . 'assets/js' . $page . '/chunk-vendors.js';
-    $app_js = plugin_dir_url( __FILE__ ) . 'assets/js' . $page . '/app.js';
+	$chunk_vendors_js = plugin_dir_url( __FILE__ ) . 'assets' . $page . '/js/chunk-vendors.js';
+    $app_js = plugin_dir_url( __FILE__ ) . 'assets' . $page . '/js/app.js';
     if (isDebug()) {
         $chunk_vendors_js = 'http://localhost:8080/js/chunk-vendors.js';
         $app_js = 'http://localhost:8080/js/app.js';
