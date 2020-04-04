@@ -18,12 +18,17 @@ function isDebug() {
 }
 
 //Register Scripts to use
-function registerVueScripts() {
-	$chunk_vendors_js = plugin_dir_url( __FILE__ ) . 'assets/js/chunk-vendors.js';
-    $app_js = plugin_dir_url( __FILE__ ) . 'assets/js/app.js';
+function registerVueScripts($page) {
+    $page = '/' . $page;
+	$chunk_vendors_js = plugin_dir_url( __FILE__ ) . 'assets/js' . $page . '/chunk-vendors.js';
+    $app_js = plugin_dir_url( __FILE__ ) . 'assets/js' . $page . '/app.js';
     if (isDebug()) {
         $chunk_vendors_js = 'http://localhost:8080/js/chunk-vendors.js';
         $app_js = 'http://localhost:8080/js/app.js';
+        if ($page == '/settings') {
+            $chunk_vendors_js = 'http://localhost:3000/js/chunk-vendors.js';
+            $app_js = 'http://localhost:3000/js/app.js';
+        }
     }
     wp_register_script(
 		'mangofp_vue_vendors',
@@ -54,15 +59,32 @@ function registerVueScripts() {
     wp_enqueue_style('vuetify_styles', 'https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css');
 }
 
-function makePeachesAdminMenuPage() {
-	$page_hook_suffix = add_menu_page(
-		'MangoFP Plugin Page',
-		'MangoFP',
+function makeMangoFpAdminMenuPage() {
+	$pageHookSuffix = add_menu_page(
+		__('MangoFP Contacts'),
+		'MangoFp',
 		'manage_options',
 		'mangofp-admin',
 		'renderAdmin'
 	);
-	add_action( "load-{$page_hook_suffix}", 'loadAdminJs' );
+    add_submenu_page(
+        'mangofp-admin',
+        __('MangoFp Contacts'),
+        __('Contacts'),
+        'manage_options',
+        'mangofp-admin',
+        'renderAdmin'
+    );
+    $contactMenuSuffix = add_submenu_page(
+        'mangofp-admin',
+        __('MangoFp Settings'),
+        __('Settings'),
+        'manage_options',
+        'mangofp-contact',
+        'renderAdmin'
+    );
+	add_action( "load-{$pageHookSuffix}", 'loadContactsJs' );
+	add_action( "load-{$contactMenuSuffix}", 'loadSettingsJs' );
 }
 
 function renderAdmin(){
@@ -75,20 +97,35 @@ function renderAdmin(){
 	}
 }
 
-function loadAdminJs() {
-    add_action('admin_enqueue_scripts', 'initAdminPage');
+function loadContactsJs() {
+    add_action('admin_enqueue_scripts', 'initContactsPage');
 }
 
-function initAdminPage() {
-    registerVueScripts();
-    //Send localized data to the script
+function loadSettingsJs() {
+    add_action('admin_enqueue_scripts', 'initSettingsPage');
+}
+
+function initContactsPage() {
+    registerVueScripts('');
     error_log('MangoFP starts ...');
     wp_localize_script(
         'mangofp_vuejs',
         'MANGOFP_RESOURCES',
         [
             'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
-            'strings' => MangoFp\Localization::getStrings()
+            'strings' => MangoFp\Localization::getContactsStrings()
+        ]
+    );
+}
+function initSettingsPage() {
+    registerVueScripts('settings');
+    error_log('MangoFP Settings starts ...');
+    wp_localize_script(
+        'mangofp_vuejs',
+        'MANGOFP_RESOURCES',
+        [
+            'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
+            'strings' => MangoFp\Localization::getSettingsStrings()
         ]
     );
 }
@@ -123,7 +160,7 @@ require_once(ABSPATH . 'wp-admin/includes/file.php');
 require_once(ABSPATH . 'wp-admin/includes/media.php');
 require_once plugin_dir_path(__FILE__) . 'autoload.php';
 
-add_action('admin_menu', 'makePeachesAdminMenuPage');
+add_action('admin_menu', 'makeMangoFpAdminMenuPage');
 add_action('wpcf7_before_send_mail','actionCF7Submit');
 add_action('rest_api_init', 'registerRestRoutes' );
 //add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );

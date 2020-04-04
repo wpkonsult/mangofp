@@ -1,7 +1,7 @@
 <?php
 namespace MangoFp;
 class Localization {
-    static public function getStrings() {
+    static public function getContactsStrings() {
         $MANGOFP = 'mangofp';
         return [
             'Send' => esc_html__('Send', $MANGOFP),
@@ -17,6 +17,13 @@ class Localization {
             'Email' => esc_html__('Email', $MANGOFP),
             'Updated' => esc_html__('Updated', $MANGOFP),
             'Change' => esc_html__('Change', $MANGOFP)
+        ];
+    }
+    static public function getSettingsStrings() {
+        $MANGOFP = 'mangofp';
+        return [
+            'Confirm' => esc_html__('Confirm', $MANGOFP),
+            'Confirm and send' => esc_html__('Confirm and send', $MANGOFP)
         ];
     }
 
