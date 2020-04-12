@@ -23,7 +23,10 @@ class Localization {
         $MANGOFP = 'mangofp';
         return [
             'Confirm' => esc_html__('Confirm', $MANGOFP),
-            'Confirm and send' => esc_html__('Confirm and send', $MANGOFP)
+            'Confirm and send' => esc_html__('Confirm and send', $MANGOFP),
+            'MangoFp settings' => esc_html__('MangoFp settings', $MANGOFP),
+            'Process' => esc_html__('Process', $MANGOFP),
+            'Parameters' => esc_html__('Parameters', $MANGOFP)
         ];
     }
 

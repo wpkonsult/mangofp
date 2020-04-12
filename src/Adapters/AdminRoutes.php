@@ -8,6 +8,8 @@ class AdminRoutes implements iOutput {
     public function __construct() {
         $this->routes = [
             ['endpoint' => '/labels', 'method' => 'GET', 'callback' => 'getLabels'],
+            ['endpoint' => '/templates', 'method' => 'GET', 'callback' => 'getTemplates'],
+            ['endpoint' => '/states', 'method' => 'GET', 'callback' => 'getStates'],
             ['endpoint' => '/messages', 'method' => 'GET', 'callback' => 'getMessages'],
             ['endpoint' => '/messages', 'method' => 'POST', 'callback' => 'postMessage'],
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)/emails', 'method' => 'POST', 'callback' => 'sendEmail'],
@@ -40,6 +42,22 @@ class AdminRoutes implements iOutput {
             new MessagesDB()
         );
         return $useCase->fetchAllLabelsToOutput();
+    }
+
+    public function getTemplates() {
+        $useCase = new UseCases\LabelsUseCase(
+            $this,
+            new MessagesDB()
+        );
+        return $useCase->fetchAllTemplatesToOutput();
+    }
+
+    public function getStates() {
+        $useCase = new UseCases\LabelsUseCase(
+            $this,
+            new MessagesDB()
+        );
+        return $useCase->fetchAllStatesToOutput();
     }
 
     public function getMessages() {
