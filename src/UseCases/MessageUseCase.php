@@ -234,32 +234,32 @@ class MessageUseCase {
         $body = $emailData['content'];
         $attachments = isset($emailData['attachments']) ? $emailData['attachments'] : [];
         $success = false;
-        //do not send email from development environment
-        if (defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG) {
+
+		$addUploadDir = function($name) {
+			$uploadData = \wp_get_upload_dir();
+			return $uploadData['basedir'] . '/' . $name;
+		};
+
+		$addUploadUrl = function($name) {
+			$uploadData = \wp_get_upload_dir();
+			return $uploadData['baseurl'] . '/' . $name;
+		};
+
+		//TODO: refactor email sending to the Adapter level
+		//do not send email from development environment
+		if (defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG) {
             $success = true;
         } else {
-            $addUploadDir = function($name) {
-                $uploadData = \wp_get_upload_dir();
-                return $uploadData['basedir'] . '/' . $name;
-            };
+			$success = wp_mail(
+				$to,
+				$subject,
+				$body,
+				'', //TODO - add header to set reply address for incoming emails. e.g:  'Reply-To: Person Name <person.name@example.com>',
+				array_map($addUploadDir, $attachments)
+			);
+		}
 
-            $addUploadUrl = function($name) {
-                $uploadData = \wp_get_upload_dir();
-                return $uploadData['baseurl'] . '/' . $name;
-            };
-
-            //TODO: refactor email sending to the Adapter level
-            if ($fullPathAttachments) {
-                $body = $body ;
-            }
-            $success = wp_mail(
-                $to,
-                $subject,
-                $body,
-                '', //TODO - add header to set reply address for incoming emails. e.g:  'Reply-To: Person Name <person.name@example.com>',
-                array_map($addUploadDir, $attachments)
-            );
-        }
+		error_log('Email Data sent: ' . print_r($emailData, 1));
 
         if ($success) {
             $historyItem = (new HistoryItem())->setEmailSent(

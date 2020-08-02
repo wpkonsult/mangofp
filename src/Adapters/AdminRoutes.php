@@ -93,7 +93,7 @@ class AdminRoutes implements iOutput {
                 'size' => $files['size'][$key]
             ];
             if ($file['error'] !== UPLOAD_ERR_OK) {
-                error_log('Upload error: ' . print_r($file, 1));
+                error_log('Upload error of file: ' . print_r($file, 1));
                 continue;
             }
             $_FILES = ['upload_file' => $file];
@@ -103,15 +103,22 @@ class AdminRoutes implements iOutput {
                 continue;
             }
             $url = \wp_get_attachment_url($attachId);
-            $metadata = \wp_get_attachment_metadata($attachId);
-            $attachments[] = [
-                'id' => $attachId,
+			$filePath = \get_attached_file($attachId);
+			if (!$filePath) {
+				error_log('Error storing ' . basename($url) . ' to media library');
+				return;
+			}
+
+            $newAttachment = [
+				'id' => $attachId,
                 'url' => $url,
                 'file_name' => basename($url),
-                'server_path' => $metadata['file']
-            ];
+                'server_path' => $filePath
+			];
+			$newAttattachments[] = $newAttachment;
+			error_log('--> Added attachment: ' . print_r($newAttachment, 1));
         }
-        return $this->outputResult($attachments);
+        return $this->outputResult($newAttattachments);
     }
 
     public function sendEmail($request) {

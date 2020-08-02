@@ -193,12 +193,14 @@ class MessagesDB implements iStorage {
             return null;
         }
         return (new Label())->setDataAsArray([
-            'id' => $labelRow['id'],
-            'labelName' => $labelRow['label_name'],
-            'create_time' => $labelRow['create_time'],
-            'delete_time' => $labelRow['delete_time'],
-            'modify_time' => $labelRow['modify_time']
-        ]);
+				'id' => $labelRow['id'],
+				'labelName' => $labelRow['label_name'],
+				'create_time' => $labelRow['create_time'],
+				'delete_time' => $labelRow['delete_time'],
+				'modify_time' => $labelRow['modify_time']
+			],
+			true
+		);
     }
 
     public function fetchLabels() {
@@ -218,12 +220,14 @@ class MessagesDB implements iStorage {
         $labels = [];
         foreach ($labelRows as $labelRow) {
             $labels[] = (new Label())->setDataAsArray([
-                'id' => $labelRow['id'],
-                'labelName' => $labelRow['label_name'],
-                'create_time' => $labelRow['create_time'],
-                'delete_time' => $labelRow['delete_time'],
-                'modify_time' => $labelRow['modify_time']
-            ]);
+					'id' => $labelRow['id'],
+					'labelName' => $labelRow['label_name'],
+					'create_time' => $labelRow['create_time'],
+					'delete_time' => $labelRow['delete_time'],
+					'modify_time' => $labelRow['modify_time']
+				],
+				true
+			);
         }
         return $labels;
     }
@@ -266,18 +270,20 @@ class MessagesDB implements iStorage {
 
     protected function makeMessageWithDbData($messageRow) {
         return (new Message())->setDataAsArray([
-            'id' => $messageRow['id'],
-            'create_time' => $messageRow['create_time'],
-            'delete_time' => $messageRow['delete_time'],
-            'modify_time' => $messageRow['modify_time'],
-            'labelId' => $messageRow['label_id'],
-            'statusCode' => $messageRow['status_code'],
-            'email' => $messageRow['email'],
-            'name' => $messageRow['person_name'],
-            'content' => $messageRow['content'],
-            'rawData' => $messageRow['rawdata'],
-            'note' => $messageRow['note']
-        ]);
+				'id' => $messageRow['id'],
+				'create_time' => $messageRow['create_time'],
+				'delete_time' => $messageRow['delete_time'],
+				'modify_time' => $messageRow['modify_time'],
+				'labelId' => $messageRow['label_id'],
+				'statusCode' => $messageRow['status_code'],
+				'email' => $messageRow['email'],
+				'name' => $messageRow['person_name'],
+				'content' => $messageRow['content'],
+				'rawData' => $messageRow['rawdata'],
+				'note' => $messageRow['note']
+			],
+			true
+		);
     }
 
     protected function parseMessageToDbData(Message $message) {

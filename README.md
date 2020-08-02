@@ -32,5 +32,10 @@ Then open Loco translate in local dev environment and translate the resources. A
 gettext, __, esc_html__, esc_html_e
 ```
 
+## Configuration for local development
+To ensures that local front end projects (mangofp-front and mangofp-settings) are served from local development servers, add into local Wordpress configuration file wp-config.php:
+
+	define( 'MANGO_FP_DEBUG', true );
+
 ## Prepare for staging
 Script **stage_backend.sh** prepares all stageables (code, language resources from translation plugin). Try not to use it directly. It should be used through **../mangofp-front/make_stage.sh**
