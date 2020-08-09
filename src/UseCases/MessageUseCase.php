@@ -232,18 +232,22 @@ class MessageUseCase {
         $to = $emailData['addresses'];
         $subject = $emailData['subject'];
         $body = $emailData['content'];
-        $attachments = isset($emailData['attachments']) ? $emailData['attachments'] : [];
-        $success = false;
-
-		$addUploadDir = function($name) {
-			$uploadData = \wp_get_upload_dir();
-			return $uploadData['basedir'] . '/' . $name;
-		};
-
-		$addUploadUrl = function($name) {
-			$uploadData = \wp_get_upload_dir();
-			return $uploadData['baseurl'] . '/' . $name;
-		};
+		$attachments = [];
+		$urls = [];
+		if (isset($emailData['attachments'])) {
+			foreach($emailData['attachments'] as $attachmentId) {
+				$url = \wp_get_attachment_url($attachmentId);
+				$filePath = \get_attached_file($attachmentId);
+				if (!$filePath) {
+					$email = $emailData['email'];
+					error_log("No file found for attachment $attachmentId while attempting to send email to $email");
+					return false;
+				}
+				$attachments[] = $filePath;
+				$urls[] = $url;
+			}
+		}
+		$success = false;
 
 		//TODO: refactor email sending to the Adapter level
 		//do not send email from development environment
@@ -255,13 +259,11 @@ class MessageUseCase {
 				$subject,
 				$body,
 				'', //TODO - add header to set reply address for incoming emails. e.g:  'Reply-To: Person Name <person.name@example.com>',
-				array_map($addUploadDir, $attachments)
+				$attachments
 			);
 		}
 
-		error_log('Email Data sent: ' . print_r($emailData, 1));
-
-        if ($success) {
+		if ($success) {
             $historyItem = (new HistoryItem())->setEmailSent(
                         $id, // item id
                         'admin', //account
@@ -270,7 +272,7 @@ class MessageUseCase {
                             'to' => $to,
                             'subject' => $subject,
                             'message' => $body . "\r\n\r\n" . "Attachments:\r\n" . implode(
-                                "\r\n", array_map($addUploadUrl, $attachments)
+                                "\r\n", $urls
                             ),
                             'attachments' => json_encode($attachments)
                         ]
