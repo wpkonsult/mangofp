@@ -55,7 +55,7 @@ class LabelsUseCase {
                 code => 'WAIT4CONF',
                 state => 'TTA kaudu',
                 action => 'TTA kaudu',
-                next => ['REGISTERED', 'CANCELLED'],
+                next => ['CONFRECEIVED', 'CANCELLED'],
             ],
             'WAIT4NEW' => [
                 order => 4,
@@ -71,36 +71,43 @@ class LabelsUseCase {
                 action => 'Paku uus aeg',
                 next => ['REGISTERED', 'WAIT4ACCEPT', 'CANCELLED'],
             ],
-            'NOTIFIED' => [
+            'CONFRECEIVED' => [
                 order => 6,
+                code => 'CONFRECEIVED',
+                state => 'Kinnitus saabunud',
+                action => 'Kinnitus saabunud',
+                next => ['REGISTERED', 'NOTIFIED', 'ARCHIVED', 'CANCELLED'],
+            ],
+            'NOTIFIED' => [
+                order => 7,
                 code => 'NOTIFIED',
                 state => 'Teade saadetud',
                 action => 'Saada meeldetuletus',
                 next => ['FBASKED', 'ARCHIVED'],
             ],
             'FBASKED' => [
-                order => 7,
+                order => 8,
                 code => 'FBASKED',
                 state => 'Tagasiside küsitud',
                 action => 'Küsi tagasiside',
                 next => ['ARCHIVED'],
             ],
             'NEWSLETTER' => [
-                order => 8,
+                order => 9,
                 code => 'NEWSLETTER',
                 state => 'Uudiskiri',
                 action => 'Uudiskiri',
                 next => ['ARCHIVED'],
             ],
             'ARCHIVED' => [
-                order => 9,
+                order => 10,
                 code => 'ARCHIVED',
                 state => 'Arhiveeritud',
                 action => 'Arhiveeri',
                 next => [],
             ],
             'CANCELLED' => [
-                order => 10,
+                order => 11,
                 code => 'CANCELLED',
                 state => 'Katkestatud',
                 action => 'Katkesta',
@@ -115,11 +122,15 @@ class LabelsUseCase {
         $templates = [
                 REGISTERED => [
                     template =>
-                        'Tere!\n\nSuur tänu! Olete koolitusele registreeritud.\n<<note>>\n\nTervitustega\nSirli Järviste\n_______________\nN.O.R.T Koolitus\nVaksali 17a, (407), Tartu\nhttps://www.nort.ee\ninfo@nort.ee\ntel. 7428000',
+                        'Tere!\n\nSuur tänu! Olete koolitusele registreeritud.\nTäpsema info ja arve saadame enne koolituse algust e-mailile.\n\nTervitustega\nSirli Järviste\n_______________\nN.O.R.T Koolitus\nVaksali 17a, (407), Tartu\nhttps://www.nort.ee\ninfo@nort.ee\ntel. 7428000',
                 ],
                 WAIT4CONF => [
                     template =>
                         'Tere!\n\nSuur tänu! Olete koolitusele registreeritud.\n\nSaadan Töötukassasse ära registreerimisteate ja annan teada kui neilt kinnitus saabub.\n\nTervitustega\nSirli Järviste\n_______________\nN.O.R.T Koolitus\nVaksali 17a, (407), Tartu\nhttps://www.nort.ee\ninfo@nort.ee\ntel. 7428000',
+                ],
+                CONFRECEIVED => [
+                    template =>
+                        'Tere!\n\nTöötukassalt saabus kinnitus, sellega on nüüd kõik korras ja jääb ainult koolitust oodata.\n\nSaadan enne koolituse algust veel täpsustava infomeili.\n\Tervitades\nSirli Järviste\n_______________\nN.O.R.T Koolitus\nVaksali 17a, (407), Tartu\nhttps://www.nort.ee\ninfo@nort.ee\ntel. 7428000',
                 ],
                 WAIT4ACCEPT => [
                     template =>
