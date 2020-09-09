@@ -147,7 +147,8 @@ class MessagesDB implements iStorage {
                 ORDER BY status_code, create_time desc;
             ",
             ARRAY_A
-        );
+		);
+		apply_filters('mangofp_fetch_additional_messages', $messageRows);
         if (!is_array($messageRows)) {
             return null;
         }
