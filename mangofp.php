@@ -159,6 +159,17 @@ function loadTranslations() {
     load_plugin_textdomain( 'mangofp', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 
+function defaultSenderEmail( $original_email_address ) {
+	//TODO: Change before release
+	return 'info@nort.ee';
+}
+
+// Function to change sender name
+function defaultSenderEmailName( $original_email_from ) {
+	//TODO: Change before release
+    return 'NORT Koolitus';
+}
+
 require_once(ABSPATH . 'wp-admin/includes/image.php');
 require_once(ABSPATH . 'wp-admin/includes/file.php');
 require_once(ABSPATH . 'wp-admin/includes/media.php');
@@ -169,6 +180,9 @@ add_action('wpcf7_before_send_mail','actionCF7Submit');
 add_action('rest_api_init', 'registerRestRoutes' );
 //add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
 add_action( 'init', 'loadTranslations');
+
+add_filter( 'wp_mail_from', 'defaultSenderEmail' );
+add_filter( 'wp_mail_from_name', 'defaultSenderEmailName' );
 
 register_activation_hook( __FILE__, 'activateMFP' );
 register_deactivation_hook( __FILE__, 'deactivateMFP' );
