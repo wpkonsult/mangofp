@@ -148,10 +148,11 @@ class MessagesDB implements iStorage {
             ",
             ARRAY_A
 		);
-		apply_filters('mangofp_fetch_additional_messages', $messageRows);
-        if (!is_array($messageRows)) {
-            return null;
-        }
+		$modifiedMessages = apply_filters('mangofp_fetch_additional_messages', $messageRows);
+
+		if (is_array($modifiedMessages)) {
+            $messageRows = $modifiedMessages;
+		}
 
         $allMessages = [];
         foreach ($messageRows as $messageRow) {
