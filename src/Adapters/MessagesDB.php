@@ -7,7 +7,7 @@ use MangoFp\UseCases\iStorage;
 
 class MessagesDB implements iStorage {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
-    const VERSION = '3';
+    const VERSION = '4.1';
     const TABLE_MESSAGES = 'mangofp_messages';
     const TABLE_LABELS = 'mangofp_labels';
     const TABLE_HISTORY = 'mangofp_history';
@@ -15,7 +15,7 @@ class MessagesDB implements iStorage {
     public static function installDatabase() {
         global $wpdb;
         if (self::VERSION == get_site_option(self::VERSION_PARAM_NAME, '0.0.0') ) {
-            error_log('will not install');
+            error_log('Installed database allready up-to-date');
             return;
         }
         error_log('installing database version ' . self::VERSION);
@@ -26,7 +26,7 @@ class MessagesDB implements iStorage {
         $table_labels = $wpdb->prefix . self::TABLE_LABELS;
         $table_history = $wpdb->prefix . self::TABLE_HISTORY;
         $createSql = "CREATE TABLE $table_labels (
-            id varchar(50) NOT NULL,
+            id varchar(100) NOT NULL,
             create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             delete_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -48,8 +48,7 @@ class MessagesDB implements iStorage {
             note varchar(100),
             content varchar(4000),
             rawdata varchar(4000),
-            UNIQUE KEY id (id),
-            FOREIGN KEY (label_id) REFERENCES $table_labels(id)
+            UNIQUE KEY id (id)
         ) $charset_collate;";
         dbDelta( $createSql );
 
