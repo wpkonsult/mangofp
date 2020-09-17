@@ -294,7 +294,8 @@ class MessagesDB implements iStorage {
         return [
             'id' => $message->get('id'),
             'modify_time' => $message->get('modify_time'),
-            'create_time' => $message->get('create_time'),
+			'create_time' => $message->get('create_time'),
+			'delete_time' => $message->get('delete_time'),
             'status_code' => $message->get('statusCode'),
             'label_id' => $message->get('labelId') ? $message->get('labelId') : null,
             'email' => $message->get('email'),

@@ -14,7 +14,8 @@ class Message extends BaseEntity {
             'content' => '',
             'rawData' => '',
             'note' => '',
-            'modify_time' => '',
+			'modify_time' => '',
+			'delete_time' => ''
         ]);
     }
 
