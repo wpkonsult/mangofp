@@ -120,7 +120,10 @@ class MessagesDB implements iStorage {
         }
         return true;
     }
-    public function messageExists(Message $message) { return false; }
+    public function messageExists(Message $message) {
+		return false;
+	}
+
     public function fetchMessage(string $id) {
         global $wpdb;
         $table_name = $wpdb->prefix . self::TABLE_MESSAGES;
@@ -287,7 +290,7 @@ class MessagesDB implements iStorage {
 		);
     }
 
-    protected function parseMessageToDbData(Message $message) {
+    static function parseMessageToDbData(Message $message) {
         return [
             'id' => $message->get('id'),
             'modify_time' => $message->get('modify_time'),
@@ -302,7 +305,7 @@ class MessagesDB implements iStorage {
         ];
     }
 
-    protected function parseHistoryItemToDbData(HistoryItem $historyItem) {
+    static function parseHistoryItemToDbData(HistoryItem $historyItem) {
         return [
             'id' => $historyItem->get('id'),
             'create_time' => $historyItem->get('create_time'),

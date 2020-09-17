@@ -41,7 +41,7 @@ class MessagesUseCaseTest extends TestCase {
         $result = $useCase->parseContentAndInsertToDatabase($content);
         $this->assertEquals(false, isset($result['error']));
         $this->assertEquals(
-            array_merge($result['payload']['message'], ['id' => 'testid']),
+            array_merge($result['payload']['message'], ['id' => 'testid', 'lastUpdated' => 'do not check']),
             [
                 'id' => 'testid',
                 'form' => '19',
@@ -49,7 +49,8 @@ class MessagesUseCaseTest extends TestCase {
                 'code' => 'NEW',
                 'email' => 'test@test.com',
                 'name' => 'Test Name',
-                'note' => '',
+				'note' => '',
+				'lastUpdated' => 'do not check',
                 'changeHistory' => null,
                 'content' => json_encode([
                     'your-phone' => '+341234 12341234 1234123',
