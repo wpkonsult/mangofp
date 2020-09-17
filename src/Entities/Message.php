@@ -1,10 +1,11 @@
 <?php
+
 namespace MangoFp\Entities;
 
 class Message extends BaseEntity {
-    function __construct() {
+    public function __construct() {
         parent::__construct();
-        $this->data = \array_merge( $this->data, [
+        $this->data = \array_merge($this->data, [
             'form' => '',
             'statusCode' => 'NEW',
             'email' => '',
@@ -12,17 +13,19 @@ class Message extends BaseEntity {
             'labelId' => '',
             'content' => '',
             'rawData' => '',
-            'note' =>''
+            'note' => '',
+            'modify_time' => '',
         ]);
     }
-    function lastUpdated() {
+
+    public function lastUpdated() {
         if (
             isset($this->data['modify_time']) &&
             $this->data['modify_time']
         ) {
             return $this->data['modify_time'];
         }
+
         return $this->data['create_time'];
     }
-
 }

@@ -39,8 +39,8 @@ class BaseEntity {
     }
 
     public function setDataAsArray($newData, $loading = false) {
-        $modified = false;
-        foreach($this->data as $key => $value) {
+		$modified = false;
+		foreach($this->data as $key => $value) {
             if (isset($newData[$key])) {
                 $modified = true;
                 $this->data[$key] = $newData[$key];
