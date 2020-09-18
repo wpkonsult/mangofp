@@ -15,7 +15,7 @@ class Message extends BaseEntity {
             'rawData' => '',
             'note' => '',
 			'modify_time' => '',
-			'delete_time' => ''
+			'delete_time' => '0000-00-00 00:00:00'
         ]);
     }
 
