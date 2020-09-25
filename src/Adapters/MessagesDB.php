@@ -1,32 +1,35 @@
 <?php
+
 namespace MangoFp;
-use MangoFp\Entities\Message;
-use MangoFp\Entities\Label;
+
 use MangoFp\Entities\HistoryItem;
+use MangoFp\Entities\Label;
+use MangoFp\Entities\Message;
 use MangoFp\UseCases\iStorage;
 
 class MessagesDB implements iStorage {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
-    const VERSION = '4.4';
+    const VERSION = '4.6';
     const TABLE_MESSAGES = 'mangofp_messages';
     const TABLE_LABELS = 'mangofp_labels';
     const TABLE_HISTORY = 'mangofp_history';
 
     public static function installDatabase() {
         global $wpdb;
-        if (self::VERSION == get_site_option(self::VERSION_PARAM_NAME, '0.0.0') ) {
-			error_log('Database version: ' .  get_site_option(self::VERSION_PARAM_NAME, '0.0.0'));
-			error_log('Installed database allready up-to-date');
+        if (self::VERSION == get_site_option(self::VERSION_PARAM_NAME, '0.0.0')) {
+            error_log('Database version: '.get_site_option(self::VERSION_PARAM_NAME, '0.0.0'));
+            error_log('Installed database allready up-to-date');
+
             return;
         }
-        error_log('installing database version ' . self::VERSION);
+        error_log('installing database version '.self::VERSION);
 
-        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+        require_once ABSPATH.'wp-admin/includes/upgrade.php';
         $charset_collate = $wpdb->get_charset_collate();
-        $table_messages = $wpdb->prefix . self::TABLE_MESSAGES;
-        $table_labels = $wpdb->prefix . self::TABLE_LABELS;
-        $table_history = $wpdb->prefix . self::TABLE_HISTORY;
-        $createSql = "CREATE TABLE $table_labels (
+        $table_messages = $wpdb->prefix.self::TABLE_MESSAGES;
+        $table_labels = $wpdb->prefix.self::TABLE_LABELS;
+        $table_history = $wpdb->prefix.self::TABLE_HISTORY;
+        $createSql = "CREATE TABLE {$table_labels} (
             id varchar(100) NOT NULL,
             create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -34,10 +37,10 @@ class MessagesDB implements iStorage {
             label_name varchar(100),
             UNIQUE KEY id (id),
             KEY label_name (label_name)
-        ) $charset_collate;";
-        dbDelta( $createSql );
+        ) {$charset_collate};";
+        dbDelta($createSql);
 
-        $createSql = "CREATE TABLE $table_messages (
+        $createSql = "CREATE TABLE {$table_messages} (
             id varchar(100) NOT NULL,
             create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -46,14 +49,14 @@ class MessagesDB implements iStorage {
             status_code varchar(20),
             email varchar(100),
             person_name varchar(100),
-            note varchar(100),
+            note varchar(4000),
             content varchar(4000),
             rawdata varchar(4000),
             UNIQUE KEY id (id)
-        ) $charset_collate;";
-        dbDelta( $createSql );
+        ) {$charset_collate};";
+        dbDelta($createSql);
 
-        $createSql = "CREATE TABLE $table_history (
+        $createSql = "CREATE TABLE {$table_history} (
             id varchar(50) NOT NULL,
             create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             item_id varchar(100),
@@ -64,10 +67,10 @@ class MessagesDB implements iStorage {
             content varchar(4000),
             UNIQUE KEY id (id),
             KEY user_account (user_account)
-        ) $charset_collate;";
-        dbDelta( $createSql );
+        ) {$charset_collate};";
+        dbDelta($createSql);
 
-        update_option( self::VERSION_PARAM_NAME, self::VERSION );
+        update_option(self::VERSION_PARAM_NAME, self::VERSION);
     }
 
     public static function removeDatabase() {
@@ -96,41 +99,49 @@ class MessagesDB implements iStorage {
             return null;
         }
         $result = $wpdb->update(
-            $wpdb->prefix . self::TABLE_MESSAGES,
+            $wpdb->prefix.self::TABLE_MESSAGES,
             $this->parseMessageToDbData($message),
             ['id' => $message->get('id')]
         );
         if (!$result) {
-            error_log('ERROR: Message Update failed with data: ' . \json_encode($message->getDataAsArray()));
+            error_log('ERROR: Message Update failed with data: '.\json_encode($message->getDataAsArray()));
+
             return false;
         }
         if ($result > 1) {
             throw new \Error('More than one message was updated!!!!');
         }
+
         return $message;
     }
+
     public function insertMessage(Message $message) {
+        error_log('Inserting message');
         global $wpdb;
         $result = $wpdb->insert(
-            $wpdb->prefix . self::TABLE_MESSAGES,
+            $wpdb->prefix.self::TABLE_MESSAGES,
             $this->parseMessageToDbData($message)
         );
-        if ($result != 1) {
-            error_log('ERROR: Message Insert failed with data: ' . \json_encode($message->getDataAsArray()));
+        if (1 != $result) {
+            //error_log('ERROR: Message Insert failed with data: ' . \json_encode($message->getDataAsArray()));
+            error_log('ERROR: Message Insert failed');
+
             return false;
         }
+
         return true;
     }
+
     public function messageExists(Message $message) {
-		return false;
-	}
+        return false;
+    }
 
     public function fetchMessage(string $id) {
         global $wpdb;
-        $table_name = $wpdb->prefix . self::TABLE_MESSAGES;
+        $table_name = $wpdb->prefix.self::TABLE_MESSAGES;
         $request = $wpdb->prepare(
             "SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata, note
-            FROM $table_name
+            FROM {$table_name}
             WHERE id = '%s';
             ",
             [$id]
@@ -139,56 +150,64 @@ class MessagesDB implements iStorage {
         if (!$messageRow) {
             return null;
         }
+
         return $this->makeMessageWithDbData($messageRow);
     }
+
     public function fetchMessages() {
         global $wpdb;
-        $table_name = $wpdb->prefix . self::TABLE_MESSAGES;
+        $table_name = $wpdb->prefix.self::TABLE_MESSAGES;
         $messageRows = $wpdb->get_results(
             "  SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata, note
-                FROM $table_name
+                FROM {$table_name}
                 ORDER BY status_code, create_time desc;
             ",
             ARRAY_A
-		);
-		$modifiedMessages = apply_filters('mangofp_fetch_additional_messages', $messageRows);
+        );
+        $modifiedMessages = apply_filters('mangofp_fetch_additional_messages', $messageRows);
 
-		if (is_array($modifiedMessages)) {
+        if (is_array($modifiedMessages)) {
             $messageRows = $modifiedMessages;
-		}
+        }
 
         $allMessages = [];
         foreach ($messageRows as $messageRow) {
-            $allMessages[] =  $this->makeMessageWithDbData($messageRow);
+            $allMessages[] = $this->makeMessageWithDbData($messageRow);
         }
+
         return $allMessages;
     }
-    public function fetchSettings() { return false; }
+
+    public function fetchSettings() {
+        return false;
+    }
 
     public function insertLabel(Label $label) {
         global $wpdb;
         $result = $wpdb->insert(
-            $wpdb->prefix . self::TABLE_LABELS,
+            $wpdb->prefix.self::TABLE_LABELS,
             [
                 'id' => $label->get('id'),
                 'label_name' => $label->get('labelName'),
                 'modify_time' => $label->get('modify_time'),
-                'create_time' => $label->get('create_time')
+                'create_time' => $label->get('create_time'),
             ]
         );
-        if ($result != 1) {
-            error_log('ERROR: Label Insert failed with data: ' . \json_encode($label->getDataAsArray()));
+        if (1 != $result) {
+            error_log('ERROR: Label Insert failed with data: '.\json_encode($label->getDataAsArray()));
+
             return false;
         }
+
         return true;
     }
 
     public function fetchLabelByName(string $labelName) {
         global $wpdb;
-        $table_name = $wpdb->prefix . self::TABLE_LABELS;
+        $table_name = $wpdb->prefix.self::TABLE_LABELS;
         $request = $wpdb->prepare(
             "SELECT id, create_time, modify_time, delete_time, label_name
-            FROM $table_name
+            FROM {$table_name}
             WHERE label_name LIKE '%s';
             ",
             [$labelName]
@@ -197,23 +216,25 @@ class MessagesDB implements iStorage {
         if (!$labelRow) {
             return null;
         }
-        return (new Label())->setDataAsArray([
-				'id' => $labelRow['id'],
-				'labelName' => $labelRow['label_name'],
-				'create_time' => $labelRow['create_time'],
-				'delete_time' => $labelRow['delete_time'],
-				'modify_time' => $labelRow['modify_time']
-			],
-			true
-		);
+
+        return (new Label())->setDataAsArray(
+            [
+                'id' => $labelRow['id'],
+                'labelName' => $labelRow['label_name'],
+                'create_time' => $labelRow['create_time'],
+                'delete_time' => $labelRow['delete_time'],
+                'modify_time' => $labelRow['modify_time'],
+            ],
+            true
+        );
     }
 
     public function fetchLabels() {
         global $wpdb;
-        $table_name = $wpdb->prefix . self::TABLE_LABELS;
+        $table_name = $wpdb->prefix.self::TABLE_LABELS;
         $labelRows = $wpdb->get_results(
             "  SELECT id, create_time, modify_time, delete_time, label_name
-                FROM $table_name
+                FROM {$table_name}
                 ORDER BY label_name;
             ",
             ARRAY_A
@@ -224,38 +245,42 @@ class MessagesDB implements iStorage {
 
         $labels = [];
         foreach ($labelRows as $labelRow) {
-            $labels[] = (new Label())->setDataAsArray([
-					'id' => $labelRow['id'],
-					'labelName' => $labelRow['label_name'],
-					'create_time' => $labelRow['create_time'],
-					'delete_time' => $labelRow['delete_time'],
-					'modify_time' => $labelRow['modify_time']
-				],
-				true
-			);
+            $labels[] = (new Label())->setDataAsArray(
+                [
+                    'id' => $labelRow['id'],
+                    'labelName' => $labelRow['label_name'],
+                    'create_time' => $labelRow['create_time'],
+                    'delete_time' => $labelRow['delete_time'],
+                    'modify_time' => $labelRow['modify_time'],
+                ],
+                true
+            );
         }
+
         return $labels;
     }
 
     public function insertHistoryItem(HistoryItem $historyItem) {
         global $wpdb;
         $result = $wpdb->insert(
-            $wpdb->prefix . self::TABLE_HISTORY,
+            $wpdb->prefix.self::TABLE_HISTORY,
             $this->parseHistoryItemToDbData($historyItem)
         );
-        if ($result != 1) {
-            error_log('ERROR: History item insert failed with data: ' . \json_encode( $this->parseHistoryItemToDbData($historyItem) ));
+        if (1 != $result) {
+            error_log('ERROR: History item insert failed with data: '.\json_encode($this->parseHistoryItemToDbData($historyItem)));
+
             return false;
         }
+
         return true;
     }
 
     public function fetchItemHistory(string $id) {
         global $wpdb;
-        $table_name = $wpdb->prefix . self::TABLE_HISTORY;
+        $table_name = $wpdb->prefix.self::TABLE_HISTORY;
         $request = $wpdb->prepare(
             "SELECT id, create_time, item_id, change_type, change_subtype, original_content, content, user_account
-            FROM $table_name
+            FROM {$table_name}
             WHERE item_id = '%s'
             ORDER BY create_time DESC;
             ",
@@ -270,33 +295,16 @@ class MessagesDB implements iStorage {
         foreach ($historyRows as $row) {
             $history[] = $this->makeHistoryItemWithDbData($row)->getDataAsArray();
         }
+
         return $history;
     }
 
-    protected function makeMessageWithDbData($messageRow) {
-        return (new Message())->setDataAsArray([
-				'id' => $messageRow['id'],
-				'create_time' => $messageRow['create_time'],
-				'delete_time' => $messageRow['delete_time'],
-				'modify_time' => $messageRow['modify_time'],
-				'labelId' => $messageRow['label_id'],
-				'statusCode' => $messageRow['status_code'],
-				'email' => $messageRow['email'],
-				'name' => $messageRow['person_name'],
-				'content' => $messageRow['content'],
-				'rawData' => $messageRow['rawdata'],
-				'note' => $messageRow['note']
-			],
-			true
-		);
-    }
-
-    static function parseMessageToDbData(Message $message) {
+    public static function parseMessageToDbData(Message $message) {
         return [
             'id' => $message->get('id'),
             'modify_time' => $message->get('modify_time'),
-			'create_time' => $message->get('create_time'),
-			'delete_time' => $message->get('delete_time'),
+            'create_time' => $message->get('create_time'),
+            'delete_time' => $message->get('delete_time'),
             'status_code' => $message->get('statusCode'),
             'label_id' => $message->get('labelId') ? $message->get('labelId') : null,
             'email' => $message->get('email'),
@@ -307,7 +315,7 @@ class MessagesDB implements iStorage {
         ];
     }
 
-    static function parseHistoryItemToDbData(HistoryItem $historyItem) {
+    public static function parseHistoryItemToDbData(HistoryItem $historyItem) {
         return [
             'id' => $historyItem->get('id'),
             'create_time' => $historyItem->get('create_time'),
@@ -316,12 +324,31 @@ class MessagesDB implements iStorage {
             'change_subtype' => $historyItem->get('changeSubType'),
             'original_content' => $historyItem->get('originalContent'),
             'content' => $historyItem->get('content'),
-            'user_account' => $historyItem->get('userAccount')
+            'user_account' => $historyItem->get('userAccount'),
         ];
     }
 
+    protected function makeMessageWithDbData($messageRow) {
+        return (new Message())->setDataAsArray(
+            [
+                'id' => $messageRow['id'],
+                'create_time' => $messageRow['create_time'],
+                'delete_time' => $messageRow['delete_time'],
+                'modify_time' => $messageRow['modify_time'],
+                'labelId' => $messageRow['label_id'],
+                'statusCode' => $messageRow['status_code'],
+                'email' => $messageRow['email'],
+                'name' => $messageRow['person_name'],
+                'content' => $messageRow['content'],
+                'rawData' => $messageRow['rawdata'],
+                'note' => $messageRow['note'],
+            ],
+            true
+        );
+    }
+
     protected function makeHistoryItemWithDbData($data) {
-        return (new HistoryItem([
+        return new HistoryItem([
             'id' => $data['id'],
             'create_time' => $data['create_time'],
             'itemId' => $data['item_id'],
@@ -329,9 +356,7 @@ class MessagesDB implements iStorage {
             'changeSubType' => $data['change_subtype'],
             'originalContent' => $data['original_content'],
             'content' => $data['content'],
-            'userAccount' => $data['user_account']
-        ]));
+            'userAccount' => $data['user_account'],
+        ]);
     }
-
-
 }
