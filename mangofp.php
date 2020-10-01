@@ -109,7 +109,16 @@ function getResources() {
 	$resources = [
 			'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
 			'version' => ['main' => 'v.0.0.5'],
-            'strings' => MangoFp\Localization::getSettingsStrings()
+			'strings' => MangoFp\Localization::getContactsStrings()
+	];
+
+	return apply_filters('mangofp_resources', $resources);
+}
+function getContactResources() {
+	$resources = [
+			'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
+			'version' => ['main' => 'v.0.0.5'],
+			'strings' => MangoFp\Localization::getContactsStrings(),
 	];
 
 	return apply_filters('mangofp_resources', $resources);
@@ -121,7 +130,7 @@ function initContactsPage() {
     wp_localize_script(
         'mangofp_vuejs',
         'MANGOFP_RESOURCES',
-        getResources(),
+        getContactResources(),
     );
 }
 function initSettingsPage() {

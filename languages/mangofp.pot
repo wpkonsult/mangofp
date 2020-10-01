@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mangofp 0.0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-11 15:38+0300\n"
+"POT-Creation-Date: 2020-10-01 12:00+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -64,40 +64,35 @@ msgstr[1] ""
 msgid "yyyy-mm-dd"
 msgstr ""
 
-#: src/Adapters/Localization.php:7 stage/Adapters/Localization.php:7
-#: stage/src/Adapters/Localization.php:7
+#: src/Adapters/Localization.php:7 stage/src/Adapters/Localization.php:7
 msgid "Send"
 msgstr ""
 
-#: src/Adapters/Localization.php:8 stage/Adapters/Localization.php:8
-#: stage/src/Adapters/Localization.php:8
+#: src/Adapters/Localization.php:8 stage/src/Adapters/Localization.php:8
 msgid "State"
 msgstr ""
 
-#: src/Adapters/Localization.php:9 stage/Adapters/Localization.php:9
-#: stage/src/Adapters/Localization.php:9
+#: src/Adapters/Localization.php:9 stage/src/Adapters/Localization.php:9
 msgid "All"
 msgstr ""
 
-#: src/Adapters/Localization.php:10 src/Adapters/Localization.php:25
-#: stage/Adapters/Localization.php:10 stage/src/Adapters/Localization.php:10
+#: src/Adapters/Localization.php:10 src/Adapters/Localization.php:26
+#: stage/src/Adapters/Localization.php:10
 #: stage/src/Adapters/Localization.php:25
 msgid "Confirm"
 msgstr ""
 
-#: src/Adapters/Localization.php:11 src/Adapters/Localization.php:26
-#: stage/Adapters/Localization.php:11 stage/src/Adapters/Localization.php:11
+#: src/Adapters/Localization.php:11 src/Adapters/Localization.php:27
+#: stage/src/Adapters/Localization.php:11
 #: stage/src/Adapters/Localization.php:26
 msgid "Confirm and send"
 msgstr ""
 
-#: src/Adapters/Localization.php:12 stage/Adapters/Localization.php:12
-#: stage/src/Adapters/Localization.php:12
+#: src/Adapters/Localization.php:12 stage/src/Adapters/Localization.php:12
 msgid "Date"
 msgstr ""
 
-#: src/Adapters/Localization.php:13 stage/Adapters/Localization.php:13
-#: stage/src/Adapters/Localization.php:13
+#: src/Adapters/Localization.php:13 stage/src/Adapters/Localization.php:13
 msgid "Status"
 msgstr ""
 
@@ -125,18 +120,18 @@ msgstr ""
 msgid "Change"
 msgstr ""
 
-#: src/Adapters/Localization.php:27
+#: src/Adapters/Localization.php:20
+msgid "Subject"
+msgstr ""
+
+#: src/Adapters/Localization.php:28 stage/src/Adapters/Localization.php:27
 msgid "MangoFp settings"
 msgstr ""
 
-#: src/Adapters/Localization.php:28
+#: src/Adapters/Localization.php:29 stage/src/Adapters/Localization.php:28
 msgid "Process"
 msgstr ""
 
-#: src/Adapters/Localization.php:29
+#: src/Adapters/Localization.php:30 stage/src/Adapters/Localization.php:29
 msgid "Parameters"
-msgstr ""
-
-#: stage/Adapters/Localization.php:14
-msgid "To"
 msgstr ""
