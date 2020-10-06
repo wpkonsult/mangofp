@@ -1,10 +1,12 @@
 <?php
 
 namespace MangoFp;
+
 use MangoFp\UseCases\iOutput;
 
 class AdminRoutes implements iOutput {
     private $routes;
+
     public function __construct() {
         $this->routes = [
             ['endpoint' => '/labels', 'method' => 'GET', 'callback' => 'getLabels'],
@@ -17,7 +19,7 @@ class AdminRoutes implements iOutput {
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'GET', 'callback' => 'getMessageDetails'],
             ['endpoint' => '/attachments', 'method' => 'POST', 'callback' => 'addAttachments'],
         ];
-        $version='1';
+        $version = '1';
     }
 
     public function registerRestRoutes() {
@@ -41,6 +43,7 @@ class AdminRoutes implements iOutput {
             $this,
             new MessagesDB()
         );
+
         return $useCase->fetchAllLabelsToOutput();
     }
 
@@ -49,6 +52,7 @@ class AdminRoutes implements iOutput {
             $this,
             new MessagesDB()
         );
+
         return $useCase->fetchAllTemplatesToOutput();
     }
 
@@ -57,6 +61,7 @@ class AdminRoutes implements iOutput {
             $this,
             new MessagesDB()
         );
+
         return $useCase->fetchAllStatesToOutput();
     }
 
@@ -65,6 +70,7 @@ class AdminRoutes implements iOutput {
             $this,
             new MessagesDB()
         );
+
         return $useCase->fetchAllMessagesToOutput();
     }
 
@@ -79,6 +85,7 @@ class AdminRoutes implements iOutput {
             !\is_array($fileParams['files'])
         ) {
             error_log('No files here. Raise error!');
+
             return;
         }
 
@@ -90,34 +97,38 @@ class AdminRoutes implements iOutput {
                 'type' => $files['type'][$key],
                 'tmp_name' => $files['tmp_name'][$key],
                 'error' => $files['error'][$key],
-                'size' => $files['size'][$key]
+                'size' => $files['size'][$key],
             ];
-            if ($file['error'] !== UPLOAD_ERR_OK) {
-                error_log('Upload error of file: ' . print_r($file, 1));
+            if (UPLOAD_ERR_OK !== $file['error']) {
+                error_log('Upload error of file: '.print_r($file, 1));
+
                 continue;
             }
             $_FILES = ['upload_file' => $file];
             $attachId = \media_handle_upload('upload_file', 0);
             if (\is_wp_error($attachId)) {
                 error_log('Media handle error!');
+
                 continue;
             }
             $url = \wp_get_attachment_url($attachId);
-			$filePath = \get_attached_file($attachId);
-			if (!$filePath) {
-				error_log('Error storing ' . basename($url) . ' to media library');
-				return;
-			}
+            $filePath = \get_attached_file($attachId);
+            if (!$filePath) {
+                error_log('Error storing '.basename($url).' to media library');
+
+                return;
+            }
 
             $newAttachment = [
-				'id' => $attachId,
+                'id' => $attachId,
                 'url' => $url,
                 'file_name' => basename($url),
-                'server_path' => $filePath
-			];
-			$newAttattachments[] = $newAttachment;
-			error_log('--> Added attachment: ' . print_r($newAttachment, 1));
+                'server_path' => $filePath,
+            ];
+            $newAttattachments[] = $newAttachment;
+            error_log('--> Added attachment: '.print_r($newAttachment, 1));
         }
+
         return $this->outputResult($newAttattachments);
     }
 
@@ -133,6 +144,7 @@ class AdminRoutes implements iOutput {
 
     public function changeMessage($request) {
         $params = json_decode(json_encode($request->get_params()), true);
+
         $useCase = new UseCases\MessageUseCase(
             $this,
             new MessagesDB()
@@ -141,8 +153,8 @@ class AdminRoutes implements iOutput {
         if (isset($params['email']) && $params['email']) {
             return $useCase->sendEmailAndUpdateMessageAndReturnChangedMessage($params['email'], $params);
         }
-        return $useCase->updateMessageAndReturnChangedMessage($params);
 
+        return $useCase->updateMessageAndReturnChangedMessage($params);
     }
 
     public function getMessageDetails($request) {
@@ -151,29 +163,32 @@ class AdminRoutes implements iOutput {
             $this,
             new MessagesDB()
         );
+
         return $useCase->getMessageDetailsAndReturn($params);
     }
 
     public function outputResult(array $data) {
-        return new \WP_REST_Response([
+        return new \WP_REST_Response(
+            [
                 'payload' => $data,
-                'status'=> iOutput::RESULT_SUCCESS
+                'status' => iOutput::RESULT_SUCCESS,
             ],
             200
         );
     }
 
     public function outputError(string $message, string $errorCode) {
-        $error = new \WP_REST_Response( [
+        $error = new \WP_REST_Response(
+            [
                 'status' => iOutput::RESULT_ERROR,
                 'error' => [
-                    'code'=> $errorCode,
-                    'message' => $message
-                ]
+                    'code' => $errorCode,
+                    'message' => $message,
+                ],
             ]
         );
         $error->set_status(404);
+
         return $error;
     }
-
 }

@@ -1,14 +1,16 @@
 <?php
+
 namespace MangoFp\UseCases;
-use MangoFp\Entities\Message;
-use MangoFp\Entities\Label;
+
 use MangoFp\Entities\HistoryItem;
+use MangoFp\Entities\Label;
+use MangoFp\Entities\Message;
 
 class MessageUseCase {
     private $attributeMapping = [
         'name' => 'your-name',
         'email' => 'your-email',
-        'form' => '_wpcf7'
+        'form' => '_wpcf7',
     ];
     private $blacklistedAttributes = [
         '_wpcf7_version',
@@ -25,10 +27,10 @@ class MessageUseCase {
         'acceptance-824',
         'acceptance-383',
         'acceptance-231',
-        'acceptance-689'
+        'acceptance-689',
     ];
 
-    function __construct(iOutput $output, iStorage $storage) {
+    public function __construct(iOutput $output, iStorage $storage) {
         $this->output = $output;
         $this->storage = $storage;
     }
@@ -44,6 +46,7 @@ class MessageUseCase {
         if (!$result) {
             return null;
         }
+
         return $newLabel;
     }
 
@@ -57,6 +60,7 @@ class MessageUseCase {
         foreach ($content as $key => $value) {
             if ($key === $labelTag) {
                 $label = $this->fetchExistingOrCreateNewLabelByName($value);
+
                 continue;
             }
 
@@ -100,6 +104,7 @@ class MessageUseCase {
         foreach ($messages as $message) {
             $data[] = $this->makeMessageOutputData($message);
         }
+
         return $this->output->outputResult(['messages' => $data]);
     }
 
@@ -108,7 +113,8 @@ class MessageUseCase {
             'labelId' => 'labelId',
             'email' => 'email',
             'code' => 'statusCode',
-            'note' => 'note'
+            'name' => 'name',
+            'note' => 'note',
         ];
 
         if (!isset($params['uuid'])) {
@@ -119,15 +125,15 @@ class MessageUseCase {
             return $this->output->outputError('No data to be updated in the request', iOutput::ERROR_VALIDATION);
         }
 
-        $messageObj =  $this->storage->fetchMessage($params['uuid']);
+        $messageObj = $this->storage->fetchMessage($params['uuid']);
         if (!$messageObj) {
-             return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
+            return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
         }
 
         $messageData = $messageObj->getDataAsArray();
         $paramsMessage = $params['message'];
         $updatesHistory = [];
-        foreach($UPDATEABLE_FIELDS as $key => $field) {
+        foreach ($UPDATEABLE_FIELDS as $key => $field) {
             if (isset($paramsMessage[$key])) {
                 $updatesHistory[] = (new HistoryItem())->setMessageChanges(
                     $messageObj->get('id'), // item id
@@ -142,7 +148,7 @@ class MessageUseCase {
         }
 
         $messageObj->setDataAsArray($messageData);
-        \error_log('Will update message: ' . print_r($messageObj->getDataAsArray(), 1));
+        \error_log('Will update message: '.print_r($messageObj->getDataAsArray(), 1));
 
         $updatedMessage = $this->storage->storeMessage($messageObj);
         if (!$updatedMessage) {
@@ -153,35 +159,39 @@ class MessageUseCase {
             //TODO - add error  handling???
             $this->storage->insertHistoryItem($item);
         }
+
         return $this->output->outputResult($this->makeOneMessageOutputData($updatedMessage));
     }
 
     public function getMessageDetailsAndReturn($params) {
-        $messageObj =  $this->storage->fetchMessage($params['uuid']);
+        $messageObj = $this->storage->fetchMessage($params['uuid']);
         if (!$messageObj) {
-             return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
+            return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
         }
+
         return $this->output->outputResult($this->makeOneMessageOutputData($messageObj));
     }
 
     public function sendEmailAndReturnMessage($emailData, $id) {
-       if (
+        if (
            !isset($emailData['content']) ||
            !isset($emailData['addresses']) ||
            !isset($emailData['subject'])
         ) {
-            \error_log('Unable to send email - email field(s) missing. Submitted: ' . \wp_json_encode( $emailData ));
+            \error_log('Unable to send email - email field(s) missing. Submitted: '.\wp_json_encode($emailData));
+
             return $this->output->outputError('Unable to send email - email field(s) missing', iOutput::ERROR_FAILED);
         }
 
-        $messageObj =  $this->storage->fetchMessage($id);
+        $messageObj = $this->storage->fetchMessage($id);
         if (!$messageObj) {
-             return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
+            return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
         }
 
         $isSuccess = $this->submitEmail($emailData, $id);
         if (!$isSuccess) {
-            \error_log('Unable to send email. Submitted: ' . \wp_json_encode( $emailData ));
+            \error_log('Unable to send email. Submitted: '.\wp_json_encode($emailData));
+
             return $this->output->outputError('Sending email failed', iOutput::ERROR_FAILED);
         }
 
@@ -189,18 +199,20 @@ class MessageUseCase {
     }
 
     public function sendEmailAndUpdateMessageAndReturnChangedMessage($emailData, $params) {
-       if (
+        if (
            !isset($emailData['content']) ||
            !isset($emailData['addresses']) ||
            !isset($emailData['subject'])
         ) {
-            \error_log('Unable to send email - email field(s) missing. Submitted: ' . \wp_json_encode( $emailData ));
+            \error_log('Unable to send email - email field(s) missing. Submitted: '.\wp_json_encode($emailData));
+
             return $this->output->outputError('Unable to send email - email field(s) missing', iOutput::ERROR_FAILED);
         }
         $code = isset($params['message']['code']) ? $params['message']['code'] : 'none';
         $isSuccess = $this->submitEmail($emailData, $params['uuid'], $code);
         if (!$isSuccess) {
-            \error_log('Unable to send email. Submitted: ' . \wp_json_encode( $emailData ));
+            \error_log('Unable to send email. Submitted: '.\wp_json_encode($emailData));
+
             return $this->output->outputError('Sending email failed', iOutput::ERROR_FAILED);
         }
 
@@ -209,22 +221,22 @@ class MessageUseCase {
 
     protected function makeOneMessageOutputData(Message $message) {
         return [
-            'message' => $this->makeMessageOutputData($message)
+            'message' => $this->makeMessageOutputData($message),
         ];
     }
 
     protected function makeMessageOutputData(Message $message) {
-         return [
+        return [
             'id' => $message->get('id'),
             'form' => $message->get('form'),
             'code' => $message->get('statusCode'),
             'content' => $message->get('content'),
-            'labelId' =>  $message->get('labelId'),
+            'labelId' => $message->get('labelId'),
             'email' => $message->get('email'),
             'name' => $message->get('name'),
             'note' => $message->get('note'),
             'lastUpdated' => $message->lastUpdated(),
-            'changeHistory' => $this->storage->fetchItemHistory($message->get('id'))
+            'changeHistory' => $this->storage->fetchItemHistory($message->get('id')),
         ];
     }
 
@@ -232,51 +244,53 @@ class MessageUseCase {
         $to = $emailData['addresses'];
         $subject = $emailData['subject'];
         $body = $emailData['content'];
-		$attachments = [];
-		$urls = [];
-		if (isset($emailData['attachments'])) {
-			foreach($emailData['attachments'] as $attachmentId) {
-				$url = \wp_get_attachment_url($attachmentId);
-				$filePath = \get_attached_file($attachmentId);
-				if (!$filePath) {
-					$email = $emailData['email'];
-					error_log("No file found for attachment $attachmentId while attempting to send email to $email");
-					return false;
-				}
-				$attachments[] = $filePath;
-				$urls[] = $url;
-			}
-		}
-		$success = false;
+        $attachments = [];
+        $urls = [];
+        if (isset($emailData['attachments'])) {
+            foreach ($emailData['attachments'] as $attachmentId) {
+                $url = \wp_get_attachment_url($attachmentId);
+                $filePath = \get_attached_file($attachmentId);
+                if (!$filePath) {
+                    $email = $emailData['email'];
+                    error_log("No file found for attachment {$attachmentId} while attempting to send email to {$email}");
 
-		//TODO: refactor email sending to the Adapter level
-		//do not send email from development environment
-		if (defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG) {
+                    return false;
+                }
+                $attachments[] = $filePath;
+                $urls[] = $url;
+            }
+        }
+        $success = false;
+
+        //TODO: refactor email sending to the Adapter level
+        //do not send email from development environment
+        if (defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG) {
             $success = true;
         } else {
-			$success = wp_mail(
-				$to,
-				$subject,
-				$body,
-				'', //TODO - add header to set reply address for incoming emails. e.g:  'Reply-To: Person Name <person.name@example.com>',
-				$attachments
-			);
-		}
+            $success = wp_mail(
+                $to,
+                $subject,
+                $body,
+                '', //TODO - add header to set reply address for incoming emails. e.g:  'Reply-To: Person Name <person.name@example.com>',
+                $attachments
+            );
+        }
 
-		if ($success) {
+        if ($success) {
             $historyItem = (new HistoryItem())->setEmailSent(
-                        $id, // item id
+                $id, // item id
                         'admin', //account
                         $code, //change type
                         [ // emailData
                             'to' => $to,
                             'subject' => $subject,
-                            'message' => $body . "\r\n\r\n" . "Attachments:\r\n" . implode(
-                                "\r\n", $urls
+                            'message' => $body."\r\n\r\n"."Attachments:\r\n".implode(
+                                "\r\n",
+                                $urls
                             ),
-                            'attachments' => json_encode($attachments)
+                            'attachments' => json_encode($attachments),
                         ]
-                    );
+            );
             $this->storage->insertHistoryItem($historyItem);
         }
 
