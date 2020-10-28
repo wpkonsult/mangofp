@@ -49,9 +49,9 @@ function registerVueScripts($page) {
 	wp_enqueue_script('mangofp_vuejs');
 
     if (!isDebug()) {
-        wp_register_style( 'vue-vendor-styles',  plugin_dir_url( __FILE__ ) . 'assets/css/chunk-vendors.css' );
+        wp_register_style( 'vue-vendor-styles',  plugin_dir_url( __FILE__ ) . 'assets' . $page . '/css/chunk-vendors.css' );
         wp_enqueue_style( 'vue-vendor-styles' );
-        wp_register_style( 'vue-app-styles',  plugin_dir_url( __FILE__ ) . 'assets/css/app.css' );
+        wp_register_style( 'vue-app-styles',  plugin_dir_url( __FILE__ ) . 'assets' . $page . '/css/app.css' );
         wp_enqueue_style( 'vue-app-styles' );
     }
 
