@@ -17,4 +17,5 @@ interface iStorage {
     public function fetchLabels();
     public function insertHistoryItem(HistoryItem $historyItem);
     public function fetchItemHistory(string $id);
+    public function fetchSteps();
 }

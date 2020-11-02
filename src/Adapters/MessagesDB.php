@@ -9,10 +9,12 @@ use MangoFp\UseCases\iStorage;
 
 class MessagesDB implements iStorage {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
-    const VERSION = '4.6';
+    const VERSION = '4.67';
     const TABLE_MESSAGES = 'mangofp_messages';
     const TABLE_LABELS = 'mangofp_labels';
     const TABLE_HISTORY = 'mangofp_history';
+    const TABLE_OPTIONS = 'mangofp_options';
+    const TABLE_TEMPLATES = 'mangofp_templates';
 
     public static function installDatabase() {
         global $wpdb;
@@ -29,6 +31,8 @@ class MessagesDB implements iStorage {
         $table_messages = $wpdb->prefix.self::TABLE_MESSAGES;
         $table_labels = $wpdb->prefix.self::TABLE_LABELS;
         $table_history = $wpdb->prefix.self::TABLE_HISTORY;
+        $table_options = $wpdb->prefix.self::TABLE_OPTIONS;
+        $table_templates = $wpdb->prefix.self::TABLE_TEMPLATES;
         $createSql = "CREATE TABLE {$table_labels} (
             id varchar(100) NOT NULL,
             create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -67,6 +71,29 @@ class MessagesDB implements iStorage {
             content varchar(4000),
             UNIQUE KEY id (id),
             KEY user_account (user_account)
+        ) {$charset_collate};";
+        dbDelta($createSql);
+
+        $createSql = "CREATE TABLE {$table_options} (
+            id varchar(50) NOT NULL,
+            create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            delete_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            option_key varchar(100),
+            option_value text,
+            UNIQUE KEY id (id)
+        ) {$charset_collate};";
+        dbDelta($createSql);
+
+        $createSql = "CREATE TABLE {$table_templates} (
+            id varchar(50) NOT NULL,
+            create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            delete_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            code varchar(100),
+            template text,
+            cc_addresses varchar(4000),
+            UNIQUE KEY id (id)
         ) {$charset_collate};";
         dbDelta($createSql);
 
@@ -179,6 +206,10 @@ class MessagesDB implements iStorage {
     }
 
     public function fetchSettings() {
+        return false;
+    }
+
+    public function fetchSteps() {
         return false;
     }
 

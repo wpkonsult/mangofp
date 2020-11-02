@@ -47,5 +47,8 @@ class MockStorage implements iStorage {
     public function fetchItemHistory(string $id) {
         return isset($this->expectedResult['fetchItemHistory']) ? $this->expectedResult['fetchItemHistory'] : [];
     }
-    
+    public function fetchSteps() {
+        return isset($this->expectedResult['fetchSteps']) ? $this->expectedResult['fetchSteps'] : [];
+    }
+
 }
