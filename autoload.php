@@ -14,6 +14,8 @@ spl_autoload_register(
                 'mangofp\\entities\\historyitem' => '/src/Entities/HistoryItem.php',
                 'mangofp\\entities\\label' => '/src/Entities/Label.php',
                 'mangofp\\entities\\message' => '/src/Entities/Message.php',
+                'mangofp\\entities\\option' => '/src/Entities/Option.php',
+                'mangofp\\entities\\steps' => '/src/Entities/Steps.php',
                 'mangofp\\localization' => '/src/Adapters/Localization.php',
                 'mangofp\\messagesdb' => '/src/Adapters/MessagesDB.php',
                 'mangofp\\usecases\\ioutput' => '/src/UseCases/iOutput.php',
@@ -23,7 +25,8 @@ spl_autoload_register(
                 'messagesusecasetest' => '/test/MessagesUseCaseTest.php',
                 'messagetest' => '/test/MessageTest.php',
                 'mockoutput' => '/test/Mockups/MockOutput.php',
-                'mockstorage' => '/test/Mockups/MockStorage.php'
+                'mockstorage' => '/test/Mockups/MockStorage.php',
+                'steptest' => '/test/StepTest.php'
             );
         }
         $cn = strtolower($class);

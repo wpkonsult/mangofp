@@ -5,6 +5,7 @@ namespace MangoFp;
 use MangoFp\Entities\HistoryItem;
 use MangoFp\Entities\Label;
 use MangoFp\Entities\Message;
+use MangoFp\Entities\Option;
 use MangoFp\UseCases\iStorage;
 
 class MessagesDB implements iStorage {
@@ -358,6 +359,28 @@ class MessagesDB implements iStorage {
             'user_account' => $historyItem->get('userAccount'),
         ];
     }
+
+    public static function parseOptionToDbData(Option $optionObj) {
+        return [
+            'modify_time' => $optionObj->get('modify_time'),
+            'create_time' => $optionObj->get('create_time'),
+            'option_key' => $optionObj->get('key'),
+            'option_value' => $optionObj->get('value'),
+        ];
+    }
+
+    public function makeOptionWithDbData($data) {
+        return new Option([
+            'create_time' => $data['create_time'],
+			'modify_time' => $data['modify_time'],
+			'key' => $data['option_key'],
+			'value' => $data['option_value'],
+        ]);
+	}
+
+	public function storeOption(Option $optionObj) {
+		return true;
+	}
 
     protected function makeMessageWithDbData($messageRow) {
         return (new Message())->setDataAsArray(
