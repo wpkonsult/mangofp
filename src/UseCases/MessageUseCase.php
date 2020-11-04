@@ -295,5 +295,15 @@ class MessageUseCase {
         }
 
         return $success;
-    }
+	}
+
+	public function updateOrInsertAndReturnStep($params) {
+		//fetch all steps
+		//if no code, insert new step otherwise find code for changing
+		//create change data, add to to dictionary
+		//save dictionaly,
+		//return state data with generated code if its insert
+
+		return null;
+	}
 }

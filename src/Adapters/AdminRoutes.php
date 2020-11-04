@@ -18,6 +18,7 @@ class AdminRoutes implements iOutput {
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'POST', 'callback' => 'changeMessage'],
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'GET', 'callback' => 'getMessageDetails'],
             ['endpoint' => '/attachments', 'method' => 'POST', 'callback' => 'addAttachments'],
+            ['endpoint' => '/steps', 'method' => 'POST', 'callback' => 'updateOrInsertStep'],
         ];
         $version = '1';
     }
@@ -63,6 +64,18 @@ class AdminRoutes implements iOutput {
         );
 
         return $useCase->fetchAllStatesToOutput();
+    }
+
+    public function updateOrInsertStep($request) {
+        $params = json_decode(json_encode($request->get_params()), true);
+
+        $useCase = new UseCases\MessageUseCase(
+            $this,
+            new MessagesDB()
+		);
+
+		return $useCase->updateOrInsertAndReturnStep($params);
+
     }
 
     public function getMessages() {
