@@ -10,7 +10,7 @@ use MangoFp\UseCases\iStorage;
 
 class MessagesDB implements iStorage {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
-    const VERSION = '4.7';
+    const VERSION = '4.72';
     const TABLE_MESSAGES = 'mangofp_messages';
     const TABLE_LABELS = 'mangofp_labels';
     const TABLE_HISTORY = 'mangofp_history';
@@ -22,6 +22,7 @@ class MessagesDB implements iStorage {
         if (self::VERSION == get_site_option(self::VERSION_PARAM_NAME, '0.0.0')) {
             error_log('Database version: '.get_site_option(self::VERSION_PARAM_NAME, '0.0.0'));
             error_log('Installed database allready up-to-date');
+
             return;
         }
         error_log('installing database version '.self::VERSION);
@@ -75,13 +76,12 @@ class MessagesDB implements iStorage {
         dbDelta($createSql);
 
         $createSql = "CREATE TABLE {$table_options} (
-            id varchar(50) NOT NULL,
             create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             delete_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             option_key varchar(100),
             option_value text,
-            UNIQUE KEY id (id)
+            UNIQUE KEY option_key (option_key)
         ) {$charset_collate};";
         dbDelta($createSql);
 
@@ -203,14 +203,6 @@ class MessagesDB implements iStorage {
         }
 
         return $allMessages;
-    }
-
-    public function fetchSettings() {
-        return false;
-    }
-
-    public function fetchSteps() {
-        return false;
     }
 
     public function insertLabel(Label $label) {
@@ -362,7 +354,6 @@ class MessagesDB implements iStorage {
     public static function parseOptionToDbData(Option $optionObj) {
         return [
             'modify_time' => $optionObj->get('modify_time'),
-            'create_time' => $optionObj->get('create_time'),
             'option_key' => $optionObj->get('key'),
             'option_value' => $optionObj->get('value'),
         ];
@@ -370,16 +361,47 @@ class MessagesDB implements iStorage {
 
     public static function makeOptionWithDbData($data) {
         return new Option([
-            'create_time' => $data['create_time'],
-			'modify_time' => $data['modify_time'],
-			'key' => $data['option_key'],
-			'value' => $data['option_value'],
+            'modify_time' => $data['modify_time'],
+            'key' => $data['option_key'],
+            'value' => $data['option_value'],
         ]);
-	}
+    }
 
-	public function storeOption(Option $optionObj) {
-		return true;
-	}
+    public function storeOption(Option $optionObj) {
+        global $wpdb;
+
+        try {
+            $wpdb->replace(
+                $wpdb->prefix.self::TABLE_OPTIONS,
+                $this->parseOptionToDbData($optionObj)
+            );
+        } catch (\Exception $err) {
+            error_log('Unable to store option '.$optionObj->get('code'));
+            error_log($err->getMessage());
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public function fetchOption(string $optionKey) {
+        global $wpdb;
+        $table_name = $wpdb->prefix.self::TABLE_OPTIONS;
+        $request = $wpdb->prepare(
+            "SELECT create_time, modify_time, option_key, option_value
+            FROM {$table_name}
+            WHERE option_key = '%s'
+            ",
+            [$optionKey]
+		);
+
+        $optionRow = $wpdb->get_row($request, ARRAY_A);
+        if (!$optionRow) {
+            return [];
+        }
+        return $this->makeOptionWithDbData($optionRow);
+    }
 
     protected function makeMessageWithDbData($messageRow) {
         return (new Message())->setDataAsArray(

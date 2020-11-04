@@ -12,8 +12,6 @@ use PHPUnit\Framework\TestCase;
 class StepTest extends TestCase {
     public function testParseStepsToArray() {
         $stepsObj = new Steps([
-            'create_time' => '2020-01-29 23:49:52',
-            'modify_time' => '',
             'value' => 'Some test data',
         ]);
         $stepsData = $stepsObj->getDataAsArray();
@@ -34,15 +32,12 @@ class StepTest extends TestCase {
 
     public function testParseStepsAsOption() {
         $stepsObj = new Steps([
-            'create_time' => '2020-01-29 23:49:52',
-            'modify_time' => '',
             'value' => 'Some test data',
         ]);
         $stepsData = MessagesDB::parseOptionToDbData($stepsObj);
         $this->assertEquals(
             [
                 'modify_time' => '',
-                'create_time' => '2020-01-29 23:49:52',
                 'option_key' => 'STEPS',
                 'option_value' => 'Some test data',
             ],
@@ -50,8 +45,7 @@ class StepTest extends TestCase {
         );
         $optionObj = MessagesDB::makeOptionWithDbData(
             [
-                'modify_time' => '',
-                'create_time' => $stepsObj->get('create_time'),
+                'modify_time' => '2020-01-29 23:49:52',
                 'option_key' => 'STEPS',
                 'option_value' => 'Some test data',
             ]
@@ -60,11 +54,15 @@ class StepTest extends TestCase {
 		$this->assertEquals(
 			[
 				'id' => '',
-				'create_time' => '2020-01-29 23:49:52',
 				'key' => 'STEPS',
-				'value' => 'Some test data'				,
+				'value' => 'Some test data',
+				'modify_time' => '2020-01-29 23:49:52',
+				'create_time' => ''
 			],
-			\array_merge($optionObj->getDataAsArray(), ['id' => ''] )
+			\array_merge(
+				$optionObj->getDataAsArray(),
+				['id' => '', 'create_time' => '']
+			)
 		);
     }
 }

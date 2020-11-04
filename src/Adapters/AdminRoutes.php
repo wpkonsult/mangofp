@@ -19,6 +19,7 @@ class AdminRoutes implements iOutput {
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'GET', 'callback' => 'getMessageDetails'],
             ['endpoint' => '/attachments', 'method' => 'POST', 'callback' => 'addAttachments'],
             ['endpoint' => '/steps', 'method' => 'POST', 'callback' => 'updateOrInsertStep'],
+            ['endpoint' => '/option', 'method' => 'POST', 'callback' => 'storeOption'],
         ];
         $version = '1';
     }
@@ -40,7 +41,7 @@ class AdminRoutes implements iOutput {
     }
 
     public function getLabels() {
-        $useCase = new UseCases\LabelsUseCase(
+        $useCase = new UseCases\SettingsUseCase(
             $this,
             new MessagesDB()
         );
@@ -49,7 +50,7 @@ class AdminRoutes implements iOutput {
     }
 
     public function getTemplates() {
-        $useCase = new UseCases\LabelsUseCase(
+        $useCase = new UseCases\SettingsUseCase(
             $this,
             new MessagesDB()
         );
@@ -58,7 +59,7 @@ class AdminRoutes implements iOutput {
     }
 
     public function getStates() {
-        $useCase = new UseCases\LabelsUseCase(
+        $useCase = new UseCases\SettingsUseCase(
             $this,
             new MessagesDB()
         );
@@ -72,10 +73,26 @@ class AdminRoutes implements iOutput {
         $useCase = new UseCases\MessageUseCase(
             $this,
             new MessagesDB()
-		);
+        );
 
-		return $useCase->updateOrInsertAndReturnStep($params);
+        return $useCase->updateOrInsertAndReturnStep($params);
+    }
 
+    public function storeOption($request) {
+		$params = json_decode(json_encode($request->get_params()), true);
+
+		//return $this->outputResult($params);
+
+		$useCase = new UseCases\SettingsUseCase(
+            $this,
+            new MessagesDB()
+        );
+
+		return $useCase->storeOption(
+			[
+				'key' => $params['key'],
+				'value' => $params['value']
+			]);
     }
 
     public function getMessages() {
