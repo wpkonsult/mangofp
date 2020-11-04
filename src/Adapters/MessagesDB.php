@@ -10,7 +10,7 @@ use MangoFp\UseCases\iStorage;
 
 class MessagesDB implements iStorage {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
-    const VERSION = '4.67';
+    const VERSION = '4.7';
     const TABLE_MESSAGES = 'mangofp_messages';
     const TABLE_LABELS = 'mangofp_labels';
     const TABLE_HISTORY = 'mangofp_history';
@@ -22,7 +22,6 @@ class MessagesDB implements iStorage {
         if (self::VERSION == get_site_option(self::VERSION_PARAM_NAME, '0.0.0')) {
             error_log('Database version: '.get_site_option(self::VERSION_PARAM_NAME, '0.0.0'));
             error_log('Installed database allready up-to-date');
-
             return;
         }
         error_log('installing database version '.self::VERSION);
@@ -369,7 +368,7 @@ class MessagesDB implements iStorage {
         ];
     }
 
-    public function makeOptionWithDbData($data) {
+    public static function makeOptionWithDbData($data) {
         return new Option([
             'create_time' => $data['create_time'],
 			'modify_time' => $data['modify_time'],
