@@ -20,6 +20,7 @@ class AdminRoutes implements iOutput {
             ['endpoint' => '/attachments', 'method' => 'POST', 'callback' => 'addAttachments'],
             ['endpoint' => '/steps', 'method' => 'POST', 'callback' => 'updateOrInsertStep'],
             ['endpoint' => '/option', 'method' => 'POST', 'callback' => 'storeOption'],
+            ['endpoint' => '/option/(?P<option>[a-z]+)', 'method' => 'GET', 'callback' => 'getOption'],
         ];
         $version = '1';
     }
@@ -79,20 +80,32 @@ class AdminRoutes implements iOutput {
     }
 
     public function storeOption($request) {
-		$params = json_decode(json_encode($request->get_params()), true);
+        $params = json_decode(json_encode($request->get_params()), true);
 
-		//return $this->outputResult($params);
-
-		$useCase = new UseCases\SettingsUseCase(
+        //return $this->outputResult($params);
+        $useCase = new UseCases\SettingsUseCase(
             $this,
             new MessagesDB()
         );
 
-		return $useCase->storeOption(
-			[
-				'key' => $params['key'],
-				'value' => $params['value']
-			]);
+        return $useCase->storeOption(
+            [
+                'key' => $params['key'],
+                'value' => $params['value'],
+            ]
+        );
+    }
+
+    public function getOption($request) {
+        $params = json_decode(json_encode($request->get_params()), true);
+        $option = $params['option'] ?? false;
+
+        $useCase = new UseCases\SettingsUseCase(
+            $this,
+            new MessagesDB()
+        );
+
+        return $useCase->getOption( $option);
     }
 
     public function getMessages() {

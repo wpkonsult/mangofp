@@ -8,10 +8,6 @@ use MangoFp\Entities\HistoryItem;
 
 class MockStorage implements iStorage {
     protected $expectedResults = [];
-    public function setExpectedResult(string $key, string $value) {
-        $this->expectedResult[$key] = $value;
-        return $this;
-    }
     public function storeMessage(Message $message) {
         return isset($this->expectedResult['storeMessage']) ? $this->expectedResult['storeMessage'] : false;
     }

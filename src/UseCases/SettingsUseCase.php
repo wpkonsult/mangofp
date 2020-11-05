@@ -27,7 +27,7 @@ class SettingsUseCase {
         }
 
         return $this->output->outputResult(['labels' => $data]);
-    }
+	}
 
     public function fetchAllStatesToOutput() {
         $data = [
@@ -150,15 +150,16 @@ class SettingsUseCase {
     }
 
     public function storeOption(array $payload) {
-		$allowedOptions = [Option::OPTION_STEPS, Option::OPTION_COMMENT];
+        if (!isset($payload['key'])) {
+            return $this->output->outputError('key is mandatory', iOutput::ERROR_FAILED);
+        }
 
-		if (!isset($payload['key'])) {
-			return $this->output->outputError('key is mandatory', iOutput::ERROR_FAILED);
-		}
-
-		if (!\in_array($payload['key'], $allowedOptions)) {
-			return $this->output->outputError('Not allowed option ' . $payload['key'], iOutput::ERROR_FAILED);
-		}
+        if (!Option::isValidOption($payload['key'])) {
+            return $this->output->outputError(
+                'Not allowed option '.$payload['key'],
+                iOutput::ERROR_FAILED
+            );
+        }
 
         $optionObj = new Option();
         $optionObj->setDataAsArray(
@@ -166,15 +167,34 @@ class SettingsUseCase {
                 'key' => $payload['key'],
                 'value' => $payload['value'],
             ]
-		);
+        );
 
-		error_log('About to store: ' . \json_encode($payload));
+        error_log('About to store: '.\json_encode($payload));
 
-		$success = $this->storage->storeOption($optionObj);
-		if (!$success) {
-			return $this->output->outputError('Failed to store option', iOutput::ERROR_FAILED);
+        $success = $this->storage->storeOption($optionObj);
+        if (!$success) {
+            return $this->output->outputError('Failed to store option', iOutput::ERROR_FAILED);
+        }
+
+        return $this->output->outputResult(['success' => 'Setting saved']);
+    }
+
+    public function getOption(string $key) {
+        if (!Option::isValidOption($key)) {
+            return $this->output->outputError(
+                'Not allowed option '. $key,
+                iOutput::ERROR_FAILED
+            );
+		}
+		$optionObj = $this->storage->fetchOption($key);
+
+		if (!$optionObj) {
+			return $this->output->outputError('Data for option ' . $key . ' not found', iOutput::ERROR_FAILED);
 		}
 
-		return $this->output->outputResult(['success' => 'Setting saved']);
+		return [
+			'key' => $optionObj->get('key'),
+			'value' => $optionObj->get('value')
+		];
     }
 }

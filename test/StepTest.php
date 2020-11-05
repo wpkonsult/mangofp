@@ -38,7 +38,7 @@ class StepTest extends TestCase {
         $this->assertEquals(
             [
                 'modify_time' => '',
-                'option_key' => 'STEPS',
+                'option_key' => 'steps',
                 'option_value' => 'Some test data',
             ],
             $stepsData

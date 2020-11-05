@@ -398,7 +398,7 @@ class MessagesDB implements iStorage {
 
         $optionRow = $wpdb->get_row($request, ARRAY_A);
         if (!$optionRow) {
-            return [];
+            return false;
         }
         return $this->makeOptionWithDbData($optionRow);
     }
