@@ -162,7 +162,7 @@ class SettingsUseCase {
         }
 
         $optionObj = new Option();
-        $optionObj->setDataAsArray(
+        $optionObj->setDataFromArray(
             [
                 'key' => $payload['key'],
                 'value' => $payload['value'],

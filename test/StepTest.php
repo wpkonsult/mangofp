@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 class StepTest extends TestCase {
     public function testParseStepsToArray() {
         $stepsObj = new Steps([
-            'value' => 'Some test data',
+            'value' => ['Some test data'],
         ]);
         $stepsData = $stepsObj->getDataAsArray();
         $this->assertEquals(
@@ -22,7 +22,7 @@ class StepTest extends TestCase {
 
         $this->assertEquals(
             $stepsData['value'],
-            'Some test data',
+            '["Some test data"]',
         );
         $this->assertEquals(
             $stepsData['modify_time'],
@@ -32,14 +32,14 @@ class StepTest extends TestCase {
 
     public function testParseStepsAsOption() {
         $stepsObj = new Steps([
-            'value' => 'Some test data',
+            'value' => ['Some test data'],
         ]);
         $stepsData = MessagesDB::parseOptionToDbData($stepsObj);
         $this->assertEquals(
             [
                 'modify_time' => '',
                 'option_key' => 'steps',
-                'option_value' => 'Some test data',
+                'option_value' => '["Some test data"]',
             ],
             $stepsData
         );
@@ -47,7 +47,7 @@ class StepTest extends TestCase {
             [
                 'modify_time' => '2020-01-29 23:49:52',
                 'option_key' => 'STEPS',
-                'option_value' => 'Some test data',
+                'option_value' => '["Some test data"]',
             ]
 		);
 
@@ -55,7 +55,7 @@ class StepTest extends TestCase {
 			[
 				'id' => '',
 				'key' => 'STEPS',
-				'value' => 'Some test data',
+				'value' => '["Some test data"]',
 				'modify_time' => '2020-01-29 23:49:52',
 				'create_time' => ''
 			],

@@ -27,7 +27,7 @@ class HistoryItem extends BaseEntity {
         }
     }
 
-    function  setDataAsArray($newData, $loading = false) {
+    function  setDataFromArray($newData, $loading = false) {
         throw new Exception("History items should not be changed after creation", 1);
     }
 

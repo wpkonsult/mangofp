@@ -21,7 +21,7 @@ class MessageTest extends TestCase {
             $message->lastUpdated()
         );
 
-        $message->setDataAsArray([
+        $message->setDataFromArray([
             'id' => '47f3e442-b58f-4c9a-8e91-240f94c76ef6',
             'create_time' => '2020-01-29 23:49:52',
             'modify_time' => ''

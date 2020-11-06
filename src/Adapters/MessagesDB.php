@@ -240,7 +240,7 @@ class MessagesDB implements iStorage {
             return null;
         }
 
-        return (new Label())->setDataAsArray(
+        return (new Label())->setDataFromArray(
             [
                 'id' => $labelRow['id'],
                 'labelName' => $labelRow['label_name'],
@@ -268,7 +268,7 @@ class MessagesDB implements iStorage {
 
         $labels = [];
         foreach ($labelRows as $labelRow) {
-            $labels[] = (new Label())->setDataAsArray(
+            $labels[] = (new Label())->setDataFromArray(
                 [
                     'id' => $labelRow['id'],
                     'labelName' => $labelRow['label_name'],
@@ -352,19 +352,26 @@ class MessagesDB implements iStorage {
     }
 
     public static function parseOptionToDbData(Option $optionObj) {
+        $optionData = $optionObj->getDataAsArray();
+
         return [
-            'modify_time' => $optionObj->get('modify_time'),
-            'option_key' => $optionObj->get('key'),
-            'option_value' => $optionObj->get('value'),
+            'modify_time' => $optionData['modify_time'],
+            'option_key' => $optionData['key'],
+            'option_value' => $optionData['value'],
         ];
     }
 
     public static function makeOptionWithDbData($data) {
-        return new Option([
-            'modify_time' => $data['modify_time'],
-            'key' => $data['option_key'],
-            'value' => $data['option_value'],
-        ]);
+        $optionObj = new Option();
+        $optionObj->setDataFromArray(
+            [
+                'modify_time' => $data['modify_time'],
+                'key' => $data['option_key'],
+                'value' => $data['option_value'],
+            ],
+            true
+		);
+		return $optionObj;
     }
 
     public function storeOption(Option $optionObj) {
@@ -394,17 +401,18 @@ class MessagesDB implements iStorage {
             WHERE option_key = '%s'
             ",
             [$optionKey]
-		);
+        );
 
         $optionRow = $wpdb->get_row($request, ARRAY_A);
         if (!$optionRow) {
             return false;
         }
+
         return $this->makeOptionWithDbData($optionRow);
     }
 
     protected function makeMessageWithDbData($messageRow) {
-        return (new Message())->setDataAsArray(
+        return (new Message())->setDataFromArray(
             [
                 'id' => $messageRow['id'],
                 'create_time' => $messageRow['create_time'],
