@@ -149,8 +149,27 @@ class Steps extends Option {
     }
 
     public function deleteStep(string $code) {
+        $stepInUse = [];
+
         $stepIndex = $this->findStepIndex($code);
-        array_splice($this->data['value'], $stepIndex, 1);
+
+        foreach ($this->data['value'] as $step) {
+			if (\in_array($code, $step['next'])) {
+				$stepInUse[] = $step['state'];
+			}
+		}
+
+        if (count($stepInUse)) {
+            throw new \Exception(
+				'Can not delete step ' .
+				$code.
+				' It is in use for states:' .
+				implode(', ', $stepInUse )
+			);
+        }
+
+
+		array_splice($this->data['value'], $stepIndex, 1);
 
         return $this;
 	}

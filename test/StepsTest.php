@@ -79,7 +79,17 @@ class StepsTest extends TestCase {
         $this->assertEquals(
             5,
             count($stepsEntity->get('value'))
-        );
+		);
+
+		//Enusre that ACCEPTED is not in use as next step anywhere
+		$stepNew = $stepsObj['NEW'];
+		$stepNew['next'] = ['ARCHIVED'];
+		$stepsEntity->updateStep('NEW', $stepNew);
+		$stepInProgress = $stepsObj['INPROGRESS'];
+		$stepInProgress['next'] = ['ARCHIVED'];
+		$stepsEntity->updateStep('INPROGRESS', $stepInProgress);
+
+		//Delet step
         $stepsEntity->deleteStep('ACCEPTED');
 
         $this->assertEquals(
@@ -91,6 +101,16 @@ class StepsTest extends TestCase {
             $test,
             $stepsEntity->get('value')[3]
         );
+    }
+
+    public function testDeleteShouldFailWhenStepInUse() {
+        $stepsEntity = new Steps();
+		$stepsEntity->setDataAsInitialSteps();
+
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Can not delete step NEW It is in use for states:In progress, Accpeted, Declined, Archived');
+		$stepsEntity->deleteStep('NEW');
     }
 
     public function testMovingStepsUp() {
@@ -197,7 +217,7 @@ class StepsTest extends TestCase {
         $stepsEntity->appendStep(['code' => 'NEW', 'state' => 'test']);
     }
 
-	public function testAppendingStepWithNonExistingNextStep() {
+    public function testAppendingStepWithNonExistingNextStep() {
         $stepsEntity = new Steps();
         $stepsEntity->setDataAsInitialSteps();
 
@@ -227,27 +247,28 @@ class StepsTest extends TestCase {
             count($stepsEntity->get('value'))
         );
 
-		$addedStep = $stepsEntity->get('value')[5];
-		$this->assertNotEquals(
-			'',
-			$addedStep['code'] ?? ''
-		);
+        $addedStep = $stepsEntity->get('value')[5];
+        $this->assertNotEquals(
+            '',
+            $addedStep['code'] ?? ''
+        );
 
-		$this->assertEquals(
+        $this->assertEquals(
             'test',
             $addedStep['state']
         );
 
-		$this->assertEquals(
+        $this->assertEquals(
             'test',
             $addedStep['action']
         );
 
-		$this->assertEquals(
+        $this->assertEquals(
             [],
             $addedStep['next']
         );
     }
+
     public function testAppendingStepWithValidData() {
         $stepsEntity = new Steps();
         $stepsEntity->setDataAsInitialSteps();
@@ -258,34 +279,34 @@ class StepsTest extends TestCase {
         );
 
         $stepsEntity->appendStep([
-			'code' => 'TEST',
-			'state' => 'test state',
-			'action' => 'test action',
-			'next' => ['NEW', 'ACCEPTED']
-		]);
+            'code' => 'TEST',
+            'state' => 'test state',
+            'action' => 'test action',
+            'next' => ['NEW', 'ACCEPTED'],
+        ]);
 
         $this->assertEquals(
             6,
             count($stepsEntity->get('value'))
         );
 
-		$addedStep = $stepsEntity->get('value')[5];
-		$this->assertEquals(
-			'TEST',
-			$addedStep['code']
-		);
+        $addedStep = $stepsEntity->get('value')[5];
+        $this->assertEquals(
+            'TEST',
+            $addedStep['code']
+        );
 
-		$this->assertEquals(
+        $this->assertEquals(
             'test state',
             $addedStep['state']
         );
 
-		$this->assertEquals(
+        $this->assertEquals(
             'test action',
             $addedStep['action']
         );
 
-		$this->assertEquals(
+        $this->assertEquals(
             ['NEW', 'ACCEPTED'],
             $addedStep['next']
         );
