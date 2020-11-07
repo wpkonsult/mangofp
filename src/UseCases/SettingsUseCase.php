@@ -3,6 +3,7 @@
 namespace MangoFp\UseCases;
 
 use MangoFp\Entities\Option;
+use MangoFp\Entities\Steps;
 
 class SettingsUseCase {
     public function __construct(iOutput $output, iStorage $storage) {
@@ -27,7 +28,7 @@ class SettingsUseCase {
         }
 
         return $this->output->outputResult(['labels' => $data]);
-	}
+    }
 
     public function fetchAllStatesToOutput() {
         $data = [
@@ -121,6 +122,37 @@ class SettingsUseCase {
         return $this->output->outputResult(['states' => $data]);
     }
 
+    public function fetchStepsOrDefaultAsSteps() {
+        $stepsOption = $this->storage->fetchOption(Option::OPTION_STEPS);
+        $stepsObj = new Steps();
+        if (!$stepsOption) {
+            $stepsObj->setDataAsInitialSteps();
+        } else {
+            $stepsObj->setDataFromArray($stepsOption->getDataAsArray(), true);
+        }
+
+        return $stepsObj;
+    }
+
+    public function updateOrInsertStepAndReturnAllSteps($stepData) {
+        return false;
+    }
+
+    public function fetchAllStepsToOutput() {
+        try {
+            $stepsObj = $this->fetchStepsOrDefaultAsSteps();
+            $result = [
+                'steps' => $stepsObj->getDataAsOrderedObject(),
+            ];
+            return $this->output->outputResult($result);
+        } catch (\Exception $err) {
+            return $this->output->outputError(
+                'Error fetching steps: '.$err->getMessage(),
+                iOutput::ERROR_NOTFOUND
+            );
+        }
+    }
+
     public function fetchAllTemplatesToOutput() {
         $templates = [
             REGISTERED => [
@@ -182,19 +214,19 @@ class SettingsUseCase {
     public function getOption(string $key) {
         if (!Option::isValidOption($key)) {
             return $this->output->outputError(
-                'Not allowed option '. $key,
+                'Not allowed option '.$key,
                 iOutput::ERROR_FAILED
             );
-		}
-		$optionObj = $this->storage->fetchOption($key);
+        }
+        $optionObj = $this->storage->fetchOption($key);
 
-		if (!$optionObj) {
-			return $this->output->outputError('Data for option ' . $key . ' not found', iOutput::ERROR_FAILED);
-		}
+        if (!$optionObj) {
+            return $this->output->outputError('Data for option '.$key.' not found', iOutput::ERROR_FAILED);
+        }
 
-		return [
-			'key' => $optionObj->get('key'),
-			'value' => $optionObj->get('value')
-		];
+        return [
+            'key' => $optionObj->get('key'),
+            'value' => $optionObj->get('value'),
+        ];
     }
 }
