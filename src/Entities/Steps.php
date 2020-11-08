@@ -200,7 +200,7 @@ class Steps extends Option {
 		}
 
 		$this->data['value'][] = [
-			'code' => $stepData['code'] ?? $this->generateUuid(),
+			'code' => $stepData['code'] ?? strtoupper($this->generateUuid()),
 			'state' => $stepData['state'] ,
 			'action' => $stepData['action'] ?? $stepData['state'],
 			'next' => $nextSteps
