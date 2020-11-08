@@ -210,14 +210,12 @@ class Steps extends Option {
 	}
 
     protected function findStepIndex(string $code) {
-        $debug = ['Debug'];
         foreach ($this->data['value'] as $index => $step) {
             if ($step['code'] === $code) {
                 return $index;
             }
-            $debug[] = $code;
         }
 
-        throw new \Exception('Step '.$code.' not found. codes: '.implode(', ', $debug));
+        throw new \Exception('Step '.$code.' not found.');
     }
 }

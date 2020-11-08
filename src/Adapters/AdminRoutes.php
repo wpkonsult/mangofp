@@ -19,7 +19,9 @@ class AdminRoutes implements iOutput {
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'GET', 'callback' => 'getMessageDetails'],
             ['endpoint' => '/attachments', 'method' => 'POST', 'callback' => 'addAttachments'],
             ['endpoint' => '/steps', 'method' => 'GET', 'callback' => 'getSteps'],
-            ['endpoint' => '/steps', 'method' => 'POST', 'callback' => 'updateOrInsertStep'],
+            ['endpoint' => '/steps/(?P<code>[a-zA-Z0-9-]+)', 'method' => 'POST', 'callback' => 'updateOrInsertSteps'],
+            ['endpoint' => '/steps/(?P<code>[a-zA-Z0-9-]+)/(?P<operation>[a-z]+)', 'method' => 'POST', 'callback' => 'doWithStep'],
+            ['endpoint' => '/steps', 'method' => 'POST', 'callback' => 'updateOrInsertSteps'],
             ['endpoint' => '/option', 'method' => 'POST', 'callback' => 'storeOption'],
             ['endpoint' => '/option/(?P<option>[a-z]+)', 'method' => 'GET', 'callback' => 'getOption'],
         ];
@@ -78,7 +80,7 @@ class AdminRoutes implements iOutput {
         return $useCase->fetchAllStepsToOutput();
     }
 
-    public function updateOrInsertStep($request) {
+    public function updateOrInsertSteps($request) {
         $params = json_decode(json_encode($request->get_params()), true);
 
         $useCase = new UseCases\SettingsUseCase(
@@ -86,7 +88,18 @@ class AdminRoutes implements iOutput {
             new MessagesDB()
         );
 
-        return $useCase->updateOrInsertAndReturnAllSteps($params);
+        return $useCase->updateOrInsertStepAndReturnAllSteps($params);
+    }
+
+    public function doWithStep($request) {
+        $params = json_decode(json_encode($request->get_params()), true);
+
+        $useCase = new UseCases\SettingsUseCase(
+            $this,
+            new MessagesDB()
+        );
+
+        return $useCase->doWithStep($params['operation'], $params['code']);
     }
 
     public function storeOption($request) {

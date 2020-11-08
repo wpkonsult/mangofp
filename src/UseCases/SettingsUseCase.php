@@ -134,23 +134,81 @@ class SettingsUseCase {
         return $stepsObj;
     }
 
-    public function updateOrInsertStepAndReturnAllSteps($stepData) {
-        return false;
-    }
-
     public function fetchAllStepsToOutput() {
         try {
             $stepsObj = $this->fetchStepsOrDefaultAsSteps();
-            $result = [
-                'steps' => $stepsObj->getDataAsOrderedObject(),
-            ];
-            return $this->output->outputResult($result);
+
+            return $this->makeStepsOutput($stepsObj);
         } catch (\Exception $err) {
             return $this->output->outputError(
                 'Error fetching steps: '.$err->getMessage(),
                 iOutput::ERROR_NOTFOUND
             );
         }
+    }
+
+    public function updateOrInsertStepAndReturnAllSteps($stepData) {
+        $stepsObj = $this->fetchStepsOrDefaultAsSteps();
+
+        try {
+            if (isset($stepData['code'])) {
+                $stepsObj->updateStep($stepData['code'], $stepData);
+            } else {
+                $stepsObj->appendStep($stepData);
+            }
+        } catch (\Exception $err) {
+            return $this->output->outputError(
+                'Error updating or inserting step: '.$err->getMessage(),
+                iOutput::ERROR_NOTFOUND
+            );
+        }
+
+        if (!$this->storage->storeOption($stepsObj)) {
+            return $this->output->outputError(
+                'Error storing steps',
+                iOutput::ERROR_NOTFOUND
+            );
+        }
+
+        return $this->makeStepsOutput($stepsObj);
+    }
+
+    public function doWithStep($operation, $code) {
+        $stepsObj = $this->fetchStepsOrDefaultAsSteps();
+
+        try {
+            switch ($operation) {
+                case 'delete':
+                    $stepsObj->deleteStep($code);
+                    break;
+                case 'moveup':
+                    $stepsObj->moveStep($code, Steps::ORDER_UP);
+                    break;
+                case 'movedown':
+                    $stepsObj->moveStep($code, Steps::ORDER_DOWN);
+                    break;
+                default:
+					return $this->output->outputError(
+					    'Action not allowed: ' . $operation,
+					    iOutput::ERROR_NOTFOUND
+					);
+                    break;
+            }
+        } catch (\Exception $err) {
+            return $this->output->outputError(
+                'Failed to ' . $operation. ' step: '.$err->getMessage(),
+                iOutput::ERROR_NOTFOUND
+            );
+        }
+
+        if (!$this->storage->storeOption($stepsObj)) {
+            return $this->output->outputError(
+                'Error storing steps',
+                iOutput::ERROR_NOTFOUND
+            );
+        }
+
+        return $this->makeStepsOutput($stepsObj);
     }
 
     public function fetchAllTemplatesToOutput() {
@@ -228,5 +286,20 @@ class SettingsUseCase {
             'key' => $optionObj->get('key'),
             'value' => $optionObj->get('value'),
         ];
+    }
+
+    protected function makeStepsOutput(Steps $stepsObj) {
+        try {
+            $result = [
+                'steps' => $stepsObj->getDataAsOrderedObject(),
+            ];
+
+            return $this->output->outputResult($result);
+        } catch (\Exception $err) {
+            return $this->output->outputError(
+                'Error parsing steps output: '.$err->getMessage(),
+                iOutput::ERROR_NOTFOUND
+            );
+        }
     }
 }
