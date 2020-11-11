@@ -2,6 +2,7 @@
 
 use MangoFp\UseCases\SettingsUseCase;
 use PHPUnit\Framework\TestCase;
+use MangoFp\Entities\Steps;
 
 /**
  * @internal
@@ -13,14 +14,21 @@ class SettingsUseCaseTest extends TestCase {
 
     public function testUpdateStepAndReturnSteps() {
         $this->output = new MockOutput();
-        $this->storage = $this->createStub(MockStorage::class);
+		$this->storage = $this->createStub(MockStorage::class);
 
-        $this->storage->method('fetchOption')->willReturn(false);
+		$testOption = new Steps();
+		$testOption->setDataAsInitialSteps();
+
+        //$this->storage->method('fetchOption')->willReturn(false);
         $this->storage->method('storeOption')->willReturn(true);
+        $this->storage->method('fetchOption')->willReturn(
+			$testOption
+		);
 
         $useCase = new SettingsUseCase($this->output, $this->storage);
 
         $result = $useCase->fetchAllStepsToOutput();
+        //$this->assertEquals('', $result['error']['message']);
         $this->assertEquals(false, isset($result['error']));
         $this->assertEquals(
             [

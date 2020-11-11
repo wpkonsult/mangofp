@@ -14,9 +14,101 @@ class Steps extends Option {
         ]);
     }
 
-    public function setDataAsInitialSteps() {
+    public function setDataAsCustNo1teps() {
         $this->data['value'] = [
             [
+                'order' => 1,
+                'code' => 'NEW',
+                'state' => 'Uus',
+                'action' => 'Määra uueks',
+                'next' => [
+                    'REGISTERED',
+                    'WAIT4CONF',
+                    'WAIT4NEW',
+                    'WAIT4ACCEPT',
+                    'CANCELLED',
+                    'NEWSLETTER',
+                    'ARCHIVED',
+                ],
+            ],
+            [
+                'order' => 2,
+                'code' => 'REGISTERED',
+                'state' => 'Registreeritud',
+                'action' => 'Registreeri',
+                'next' => ['NOTIFIED', 'ARCHIVED', 'CANCELLED'],
+            ],
+            [
+                'order' => 3,
+                'code' => 'WAIT4CONF',
+                'state' => 'TTA kaudu',
+                'action' => 'TTA kaudu',
+                'next' => ['CONFRECEIVED', 'CANCELLED'],
+            ],
+            [
+                'order' => 4,
+                'code' => 'CONFRECEIVED',
+                'state' => 'TTA kinnitanud',
+                'action' => 'TTA kinnitanud',
+                'next' => ['REGISTERED', 'NOTIFIED', 'CANCELLED'],
+            ],
+            [
+                'order' => 5,
+                'code' => 'WAIT4NEW',
+                'state' => 'Ooteleht',
+                'action' => 'Ooteleht',
+                'next' => ['REGISTERED', 'WAIT4ACCEPT', 'CANCELLED'],
+            ],
+            [
+                'order' => 6,
+                'code' => 'WAIT4ACCEPT',
+                'state' => 'Aeg pakutud',
+                'action' => 'Paku uus aeg',
+                'next' => ['REGISTERED', 'WAIT4ACCEPT', 'CANCELLED'],
+            ],
+            [
+                'order' => 7,
+                'code' => 'NOTIFIED',
+                'state' => 'Teade saadetud',
+                'action' => 'Saada meeldetuletus',
+                'next' => ['FBASKED', 'ARCHIVED'],
+            ],
+            [
+                'order' => 8,
+                'code' => 'FBASKED',
+                'state' => 'Tagasiside küsitud',
+                'action' => 'Küsi tagasiside',
+                'next' => ['ARCHIVED'],
+            ],
+            [
+                'order' => 9,
+                'code' => 'NEWSLETTER',
+                'state' => 'Uudiskiri',
+                'action' => 'Uudiskiri',
+                'next' => ['ARCHIVED'],
+            ],
+            [
+                'order' => 10,
+                'code' => 'ARCHIVED',
+                'state' => 'Arhiveeritud',
+                'action' => 'Arhiveeri',
+                'next' => [],
+            ],
+            [
+                'order' => 11,
+                'code' => 'CANCELLED',
+                'state' => 'Katkestatud',
+                'action' => 'Katkesta',
+                'next' => ['ARCHIVED'],
+            ],
+        ];
+
+        return $this;
+	}
+
+	public static function getDefaultSteps() {
+		return [
+[
                 'code' => 'NEW',
                 'state' => 'New',
                 'action' => 'Set as new',
@@ -63,8 +155,11 @@ class Steps extends Option {
                     'NEW',
                 ],
             ],
-        ];
+		];
+	}
 
+    public function setDataAsInitialSteps() {
+        $this->data['value'] = Steps::getDefaultSteps();
         return $this;
     }
 
@@ -92,7 +187,7 @@ class Steps extends Option {
     public function setDataFromArray($newData, $loading = false) {
         if (!is_array($newData['value'])) {
             $stepsData = \json_decode($newData['value'], true);
-            if (!stepsDatajsonStr) {
+            if (!$stepsData) {
                 throw new \Exception('Error converting data from json string');
             }
             $newData['value'] = $stepsData;
@@ -126,9 +221,9 @@ class Steps extends Option {
             throw new \Exception('Order '.$order.' not allowed');
         }
 
-		$stepIndex = $this->findStepIndex($code);
-		$newindex = $stepIndex;
-		$lastIndex = count($this->data['value']);
+        $stepIndex = $this->findStepIndex($code);
+        $newindex = $stepIndex;
+        $lastIndex = count($this->data['value']);
 
         if (Steps::ORDER_UP === $direction) {
             if (0 === $stepIndex) {
@@ -140,12 +235,13 @@ class Steps extends Option {
                 return $this;
             }
             $newindex = $stepIndex + 1;
-		}
+        }
 
-		$tempStep =  $this->data['value'][$newindex];
-		$this->data['value'][$newindex] = $this->data['value'][$stepIndex];
-		$this->data['value'][$stepIndex] = $tempStep;
-		return $this;
+        $tempStep = $this->data['value'][$newindex];
+        $this->data['value'][$newindex] = $this->data['value'][$stepIndex];
+        $this->data['value'][$stepIndex] = $tempStep;
+
+        return $this;
     }
 
     public function deleteStep(string $code) {
@@ -154,60 +250,59 @@ class Steps extends Option {
         $stepIndex = $this->findStepIndex($code);
 
         foreach ($this->data['value'] as $step) {
-			if (\in_array($code, $step['next'])) {
-				$stepInUse[] = $step['state'];
-			}
-		}
+            if (\in_array($code, $step['next'])) {
+                $stepInUse[] = $step['state'];
+            }
+        }
 
         if (count($stepInUse)) {
             throw new \Exception(
-				'Can not delete step ' .
-				$code.
-				' It is in use for states:' .
-				implode(', ', $stepInUse )
-			);
+                'Can not delete step '.
+                $code.
+                ' It is in use for states:'.
+                implode(', ', $stepInUse)
+            );
         }
 
-
-		array_splice($this->data['value'], $stepIndex, 1);
+        array_splice($this->data['value'], $stepIndex, 1);
 
         return $this;
-	}
+    }
 
-	public function appendStep(array $stepData) {
-		//validate that steps exist
-		if (!isset($stepData['state'])) {
-			throw new \Exception('Missing state from step');
-		}
+    public function appendStep(array $stepData) {
+        //validate that steps exist
+        if (!isset($stepData['state'])) {
+            throw new \Exception('Missing state from step');
+        }
 
-		$nextSteps = $stepData['next'] ?? [];
-		$allSteps = [];
+        $nextSteps = $stepData['next'] ?? [];
+        $allSteps = [];
 
-		foreach ($this->data['value'] as $step) {
-			$allSteps[] = $step['code'];
-		}
+        foreach ($this->data['value'] as $step) {
+            $allSteps[] = $step['code'];
+        }
 
-		if (isset($stepData['code']) &&
-			\in_array($stepData['code'], $allSteps)
-		) {
-			throw new \Exception( $stepData['code'] . ' allready exists - can not append');
-		}
+        if (isset($stepData['code']) &&
+            \in_array($stepData['code'], $allSteps)
+        ) {
+            throw new \Exception($stepData['code'].' allready exists - can not append');
+        }
 
-		foreach ($nextSteps as $value) {
-			if (!\in_array($value, $allSteps)) {
-				throw new \Exception('Step ' . $value . ' not a valid step');
-			}
-		}
+        foreach ($nextSteps as $value) {
+            if (!\in_array($value, $allSteps)) {
+                throw new \Exception('Step '.$value.' not a valid step');
+            }
+        }
 
-		$this->data['value'][] = [
-			'code' => $stepData['code'] ?? strtoupper($this->generateUuid()),
-			'state' => $stepData['state'] ,
-			'action' => $stepData['action'] ?? $stepData['state'],
-			'next' => $nextSteps
-		];
+        $this->data['value'][] = [
+            'code' => $stepData['code'] ?? strtoupper($this->generateUuid()),
+            'state' => $stepData['state'],
+            'action' => $stepData['action'] ?? $stepData['state'],
+            'next' => $nextSteps,
+        ];
 
-		return $this;
-	}
+        return $this;
+    }
 
     protected function findStepIndex(string $code) {
         foreach ($this->data['value'] as $index => $step) {
