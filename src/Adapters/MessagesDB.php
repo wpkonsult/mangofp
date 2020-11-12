@@ -10,7 +10,7 @@ use MangoFp\UseCases\iStorage;
 
 class MessagesDB implements iStorage {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
-    const VERSION = '4.72';
+    const VERSION = '4.8';
     const TABLE_MESSAGES = 'mangofp_messages';
     const TABLE_LABELS = 'mangofp_labels';
     const TABLE_HISTORY = 'mangofp_history';
@@ -51,7 +51,7 @@ class MessagesDB implements iStorage {
             modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             delete_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             label_id varchar(100),
-            status_code varchar(20),
+            status_code varchar(100),
             email varchar(100),
             person_name varchar(100),
             note varchar(4000),
