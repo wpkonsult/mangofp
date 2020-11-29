@@ -14,16 +14,19 @@ spl_autoload_register(
                 'mangofp\\entities\\historyitem' => '/src/Entities/HistoryItem.php',
                 'mangofp\\entities\\label' => '/src/Entities/Label.php',
                 'mangofp\\entities\\message' => '/src/Entities/Message.php',
+                'mangofp\\entities\\option' => '/src/Entities/Option.php',
+                'mangofp\\entities\\steps' => '/src/Entities/Steps.php',
                 'mangofp\\localization' => '/src/Adapters/Localization.php',
                 'mangofp\\messagesdb' => '/src/Adapters/MessagesDB.php',
                 'mangofp\\usecases\\ioutput' => '/src/UseCases/iOutput.php',
                 'mangofp\\usecases\\istorage' => '/src/UseCases/iStorage.php',
-                'mangofp\\usecases\\labelsusecase' => '/src/UseCases/LabelsUseCase.php',
                 'mangofp\\usecases\\messageusecase' => '/src/UseCases/MessageUseCase.php',
+                'mangofp\\usecases\\settingsusecase' => '/src/UseCases/SettingsUseCase.php',
                 'messagesusecasetest' => '/test/MessagesUseCaseTest.php',
                 'messagetest' => '/test/MessageTest.php',
                 'mockoutput' => '/test/Mockups/MockOutput.php',
-                'mockstorage' => '/test/Mockups/MockStorage.php'
+                'mockstorage' => '/test/Mockups/MockStorage.php',
+                'steptest' => '/test/StepTest.php'
             );
         }
         $cn = strtolower($class);

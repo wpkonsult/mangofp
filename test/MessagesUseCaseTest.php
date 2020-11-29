@@ -12,7 +12,7 @@ class MessagesUseCaseTest extends TestCase {
         $this->output = new MockOutput();
         $this->storage = $this->createStub(MockStorage::class);
 
-        $label = (new Label())->setDataAsArray([
+        $label = (new Label())->setDataFromArray([
             'id' => '47f3e442-b58f-4c9a-8e91-240f94c76ef6',
             'create_time' => '2020-01-29 23:49:52',
             'modify_time' => '',
@@ -63,7 +63,7 @@ class MessagesUseCaseTest extends TestCase {
         $this->output = new MockOutput();
         $this->storage = $this->createStub(MockStorage::class);
 
-        $label = (new Label())->setDataAsArray([
+        $label = (new Label())->setDataFromArray([
             'id' => '47f3e442-b58f-4c9a-8e91-240f94c76ef6',
             'create_time' => '2020-01-29 23:49:52',
             'modify_time' => '',
@@ -105,7 +105,7 @@ class MessagesUseCaseTest extends TestCase {
     public function testFetchingExistingLabelByName() {
         $this->storage = $this->createStub(MockStorage::class);
         $this->output = new MockOutput();
-        $label = (new Label())->setDataAsArray([
+        $label = (new Label())->setDataFromArray([
             'id' => '47f3e442-b58f-4c9a-8e91-240f94c76ef6',
             'create_time' => '2020-01-29 23:49:52',
             'modify_time' => '',
@@ -130,7 +130,7 @@ class MessagesUseCaseTest extends TestCase {
     public function testFetchingCreatedLabel() {
         $this->storage = $this->createStub(MockStorage::class);
         $this->output = new MockOutput();
-        $label = (new Label())->setDataAsArray([
+        $label = (new Label())->setDataFromArray([
             'labelName' => 'Test Label3'
         ]);
         $this->storage->method('insertLabel')->willReturn($label);

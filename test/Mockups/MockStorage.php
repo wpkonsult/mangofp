@@ -2,15 +2,12 @@
 //namespace Mockups;
 use MangoFp\UseCases\iStorage;
 use MangoFp\Entities\Message;
+use MangoFp\Entities\Option;
 use MangoFp\Entities\Label;
 use MangoFp\Entities\HistoryItem;
 
 class MockStorage implements iStorage {
     protected $expectedResults = [];
-    public function setExpectedResult(string $key, string $value) {
-        $this->expectedResult[$key] = $value;
-        return $this;
-    }
     public function storeMessage(Message $message) {
         return isset($this->expectedResult['storeMessage']) ? $this->expectedResult['storeMessage'] : false;
     }
@@ -23,7 +20,7 @@ class MockStorage implements iStorage {
     public function fetchMessages() {
         return isset($this->expectedResult['fetchMessage']) ? $this->expectedResult['fetchMessage'] : false;
     }
-    public function fetchSettings() {
+    public function fetchSetting(string $key) {
         return isset($this->expectedResult['fetchSettings']) ? $this->expectedResult['fetchSettings'] : false;
     }
     public function messageExists(Message $message) {
@@ -47,5 +44,11 @@ class MockStorage implements iStorage {
     public function fetchItemHistory(string $id) {
         return isset($this->expectedResult['fetchItemHistory']) ? $this->expectedResult['fetchItemHistory'] : [];
     }
-    
+    public function storeOption(Option $optionObj) {
+        return isset($this->expectedResult['storeOption']) ? $this->expectedResult['storeOption'] : [];
+    }
+    public function fetchOption(string $code) {
+        return isset($this->expectedResult['fetchOption']) ? $this->expectedResult['fetchOption'] : [];
+    }
+
 }

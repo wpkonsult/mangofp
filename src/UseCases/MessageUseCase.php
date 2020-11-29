@@ -41,7 +41,7 @@ class MessageUseCase {
             return $label;
         }
 
-        $newLabel = (new Label())->setDataAsArray(['labelName' => $labelName]);
+        $newLabel = (new Label())->setDataFromArray(['labelName' => $labelName]);
         $result = $this->storage->insertLabel($newLabel);
         if (!$result) {
             return null;
@@ -81,7 +81,7 @@ class MessageUseCase {
         $data['content'] = \json_encode($secondaries);
         $data['raw_data'] = \json_encode($content);
         $data['labelId'] = $label ? $label->get('id') : '';
-        $message = (new Message())->setDataAsArray($data);
+        $message = (new Message())->setDataFromArray($data);
 
         $res = $this->storage->insertMessage($message);
         if (!$res) {
@@ -147,7 +147,7 @@ class MessageUseCase {
             }
         }
 
-        $messageObj->setDataAsArray($messageData);
+        $messageObj->setDataFromArray($messageData);
         \error_log('Will update message: '.print_r($messageObj->getDataAsArray(), 1));
 
         $updatedMessage = $this->storage->storeMessage($messageObj);
@@ -295,5 +295,6 @@ class MessageUseCase {
         }
 
         return $success;
-    }
+	}
+
 }

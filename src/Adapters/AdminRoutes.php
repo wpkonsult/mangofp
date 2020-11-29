@@ -11,13 +11,18 @@ class AdminRoutes implements iOutput {
         $this->routes = [
             ['endpoint' => '/labels', 'method' => 'GET', 'callback' => 'getLabels'],
             ['endpoint' => '/templates', 'method' => 'GET', 'callback' => 'getTemplates'],
-            ['endpoint' => '/states', 'method' => 'GET', 'callback' => 'getStates'],
             ['endpoint' => '/messages', 'method' => 'GET', 'callback' => 'getMessages'],
             ['endpoint' => '/messages', 'method' => 'POST', 'callback' => 'postMessage'],
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)/emails', 'method' => 'POST', 'callback' => 'sendEmail'],
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'POST', 'callback' => 'changeMessage'],
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'GET', 'callback' => 'getMessageDetails'],
             ['endpoint' => '/attachments', 'method' => 'POST', 'callback' => 'addAttachments'],
+            ['endpoint' => '/steps', 'method' => 'GET', 'callback' => 'getSteps'],
+            ['endpoint' => '/steps/(?P<code>[a-zA-Z0-9-]+)', 'method' => 'POST', 'callback' => 'updateOrInsertSteps'],
+            ['endpoint' => '/steps/(?P<code>[a-zA-Z0-9-]+)/(?P<operation>[a-z]+)', 'method' => 'POST', 'callback' => 'doWithStep'],
+            ['endpoint' => '/steps', 'method' => 'POST', 'callback' => 'updateOrInsertSteps'],
+            ['endpoint' => '/option', 'method' => 'POST', 'callback' => 'storeOption'],
+            ['endpoint' => '/option/(?P<option>[a-z]+)', 'method' => 'GET', 'callback' => 'getOption'],
         ];
         $version = '1';
     }
@@ -39,7 +44,7 @@ class AdminRoutes implements iOutput {
     }
 
     public function getLabels() {
-        $useCase = new UseCases\LabelsUseCase(
+        $useCase = new UseCases\SettingsUseCase(
             $this,
             new MessagesDB()
         );
@@ -48,7 +53,7 @@ class AdminRoutes implements iOutput {
     }
 
     public function getTemplates() {
-        $useCase = new UseCases\LabelsUseCase(
+        $useCase = new UseCases\SettingsUseCase(
             $this,
             new MessagesDB()
         );
@@ -56,13 +61,64 @@ class AdminRoutes implements iOutput {
         return $useCase->fetchAllTemplatesToOutput();
     }
 
-    public function getStates() {
-        $useCase = new UseCases\LabelsUseCase(
+    public function getSteps() {
+        $useCase = new UseCases\SettingsUseCase(
             $this,
             new MessagesDB()
         );
 
-        return $useCase->fetchAllStatesToOutput();
+        return $useCase->fetchAllStepsToOutput();
+    }
+
+    public function updateOrInsertSteps($request) {
+        $params = json_decode(json_encode($request->get_params()), true);
+
+        $useCase = new UseCases\SettingsUseCase(
+            $this,
+            new MessagesDB()
+        );
+
+        return $useCase->updateOrInsertStepAndReturnAllSteps($params);
+    }
+
+    public function doWithStep($request) {
+        $params = json_decode(json_encode($request->get_params()), true);
+
+        $useCase = new UseCases\SettingsUseCase(
+            $this,
+            new MessagesDB()
+        );
+
+        return $useCase->doWithStep($params['operation'], $params['code']);
+    }
+
+    public function storeOption($request) {
+        $params = json_decode(json_encode($request->get_params()), true);
+
+        //return $this->outputResult($params);
+        $useCase = new UseCases\SettingsUseCase(
+            $this,
+            new MessagesDB()
+        );
+
+        return $useCase->storeOption(
+            [
+                'key' => $params['key'],
+                'value' => $params['value'],
+            ]
+        );
+    }
+
+    public function getOption($request) {
+        $params = json_decode(json_encode($request->get_params()), true);
+        $option = $params['option'] ?? false;
+
+        $useCase = new UseCases\SettingsUseCase(
+            $this,
+            new MessagesDB()
+        );
+
+        return $useCase->getOption($option);
     }
 
     public function getMessages() {

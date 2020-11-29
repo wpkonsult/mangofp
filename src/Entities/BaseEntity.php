@@ -32,13 +32,18 @@ class BaseEntity {
             'create_time' => (new \DateTime())->format('Y-m-d H:i:s '),
         ];
         $this->className = 'Base';
-    }
+	}
+
+	protected function refreshModifiedTime() {
+		 $this->data['modify_time'] = (new \DateTime())->format('Y-m-d H:i:s ');
+		 return $this;
+	}
 
     public function getDataAsArray() : array {
         return $this->data;
     }
 
-    public function setDataAsArray($newData, $loading = false) {
+    public function setDataFromArray($newData, $loading = false) {
 		$modified = false;
 		foreach($this->data as $key => $value) {
             if (isset($newData[$key])) {

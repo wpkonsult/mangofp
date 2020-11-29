@@ -5,14 +5,17 @@ namespace MangoFp;
 use MangoFp\Entities\HistoryItem;
 use MangoFp\Entities\Label;
 use MangoFp\Entities\Message;
+use MangoFp\Entities\Option;
 use MangoFp\UseCases\iStorage;
 
 class MessagesDB implements iStorage {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
-    const VERSION = '4.6';
+    const VERSION = '4.8';
     const TABLE_MESSAGES = 'mangofp_messages';
     const TABLE_LABELS = 'mangofp_labels';
     const TABLE_HISTORY = 'mangofp_history';
+    const TABLE_OPTIONS = 'mangofp_options';
+    const TABLE_TEMPLATES = 'mangofp_templates';
 
     public static function installDatabase() {
         global $wpdb;
@@ -29,6 +32,8 @@ class MessagesDB implements iStorage {
         $table_messages = $wpdb->prefix.self::TABLE_MESSAGES;
         $table_labels = $wpdb->prefix.self::TABLE_LABELS;
         $table_history = $wpdb->prefix.self::TABLE_HISTORY;
+        $table_options = $wpdb->prefix.self::TABLE_OPTIONS;
+        $table_templates = $wpdb->prefix.self::TABLE_TEMPLATES;
         $createSql = "CREATE TABLE {$table_labels} (
             id varchar(100) NOT NULL,
             create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -46,7 +51,7 @@ class MessagesDB implements iStorage {
             modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             delete_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             label_id varchar(100),
-            status_code varchar(20),
+            status_code varchar(100),
             email varchar(100),
             person_name varchar(100),
             note varchar(4000),
@@ -67,6 +72,28 @@ class MessagesDB implements iStorage {
             content varchar(4000),
             UNIQUE KEY id (id),
             KEY user_account (user_account)
+        ) {$charset_collate};";
+        dbDelta($createSql);
+
+        $createSql = "CREATE TABLE {$table_options} (
+            create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            delete_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            option_key varchar(100),
+            option_value text,
+            UNIQUE KEY option_key (option_key)
+        ) {$charset_collate};";
+        dbDelta($createSql);
+
+        $createSql = "CREATE TABLE {$table_templates} (
+            id varchar(50) NOT NULL,
+            create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            delete_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            code varchar(100),
+            template text,
+            cc_addresses varchar(4000),
+            UNIQUE KEY id (id)
         ) {$charset_collate};";
         dbDelta($createSql);
 
@@ -178,10 +205,6 @@ class MessagesDB implements iStorage {
         return $allMessages;
     }
 
-    public function fetchSettings() {
-        return false;
-    }
-
     public function insertLabel(Label $label) {
         global $wpdb;
         $result = $wpdb->insert(
@@ -217,7 +240,7 @@ class MessagesDB implements iStorage {
             return null;
         }
 
-        return (new Label())->setDataAsArray(
+        return (new Label())->setDataFromArray(
             [
                 'id' => $labelRow['id'],
                 'labelName' => $labelRow['label_name'],
@@ -245,7 +268,7 @@ class MessagesDB implements iStorage {
 
         $labels = [];
         foreach ($labelRows as $labelRow) {
-            $labels[] = (new Label())->setDataAsArray(
+            $labels[] = (new Label())->setDataFromArray(
                 [
                     'id' => $labelRow['id'],
                     'labelName' => $labelRow['label_name'],
@@ -328,8 +351,68 @@ class MessagesDB implements iStorage {
         ];
     }
 
+    public static function parseOptionToDbData(Option $optionObj) {
+        $optionData = $optionObj->getDataAsArray();
+
+        return [
+            'modify_time' => $optionData['modify_time'],
+            'option_key' => $optionData['key'],
+            'option_value' => $optionData['value'],
+        ];
+    }
+
+    public static function makeOptionWithDbData($data) {
+        $optionObj = new Option();
+        $optionObj->setDataFromArray(
+            [
+                'modify_time' => $data['modify_time'],
+                'key' => $data['option_key'],
+                'value' => $data['option_value'],
+            ],
+            true
+		);
+		return $optionObj;
+    }
+
+    public function storeOption(Option $optionObj) {
+        global $wpdb;
+
+        try {
+            $wpdb->replace(
+                $wpdb->prefix.self::TABLE_OPTIONS,
+                $this->parseOptionToDbData($optionObj)
+            );
+        } catch (\Exception $err) {
+            error_log('Unable to store option '.$optionObj->get('code'));
+            error_log($err->getMessage());
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public function fetchOption(string $optionKey) {
+        global $wpdb;
+        $table_name = $wpdb->prefix.self::TABLE_OPTIONS;
+        $request = $wpdb->prepare(
+            "SELECT create_time, modify_time, option_key, option_value
+            FROM {$table_name}
+            WHERE option_key = '%s'
+            ",
+            [$optionKey]
+        );
+
+        $optionRow = $wpdb->get_row($request, ARRAY_A);
+        if (!$optionRow) {
+            return false;
+        }
+
+        return $this->makeOptionWithDbData($optionRow);
+    }
+
     protected function makeMessageWithDbData($messageRow) {
-        return (new Message())->setDataAsArray(
+        return (new Message())->setDataFromArray(
             [
                 'id' => $messageRow['id'],
                 'create_time' => $messageRow['create_time'],
