@@ -35,8 +35,6 @@ class SettingsUseCase {
         $stepsObj = new Steps();
         if (!$stepsOption) {
 			$stepsObj->setDataAsInitialSteps();
-			//TODO - remove when conversions are done
-			$stepsObj->setDataAsCustNo1teps();
         } else {
             $stepsObj->setDataFromArray($stepsOption->getDataAsArray(), true);
         }
