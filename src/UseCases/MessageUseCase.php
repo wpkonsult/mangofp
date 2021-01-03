@@ -264,6 +264,16 @@ class MessageUseCase {
 
         //TODO: refactor email sending to the Adapter level
         //do not send email from development environment
+
+        $headers = [];
+        $ccForHistory = '';
+        if (isset($emailData['ccAddresses']) && is_array($emailData['ccAddresses'])) {
+            foreach ($emailData['ccAddresses'] as $email) {
+                $headers[] = 'Cc: '.$email;
+            }
+            $ccForHistory = implode(', ', $emailData['ccAddresses']);
+        }
+
         if (defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG) {
             $success = true;
         } else {
@@ -271,7 +281,7 @@ class MessageUseCase {
                 $to,
                 $subject,
                 $body,
-                '', //TODO - add header to set reply address for incoming emails. e.g:  'Reply-To: Person Name <person.name@example.com>',
+                $headers, //TODO - add header to set reply address for incoming emails. e.g:  'Reply-To: Person Name <person.name@example.com>',
                 $attachments
             );
         }
@@ -283,6 +293,7 @@ class MessageUseCase {
                         $code, //change type
                         [ // emailData
                             'to' => $to,
+                            'cc' => $ccForHistory,
                             'subject' => $subject,
                             'message' => $body."\r\n\r\n"."Attachments:\r\n".implode(
                                 "\r\n",

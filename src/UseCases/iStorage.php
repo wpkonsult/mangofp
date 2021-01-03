@@ -4,6 +4,7 @@ use MangoFp\Entities\Message;
 use MangoFp\Entities\Option;
 use MangoFp\Entities\Label;
 use MangoFp\Entities\HistoryItem;
+use MangoFp\Entities\Template;
 
 interface iStorage {
     public function storeMessage(Message $message);
@@ -19,4 +20,6 @@ interface iStorage {
     public function fetchItemHistory(string $id);
 	public function storeOption(Option $optionObj);
 	public function fetchOption(string $code);
+	public function storeTemplate(Template $emailTemplate);
+	public function fetchTemplate(string $code);
 }

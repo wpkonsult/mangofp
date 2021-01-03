@@ -11,6 +11,8 @@ class AdminRoutes implements iOutput {
         $this->routes = [
             ['endpoint' => '/labels', 'method' => 'GET', 'callback' => 'getLabels'],
             ['endpoint' => '/templates', 'method' => 'GET', 'callback' => 'getTemplates'],
+            ['endpoint' => '/templates/(?P<templateCode>[a-zA-Z0-9-]+)', 'method' => 'GET', 'callback' => 'getTemplate'],
+            ['endpoint' => '/templates/(?P<templateCode>[a-zA-Z0-9-]+)', 'method' => 'POST', 'callback' => 'updateOrInsertTemplate'],
             ['endpoint' => '/messages', 'method' => 'GET', 'callback' => 'getMessages'],
             ['endpoint' => '/messages', 'method' => 'POST', 'callback' => 'postMessage'],
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)/emails', 'method' => 'POST', 'callback' => 'sendEmail'],
@@ -59,6 +61,25 @@ class AdminRoutes implements iOutput {
         );
 
         return $useCase->fetchAllTemplatesToOutput();
+    }
+
+    public function updateOrInsertTemplate($request) {
+        $params = json_decode(json_encode($request->get_params()), true);
+        $useCase = new UseCases\SettingsUseCase(
+            $this,
+            new MessagesDB()
+        );
+
+        return $useCase->updateOrInsertTemplate($params);
+    }
+
+    public function getTemplate($request) {
+		$params = json_decode(json_encode($request->get_params()), true);
+        $useCase = new UseCases\SettingsUseCase(
+            $this,
+            new MessagesDB()
+        );
+        return $useCase->fetchTemplateToOutput($params['templateCode']);
     }
 
     public function getSteps() {
@@ -135,10 +156,10 @@ class AdminRoutes implements iOutput {
         error_log('Got file params:');
         error_log(print_r($fileParams, true));
         if (
-            !$fileParams ||
-            !\is_array($fileParams) ||
-            !isset($fileParams['files']) ||
-            !\is_array($fileParams['files'])
+            !$fileParams
+            || !\is_array($fileParams)
+            || !isset($fileParams['files'])
+            || !\is_array($fileParams['files'])
         ) {
             error_log('No files here. Raise error!');
 
