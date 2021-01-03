@@ -6,11 +6,12 @@ use MangoFp\Entities\HistoryItem;
 use MangoFp\Entities\Label;
 use MangoFp\Entities\Message;
 use MangoFp\Entities\Option;
+use MangoFp\Entities\Template;
 use MangoFp\UseCases\iStorage;
 
 class MessagesDB implements iStorage {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
-    const VERSION = '4.8';
+    const VERSION = '4.92';
     const TABLE_MESSAGES = 'mangofp_messages';
     const TABLE_LABELS = 'mangofp_labels';
     const TABLE_HISTORY = 'mangofp_history';
@@ -86,14 +87,14 @@ class MessagesDB implements iStorage {
         dbDelta($createSql);
 
         $createSql = "CREATE TABLE {$table_templates} (
-            id varchar(50) NOT NULL,
             create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             delete_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             code varchar(100),
             template text,
+            main_addresses text,
             cc_addresses varchar(4000),
-            UNIQUE KEY id (id)
+            UNIQUE KEY code (code)
         ) {$charset_collate};";
         dbDelta($createSql);
 
@@ -322,6 +323,83 @@ class MessagesDB implements iStorage {
         return $history;
     }
 
+    public function storeTemplate(Template $emailTemplate) {
+        global $wpdb;
+
+        $result = $wpdb->replace(
+            $wpdb->prefix.self::TABLE_TEMPLATES,
+            [
+                'code' => $emailTemplate->get('code'),
+                'template' => $emailTemplate->get('template'),
+                'cc_addresses' => json_encode($emailTemplate->get('addresses')),
+                'main_addresses' => json_encode($emailTemplate->get('mainAddresses')),
+                'modify_time' => $emailTemplate->get('modify_time'),
+            ]
+        );
+        if (!$result) {
+            error_log('ERROR: Tempalte item insert failed');
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public function fetchTemplates() {
+        global $wpdb;
+        $table_name = $wpdb->prefix.self::TABLE_TEMPLATES;
+        $templateRows = $wpdb->get_results(
+            "   SELECT code, template, cc_addresses, main_addresses, modify_time
+                FROM {$table_name}
+            ",
+            ARRAY_A
+        );
+
+        $allTemplates = [];
+        foreach ($templateRows as $templateRow) {
+            $templateObj = $this->makeTemplateWithDbData($templateRow);
+            if ($templateObj) {
+                $allTemplates[] = $templateObj;
+            }
+        }
+
+        return $allTemplates;
+    }
+
+    public function fetchTemplate(string $code) {
+        global $wpdb;
+        $table_name = $wpdb->prefix.self::TABLE_TEMPLATES;
+        $request = $wpdb->prepare(
+            "SELECT code, template, cc_addresses, main_addresses, modify_time
+            FROM {$table_name}
+            WHERE code = '%s'
+            ",
+            [$code]
+        );
+        $templateRow = $wpdb->get_row($request, ARRAY_A);
+        if (!$templateRow) {
+            return false;
+        }
+
+        return $this->makeTemplateWithDbData($templateRow);
+    }
+
+    public static function makeTemplateWithDbData($templateRow) {
+        $templateObj = new Template();
+        $templateObj->setDataFromArray(
+            [
+                'code' => $templateRow['code'],
+                'template' => $templateRow['template'],
+                'addresses' => $templateRow['cc_addresses'],
+                'mainAddresses' => $templateRow['main_addresses'],
+                'modify_time' => $templateRow['modify_time'],
+            ],
+            true
+        );
+
+        return $templateObj;
+    }
+
     public static function parseMessageToDbData(Message $message) {
         return [
             'id' => $message->get('id'),
@@ -370,8 +448,9 @@ class MessagesDB implements iStorage {
                 'value' => $data['option_value'],
             ],
             true
-		);
-		return $optionObj;
+        );
+
+        return $optionObj;
     }
 
     public function storeOption(Option $optionObj) {

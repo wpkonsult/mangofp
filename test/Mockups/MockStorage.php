@@ -5,6 +5,7 @@ use MangoFp\Entities\Message;
 use MangoFp\Entities\Option;
 use MangoFp\Entities\Label;
 use MangoFp\Entities\HistoryItem;
+use MangoFp\Entities\Template;
 
 class MockStorage implements iStorage {
     protected $expectedResults = [];
@@ -49,6 +50,12 @@ class MockStorage implements iStorage {
     }
     public function fetchOption(string $code) {
         return isset($this->expectedResult['fetchOption']) ? $this->expectedResult['fetchOption'] : [];
+    }
+    public function storeTemplate(Template $emailTemplate) {
+        return isset($this->expectedResult['storeTemplate']) ? $this->expectedResult['storeTemplate'] : [];
+    }
+    public function fetchTemplate(string $code) {
+        return isset($this->expectedResult['fetchTemplate']) ? $this->expectedResult['fetchTemplate'] : [];
     }
 
 }
