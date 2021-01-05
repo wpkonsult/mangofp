@@ -17,6 +17,14 @@ function isDebug() {
     return ( defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG );
 }
 
+function getJsVersion() {
+    if (isDebug()) {
+        return time();
+    }
+
+    return "0.1.1";
+}
+
 //Register Scripts to use
 function registerVueScripts($page) {
     $page = '/' . $page;
@@ -34,29 +42,41 @@ function registerVueScripts($page) {
 		'mangofp_vue_vendors',
 		$chunk_vendors_js,
 		false, //no dependencies
-		'0.0.1',
+		getJsVersion(),
 		true //in the footer otherwise Vue triggers it too early
 	);
 	wp_register_script(
 		'mangofp_vuejs',
 		$app_js,
 		['mangofp_vue_vendors'],
-		'0.0.1',
+		getJsVersion(),
 		true //in the footer otherwise Vue triggers it too early
 	);
 
-	wp_enqueue_script('mangofp_vue_vendors');
-	wp_enqueue_script('mangofp_vuejs');
+    wp_enqueue_style('vuetify_styles_font', 'https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900');
+    wp_enqueue_style('vuetify_styles', 'https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css');
+    wp_enqueue_script('mangofp_vue_vendors');
 
     if (!isDebug()) {
-        wp_register_style( 'vue-vendor-styles',  plugin_dir_url( __FILE__ ) . 'assets' . $page . '/css/chunk-vendors.css' );
+        wp_register_style(
+            'vue-vendor-styles',
+            plugin_dir_url( __FILE__ ) . 'assets' . $page . '/css/chunk-vendors.css',
+            [],
+            getJsVersion()
+         );
         wp_enqueue_style( 'vue-vendor-styles' );
-        wp_register_style( 'vue-app-styles',  plugin_dir_url( __FILE__ ) . 'assets' . $page . '/css/app.css' );
+
+        wp_register_style(
+            'vue-app-styles',
+            plugin_dir_url( __FILE__ ) . 'assets' . $page . '/css/app.css',
+            ['vue-vendor-styles'],
+            getJsVersion()
+         );
         wp_enqueue_style( 'vue-app-styles' );
     }
 
-    wp_enqueue_style('vuetify_styles_font', 'https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900');
-    wp_enqueue_style('vuetify_styles', 'https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css');
+    wp_enqueue_script('mangofp_vuejs');
+
 }
 
 function makeMangoFpAdminMenuPage() {
