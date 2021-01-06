@@ -11,7 +11,7 @@ use MangoFp\UseCases\iStorage;
 
 class MessagesDB implements iStorage {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
-    const VERSION = '4.92';
+    const VERSION = '4.93';
     const TABLE_MESSAGES = 'mangofp_messages';
     const TABLE_LABELS = 'mangofp_labels';
     const TABLE_HISTORY = 'mangofp_history';
