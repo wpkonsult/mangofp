@@ -265,7 +265,7 @@ class MessageUseCase {
         //TODO: refactor email sending to the Adapter level
         //do not send email from development environment
 
-        $headers = [];
+        $headers = ['Content-Type: text/html; charset=UTF-8'];
         $ccForHistory = '';
         if (isset($emailData['ccAddresses']) && is_array($emailData['ccAddresses'])) {
             foreach ($emailData['ccAddresses'] as $email) {
@@ -277,6 +277,8 @@ class MessageUseCase {
         if (defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG) {
             $success = true;
         } else {
+            error_log('Headers for sending email:');
+            error_log(print_r($headers, true));
             $success = wp_mail(
                 $to,
                 $subject,
