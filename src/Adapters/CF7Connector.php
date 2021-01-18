@@ -4,6 +4,7 @@ namespace MangoFp;
 class CF7Connector {
     public static function actionCF7Submit( $result ) {
         $submission = \WPCF7_Submission::get_instance();
+        $pageTitle = \wp_title('');
         if (
             !$submission ||
             !$posted_data = $submission->get_posted_data()
@@ -17,6 +18,9 @@ class CF7Connector {
             new AdminRoutes(),
             new MessagesDB()
         );
+        if ($pageTitle) {
+            $useCase->setTitle($pageTitle);
+        }
         $useCase->parseContentAndInsertToDatabase($posted_data);
     }
 }

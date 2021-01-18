@@ -384,6 +384,11 @@ class MessagesDB implements iStorage {
         return $this->makeTemplateWithDbData($templateRow);
     }
 
+    public function getAdminEmail() {
+        $adminEmail = \get_option('admin_email');
+        return $adminEmail;
+    }
+
     public static function makeTemplateWithDbData($templateRow) {
         $templateObj = new Template();
         $templateObj->setDataFromArray(

@@ -25,6 +25,7 @@ class AdminRoutes implements iOutput {
             ['endpoint' => '/steps', 'method' => 'POST', 'callback' => 'updateOrInsertSteps'],
             ['endpoint' => '/option', 'method' => 'POST', 'callback' => 'storeOption'],
             ['endpoint' => '/option/(?P<option>[a-z]+)', 'method' => 'GET', 'callback' => 'getOption'],
+            ['endpoint' => '/option', 'method' => 'GET', 'callback' => 'getOptions'],
         ];
         $version = '1';
     }
@@ -140,6 +141,18 @@ class AdminRoutes implements iOutput {
         );
 
         return $useCase->getOption($option);
+    }
+
+    public function getOptions($request) {
+        $params = json_decode(json_encode($request->get_params()), true);
+        $option = $params['option'] ?? false;
+
+        $useCase = new UseCases\SettingsUseCase(
+            $this,
+            new MessagesDB()
+        );
+
+        return $useCase->makeAllOptionsOutput();
     }
 
     public function getMessages() {

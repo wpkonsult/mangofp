@@ -5,6 +5,9 @@ namespace MangoFp\Entities;
 class Option extends BaseEntity {
     const OPTION_STEPS = 'steps';
     const OPTION_COMMENT = 'comment';
+    const OPTION_REPLY_EMAIL = 'reply_email';
+    const OPTION_EMAIL_FIELD = 'email_field';
+    const OPTION_LABEL_FIELD = 'label_field';
 
     public function __construct($data = []) {
         parent::__construct();
@@ -16,12 +19,22 @@ class Option extends BaseEntity {
         $this->className = 'Option';
     }
 
-    public static function isValidOption(string $key) {
-		$allowedOptions = [Option::OPTION_STEPS, Option::OPTION_COMMENT];
-		if (!\in_array($key, $allowedOptions)) {
-			return false;
-		}
+    public static function getListOfAllOptions() {
+        $allowedOptions = [
+            Option::OPTION_STEPS,
+            Option::OPTION_EMAIL_FIELD,
+            Option::OPTION_LABEL_FIELD,
+            Option::OPTION_REPLY_EMAIL,
+        ];
+        //TODO: Add filter for email plugin
+        return $allowedOptions;
+    }
 
-		return true;
+    public static function isValidOption(string $key) {
+        if (!\in_array($key, Option::getListOfAllOptions())) {
+            return false;
+        }
+
+        return true;
     }
 }

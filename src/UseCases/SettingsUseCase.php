@@ -170,9 +170,9 @@ class SettingsUseCase {
             $templates[$templateObj->get('code')] = $this->getTemplateDataForOutput($templateObj);
         }
 
-        return   $this->output->outputResult(
+        return $this->output->outputResult(
             [
-                'templates' => $templates
+                'templates' => $templates,
             ]
         );
     }
@@ -246,6 +246,64 @@ class SettingsUseCase {
             'key' => $optionObj->get('key'),
             'value' => $optionObj->get('value'),
         ];
+    }
+
+    public function makeAllOptionsOutput() {
+        try {
+            $result = [];
+            foreach (Option::getListOfAllOptions() as $optionKey) {
+                $defaultValue = '';
+                $optionValue = false;
+
+                switch ($optionKey) {
+                    case Option::OPTION_STEPS:
+                        $stepsObj = $this->fetchStepsOrDefaultAsSteps();
+                        $optionValue = $stepsObj->getDataAsOrderedObject();
+
+                        break;
+
+                    case Option::OPTION_REPLY_EMAIL:
+                        $optionObj = $this->storage->fetchOption($optionKey);
+                        if (!$optionObj) {
+                            $optionValue = $this->storage->getAdminEmail();
+                        }
+
+                        break;
+
+                    case Option::OPTION_LABEL_FIELD:
+                        $optionObj = $this->storage->fetchOption($optionKey);
+                        if (!$optionObj) {
+                            $optionValue = '[pageTitle]';
+                        }
+
+                        break;
+
+                    case Option::OPTION_EMAIL_FIELD:
+                        $optionObj = $this->storage->fetchOption($optionKey);
+                        if (!$optionObj) {
+                            $optionValue = 'email';
+                        }
+
+                        break;
+
+                    default:
+                        $optionObj = $this->storage->fetchOption($optionKey);
+                        if (!$optionObj) {
+                            $optionValue = '';
+                        }
+
+                        break;
+                }
+                $result[$optionKey] = $optionValue;
+            }
+            return $this->output->outputResult($result);
+
+        } catch (\Exception $err) {
+            return $this->output->outputError(
+                'Error while fetching options: '.$err->getMessage(),
+                iOutput::ERROR_NOTFOUND
+            );
+        }
     }
 
     protected function getTemplateDataForOutput($templateObj) {
