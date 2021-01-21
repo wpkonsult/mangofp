@@ -248,20 +248,17 @@ class SettingsUseCase {
         ];
     }
 
+    public function makeOptionsDefinitionsOutput() {
+
+    }
+
     public function makeAllOptionsOutput() {
         try {
             $result = [];
-            foreach (Option::getListOfAllOptions() as $optionKey) {
+            foreach (Option::getAllOptionsDefinitions() as $optionKey => $optionDef) {
                 $defaultValue = '';
                 $optionValue = false;
-
                 switch ($optionKey) {
-                    case Option::OPTION_STEPS:
-                        $stepsObj = $this->fetchStepsOrDefaultAsSteps();
-                        $optionValue = $stepsObj->getDataAsOrderedObject();
-
-                        break;
-
                     case Option::OPTION_REPLY_EMAIL:
                         $optionObj = $this->storage->fetchOption($optionKey);
                         if (!$optionObj) {
@@ -294,9 +291,17 @@ class SettingsUseCase {
 
                         break;
                 }
-                $result[$optionKey] = $optionValue;
+                $result[$optionKey] = [
+                        "label" => $optionDef["label"],
+                        "type" => $optionDef["type"],
+                        "name" => $optionDef["name"],
+                        "hint" => $optionDef["hint"],
+                        "value" => $optionValue
+                ];
             }
-            return $this->output->outputResult($result);
+            return $this->output->outputResult([
+                "options" => $result
+            ]);
 
         } catch (\Exception $err) {
             return $this->output->outputError(
