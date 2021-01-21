@@ -29,7 +29,7 @@ class Option extends BaseEntity {
             "type" => Option::OPTION_TYPE_text,
             "name" => __("Email field"),
             "hint" => __(
-                "Email field on Contact Form(s) that will be seen as contact's email in Mango Contacts. Default: 'email'",
+                "Name of the Email field on Contact Form(s) that will be used as contact's email for contact records in Mango Contacts. Default: email",
                 ),
             ],
             Option::OPTION_LABEL_FIELD => [
@@ -37,7 +37,7 @@ class Option extends BaseEntity {
                 "type" => Option::OPTION_TYPE_text,
                 "name" => __("Label field"),
                 "hint" => __(
-                    "Name of the Contact Form field that will be considered as label in Mango Contacts. If value is not set, name of the form's page is label value",
+                    "Name of the Contact Form field that will be used as label for contact records in Mango Contacts. Special shortocde [pageTitle] means name of the form's page. This is also default value",
                 ),
             ],
             Option::OPTION_REPLY_EMAIL => [
@@ -45,7 +45,7 @@ class Option extends BaseEntity {
                 "type" => Option::OPTION_TYPE_EMAIL,
                 "name" => __("Reply email"),
                 "hint" => __(
-                    "Email address for replies for emails that are sent from MangoFp. Premium emails add-on plugin enables receiving and management of replies directly in MangoFp",
+                    "Email address for replies to emails sent from MangoFp. Premium emails add-on plugin enables receiving and management of replies directly in MangoFp",
                 ),
             ],
         ];
