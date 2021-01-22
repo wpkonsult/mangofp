@@ -208,7 +208,7 @@ class SettingsUseCase {
 
         if (!Option::isValidOption($payload['key'])) {
             return $this->output->outputError(
-                'Not allowed option '.$payload['key'],
+                __('Not allowed option: ').$payload['key'],
                 iOutput::ERROR_FAILED
             );
         }
@@ -223,10 +223,70 @@ class SettingsUseCase {
 
         $success = $this->storage->storeOption($optionObj);
         if (!$success) {
-            return $this->output->outputError('Failed to store option', iOutput::ERROR_FAILED);
+            return $this->output->outputError(__('Failed to store option'), iOutput::ERROR_FAILED);
         }
 
-        return $this->output->outputResult(['success' => 'Setting saved']);
+        return $this->output->outputResult(['success' => __('Setting saved')]);
+    }
+
+    public function storeOptionsAndMakeAllOptionsOutput(array $payload) {
+        if (!isset($payload['options'])) {
+            return $this->output->outputError(__('No options in request'), iOutput::ERROR_FAILED);
+        }
+        if (!is_array($payload['options'])) {
+            return $this->output->outputError(__('Options should be array'), iOutput::ERROR_FAILED);
+        }
+
+        $inValidOptionFound = false;
+        $lastError = '';
+
+        foreach ($payload['options'] as $optionInPayload) {
+            if (!isset($optionInPayload['key'])) {
+                $lastError = __('Option without a key in request');
+                $inValidOptionFound = true;
+
+                return;
+            }
+
+            if (!isset($optionInPayload['value'])) {
+                $lastError = __('Option without a value in request');
+                $inValidOptionFound = true;
+
+                return;
+            }
+
+            if (!Option::isValidOption($optionInPayload['key'])) {
+                $lastError = sprintf(__('Not valid option: %s'), $optionInPayload['key']);
+                $inValidOptionFound = true;
+
+                return;
+            }
+        }
+
+        if ($inValidOptionFound) {
+            return $this->output->outputError($lastError, iOutput::ERROR_FAILED);
+        }
+
+        $errors = [];
+
+        \error_log(print_r($payload, true));
+
+        foreach ($payload['options'] as $optionInPayload) {
+            $optionObj = new Option();
+            $optionObj->setDataFromArray(
+                [
+                    'key' => $optionInPayload['key'],
+                    'value' => $optionInPayload['value'],
+                ]
+            );
+
+            $success = $this->storage->storeOption($optionObj);
+            if (!$success) {
+                $errors[] = \sprintf(__('Failed to store option %s '), $optionInPayload['key']);
+            }
+        }
+
+        return $this->makeAllOptionsOutput($errors);
     }
 
     public function getOption(string $key) {
@@ -239,7 +299,9 @@ class SettingsUseCase {
         $optionObj = $this->storage->fetchOption($key);
 
         if (!$optionObj) {
-            return $this->output->outputError('Data for option '.$key.' not found', iOutput::ERROR_FAILED);
+            $errMsg = \sprintf(__('Data for option %s not found'), $key);
+
+            return $this->output->outputError($errMsg, iOutput::ERROR_FAILED);
         }
 
         return [
@@ -249,66 +311,68 @@ class SettingsUseCase {
     }
 
     public function makeOptionsDefinitionsOutput() {
-
     }
 
-    public function makeAllOptionsOutput() {
+    public function getAllOptions() {
         try {
             $result = [];
             foreach (Option::getAllOptionsDefinitions() as $optionKey => $optionDef) {
                 $defaultValue = '';
-                $optionValue = false;
-                switch ($optionKey) {
-                    case Option::OPTION_REPLY_EMAIL:
-                        $optionObj = $this->storage->fetchOption($optionKey);
-                        if (!$optionObj) {
-                            $optionValue = $this->storage->getAdminEmail();
-                        }
+                $optionValue = '';
 
-                        break;
+                $optionObj = $this->storage->fetchOption($optionKey);
+                if ($optionObj) {
+                    $optionValue = $optionObj->get('value');
+                } else {
+                    switch ($optionKey) {
+                        case Option::OPTION_REPLY_EMAIL:
+                                $optionValue = $this->storage->getAdminEmail();
 
-                    case Option::OPTION_LABEL_FIELD:
-                        $optionObj = $this->storage->fetchOption($optionKey);
-                        if (!$optionObj) {
-                            $optionValue = '[pageTitle]';
-                        }
+                            break;
 
-                        break;
+                        case Option::OPTION_LABEL_FIELD:
+                                $optionValue = '[pageTitle]';
 
-                    case Option::OPTION_EMAIL_FIELD:
-                        $optionObj = $this->storage->fetchOption($optionKey);
-                        if (!$optionObj) {
-                            $optionValue = 'email';
-                        }
+                            break;
 
-                        break;
+                        case Option::OPTION_EMAIL_FIELD:
+                                $optionValue = 'email';
 
-                    default:
-                        $optionObj = $this->storage->fetchOption($optionKey);
-                        if (!$optionObj) {
-                            $optionValue = '';
-                        }
-
-                        break;
+                            break;
+                    }
                 }
+
                 $result[$optionKey] = [
-                        "label" => $optionDef["label"],
-                        "type" => $optionDef["type"],
-                        "name" => $optionDef["name"],
-                        "hint" => $optionDef["hint"],
-                        "value" => $optionValue
+                    'label' => $optionDef['label'],
+                    'type' => $optionDef['type'],
+                    'name' => $optionDef['name'],
+                    'hint' => $optionDef['hint'],
+                    'value' => $optionValue,
                 ];
             }
-            return $this->output->outputResult([
-                "options" => $result
-            ]);
 
+            return $result;
         } catch (\Exception $err) {
-            return $this->output->outputError(
-                'Error while fetching options: '.$err->getMessage(),
-                iOutput::ERROR_NOTFOUND
-            );
+            return \sprintf(__('Error while fetching options: %s'), $err->getMessage());
         }
+    }
+
+    public function makeAllOptionsOutput($messages = []) {
+        $allOptions = $this->getAllOptions();
+
+        if (!is_array($allOptions)) {
+            return $this->output->outputError($allOptions, iOutput::ERROR_FAILED);
+        }
+
+        $output = [
+            'options' => $allOptions,
+        ];
+
+        if ($messages) {
+            $output['errors'] = $messages;
+        }
+
+        return $this->output->outputResult($output);
     }
 
     protected function getTemplateDataForOutput($templateObj) {

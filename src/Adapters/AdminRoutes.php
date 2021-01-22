@@ -23,7 +23,7 @@ class AdminRoutes implements iOutput {
             ['endpoint' => '/steps/(?P<code>[a-zA-Z0-9-]+)', 'method' => 'POST', 'callback' => 'updateOrInsertSteps'],
             ['endpoint' => '/steps/(?P<code>[a-zA-Z0-9-]+)/(?P<operation>[a-z]+)', 'method' => 'POST', 'callback' => 'doWithStep'],
             ['endpoint' => '/steps', 'method' => 'POST', 'callback' => 'updateOrInsertSteps'],
-            ['endpoint' => '/option', 'method' => 'POST', 'callback' => 'storeOption'],
+            ['endpoint' => '/options', 'method' => 'POST', 'callback' => 'storeOptions'],
             ['endpoint' => '/option/(?P<option>[a-z]+)', 'method' => 'GET', 'callback' => 'getOption'],
             ['endpoint' => '/option', 'method' => 'GET', 'callback' => 'getOptions'],
         ];
@@ -114,21 +114,15 @@ class AdminRoutes implements iOutput {
         return $useCase->doWithStep($params['operation'], $params['code']);
     }
 
-    public function storeOption($request) {
+    public function storeOptions($request) {
         $params = json_decode(json_encode($request->get_params()), true);
 
-        //return $this->outputResult($params);
         $useCase = new UseCases\SettingsUseCase(
             $this,
             new MessagesDB()
         );
 
-        return $useCase->storeOption(
-            [
-                'key' => $params['key'],
-                'value' => $params['value'],
-            ]
-        );
+        return $useCase->storeOptionsAndMakeAllOptionsOutput($params);
     }
 
     public function getOption($request) {
