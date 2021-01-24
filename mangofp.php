@@ -8,7 +8,7 @@
  *  @since              0.0.1
  *  @package            MangoFp
  *  Author:             Andres Järviste
- *  Version:            0.0.3
+ *  Version:            0.0.4
  *  Author URI:         https://mangofp.net
  *  Domain Path:        /languages
  */
