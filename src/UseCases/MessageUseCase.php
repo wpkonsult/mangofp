@@ -5,6 +5,7 @@ namespace MangoFp\UseCases;
 use MangoFp\Entities\HistoryItem;
 use MangoFp\Entities\Label;
 use MangoFp\Entities\Message;
+use MangoFp\Entities\Option;
 
 class MessageUseCase {
     private $attributeMapping = [
@@ -65,8 +66,8 @@ class MessageUseCase {
             }
 
             if (
-                \in_array($key, $this->blacklistedAttributes) ||
-                !$value
+                \in_array($key, $this->blacklistedAttributes)
+                || !$value
                 ) {
                 continue;
             }
@@ -174,9 +175,9 @@ class MessageUseCase {
 
     public function sendEmailAndReturnMessage($emailData, $id) {
         if (
-           !isset($emailData['content']) ||
-           !isset($emailData['addresses']) ||
-           !isset($emailData['subject'])
+           !isset($emailData['content'])
+           || !isset($emailData['addresses'])
+           || !isset($emailData['subject'])
         ) {
             \error_log('Unable to send email - email field(s) missing. Submitted: '.\wp_json_encode($emailData));
 
@@ -200,9 +201,9 @@ class MessageUseCase {
 
     public function sendEmailAndUpdateMessageAndReturnChangedMessage($emailData, $params) {
         if (
-           !isset($emailData['content']) ||
-           !isset($emailData['addresses']) ||
-           !isset($emailData['subject'])
+           !isset($emailData['content'])
+           || !isset($emailData['addresses'])
+           || !isset($emailData['subject'])
         ) {
             \error_log('Unable to send email - email field(s) missing. Submitted: '.\wp_json_encode($emailData));
 
@@ -240,6 +241,21 @@ class MessageUseCase {
         ];
     }
 
+    protected function getReplyAddressAsEmailHeader() {
+        $settingsUC = new SettingsUseCase(
+            $this->output,
+            $this->storage
+        );
+        $optionReplyEmail = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL);
+
+        //TODO: filter premiumi jaoks
+        return sprintf(
+            'Reply-To: %s<%s>',
+            'emails',
+            $optionReplyEmail->get('value')
+        );
+    }
+
     protected function submitEmail($emailData, $id, $code = 'none') {
         $to = $emailData['addresses'];
         $subject = $emailData['subject'];
@@ -266,6 +282,7 @@ class MessageUseCase {
         //do not send email from development environment
 
         $headers = ['Content-Type: text/html; charset=UTF-8'];
+        $headers[] = $this->getReplyAddressAsEmailHeader();
         $ccForHistory = '';
         if (isset($emailData['ccAddresses']) && is_array($emailData['ccAddresses'])) {
             foreach ($emailData['ccAddresses'] as $email) {
@@ -276,6 +293,7 @@ class MessageUseCase {
 
         if (defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG) {
             $success = true;
+            error_log(print_r($headers, true));
         } else {
             error_log('Headers for sending email:');
             error_log(print_r($headers, true));
@@ -308,6 +326,5 @@ class MessageUseCase {
         }
 
         return $success;
-	}
-
+    }
 }

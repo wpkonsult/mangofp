@@ -289,19 +289,53 @@ class SettingsUseCase {
         return $this->makeAllOptionsOutput($errors);
     }
 
-    public function getOption(string $key) {
+    public function getOptionObj(string $optionKey) {
+        if (!Option::isValidOption($optionKey)) {
+            throw new \Exception(sprintf(__('%s is not valid option'), $optionKey));
+        }
+
+        $optionObj = $this->storage->fetchOption($optionKey);
+        $optionValue = '';
+
+        if (!$optionObj) {
+            switch ($optionKey) {
+                case Option::OPTION_REPLY_EMAIL:
+                        $optionValue = $this->storage->getAdminEmail();
+
+                    break;
+
+                case Option::OPTION_LABEL_FIELD:
+                        $optionValue = '[pageTitle]';
+
+                    break;
+
+                case Option::OPTION_EMAIL_FIELD:
+                        $optionValue = 'email';
+
+                    break;
+            }
+
+            $optionObj = new Option([
+                'key' => $optionKey,
+                'value' => $optionValue,
+            ]);
+        }
+
+        return $optionObj;
+    }
+
+    public function makeOptionOutput(string $key) {
         if (!Option::isValidOption($key)) {
             return $this->output->outputError(
                 'Not allowed option '.$key,
                 iOutput::ERROR_FAILED
             );
         }
-        $optionObj = $this->storage->fetchOption($key);
 
-        if (!$optionObj) {
-            $errMsg = \sprintf(__('Data for option %s not found'), $key);
-
-            return $this->output->outputError($errMsg, iOutput::ERROR_FAILED);
+        try {
+            $optionObj = $this->getOptionObj($key);
+        } catch (\Exception $err) {
+            return $this->output->outputError($err->getMessage(), iOutput::ERROR_FAILED);
         }
 
         return [
@@ -310,69 +344,31 @@ class SettingsUseCase {
         ];
     }
 
-    public function makeOptionsDefinitionsOutput() {
-    }
-
-    public function getAllOptions() {
+    public function makeAllOptionsOutput($messages = []) {
         try {
-            $result = [];
+            $allOptions = [];
             foreach (Option::getAllOptionsDefinitions() as $optionKey => $optionDef) {
-                $defaultValue = '';
-                $optionValue = '';
-
-                $optionObj = $this->storage->fetchOption($optionKey);
-                if ($optionObj) {
-                    $optionValue = $optionObj->get('value');
-                } else {
-                    switch ($optionKey) {
-                        case Option::OPTION_REPLY_EMAIL:
-                                $optionValue = $this->storage->getAdminEmail();
-
-                            break;
-
-                        case Option::OPTION_LABEL_FIELD:
-                                $optionValue = '[pageTitle]';
-
-                            break;
-
-                        case Option::OPTION_EMAIL_FIELD:
-                                $optionValue = 'email';
-
-                            break;
-                    }
-                }
-
-                $result[$optionKey] = [
+                $optionObj = $this->getOptionObj($optionKey);
+                $allOptions[$optionKey] = [
                     'label' => $optionDef['label'],
                     'type' => $optionDef['type'],
                     'name' => $optionDef['name'],
                     'hint' => $optionDef['hint'],
-                    'value' => $optionValue,
+                    'value' => $optionObj->get('value'),
                 ];
             }
+            $output = [
+                'options' => $allOptions,
+            ];
 
-            return $result;
+            if ($messages) {
+                $output['errors'] = $messages;
+            }
+
+            return $this->output->outputResult($output);
         } catch (\Exception $err) {
             return \sprintf(__('Error while fetching options: %s'), $err->getMessage());
         }
-    }
-
-    public function makeAllOptionsOutput($messages = []) {
-        $allOptions = $this->getAllOptions();
-
-        if (!is_array($allOptions)) {
-            return $this->output->outputError($allOptions, iOutput::ERROR_FAILED);
-        }
-
-        $output = [
-            'options' => $allOptions,
-        ];
-
-        if ($messages) {
-            $output['errors'] = $messages;
-        }
-
-        return $this->output->outputResult($output);
     }
 
     protected function getTemplateDataForOutput($templateObj) {

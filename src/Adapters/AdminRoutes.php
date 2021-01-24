@@ -134,7 +134,7 @@ class AdminRoutes implements iOutput {
             new MessagesDB()
         );
 
-        return $useCase->getOption($option);
+        return $useCase->makeOptionOutput($option);
     }
 
     public function getOptions($request) {
