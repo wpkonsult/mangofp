@@ -8,7 +8,7 @@
  *  @since              0.0.1
  *  @package            MangoFp
  *  Author:             Andres Järviste
- *  Version:            0.0.4
+ *  Version:            0.0.6
  *  Author URI:         https://mangofp.net
  *  Domain Path:        /languages
  */
@@ -129,7 +129,7 @@ function loadSettingsJs() {
 function getResources() {
 	$resources = [
 			'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
-			'version' => ['main' => 'v.0.0.5'],
+			'version' => ['main' => 'v.0.0.6'],
 			'strings' => MangoFp\Localization::getContactsStrings()
 	];
 
@@ -138,7 +138,7 @@ function getResources() {
 function getContactResources() {
 	$resources = [
 			'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
-			'version' => ['main' => 'v.0.0.5'],
+			'version' => ['main' => 'v.0.0.6'],
 			'strings' => MangoFp\Localization::getContactsStrings(),
 	];
 
