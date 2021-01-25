@@ -23,6 +23,19 @@ class Option extends BaseEntity {
     }
 
     public static function getAllOptionsDefinitions() {
+        $rowElems = [
+            sprintf('<li><strong>[pageTitle]</strong> - %s</li>', __("name of the page where submitted form is located")),
+            sprintf('<li><strong>[pageId]</strong> - %s</li>', __("id of the page where submitted form is located")),
+            sprintf('<li><strong>[formName]</strong> - %s</li>', __("name of the submitted form")),
+            sprintf('<li><strong>[formId]</strong> - %s</li>', __("id of the submitted form")),
+        ];
+
+        $labelHint = sprintf("%s<p>%s</p><ul>%s</ul>",
+            __('Name of the Contact Form field that will be used as label for contact records in Mango Contacts.'),
+            __('Use form field name or following shortcodes for dynamic values:'),
+            implode('', $rowElems)
+        );
+
         return [
             Option::OPTION_EMAIL_FIELD => [
             "label" => Option::OPTION_EMAIL_FIELD,
@@ -36,9 +49,7 @@ class Option extends BaseEntity {
                 "label" => Option::OPTION_LABEL_FIELD,
                 "type" => Option::OPTION_TYPE_text,
                 "name" => __("Label field"),
-                "hint" => __(
-                    "Name of the Contact Form field that will be used as label for contact records in Mango Contacts. Special shortocde [pageTitle] means name of the form's page. This is also default value",
-                ),
+                "hint" => $labelHint,
             ],
             Option::OPTION_REPLY_EMAIL => [
                 "label" => Option::OPTION_REPLY_EMAIL,

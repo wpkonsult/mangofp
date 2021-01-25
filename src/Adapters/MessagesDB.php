@@ -117,8 +117,24 @@ class MessagesDB implements iStorage {
         //delete_option( self::VERSION_PARAM_NAME );
     }
 
+    //TODO: remove
     public function getLabelTag() {
         return 'pealkiri';
+    }
+
+    public function getDefaultLabel($meta) {
+        //Finds default value for label that is a name of the page/post of the form
+        //Can be overriden by defining label field with the name of the contact form field
+        if (\is_front_page() || \is_home()) {
+            return \get_bloginfo('name');
+        } else if (isset($meta['pageId'])) {
+           $post = get_post($meta['pageId']);
+           if ($post) {
+               return esc_html($post->post_title);
+           }
+        }
+
+        return \wp_title('');
     }
 
     public function storeMessage(Message $message) {
@@ -385,8 +401,7 @@ class MessagesDB implements iStorage {
     }
 
     public function getAdminEmail() {
-        $adminEmail = \get_option('admin_email');
-        return $adminEmail;
+        return \get_option('admin_email');
     }
 
     public static function makeTemplateWithDbData($templateRow) {

@@ -4,7 +4,7 @@ namespace MangoFp;
 class CF7Connector {
     public static function actionCF7Submit( $result ) {
         $submission = \WPCF7_Submission::get_instance();
-        $pageTitle = \wp_title('');
+
         if (
             !$submission ||
             !$posted_data = $submission->get_posted_data()
@@ -13,14 +13,28 @@ class CF7Connector {
             return;
         }
 
-        error_log('Posted data:' . print_r($posted_data, 1));
+        $post_id = (int) $submission->get_meta('container_post_id');
+        $post = get_post( $post_id );
+        $pageTitle = $post->post_title;
+
         $useCase = new UseCases\MessageUseCase(
             new AdminRoutes(),
             new MessagesDB()
         );
-        if ($pageTitle) {
-            $useCase->setTitle($pageTitle);
+
+        $meta = [];
+        $contactForm = $submission->get_contact_form();
+
+        if ($contactForm) {
+            $meta['formId'] = $contactForm->id();
+            $meta['formName'] = $contactForm->name();
+            $meta['formTitle'] = $contactForm->title();
         }
-        $useCase->parseContentAndInsertToDatabase($posted_data);
+
+        if ($post_id) {
+            $meta['pageId'] = $post_id;
+        }
+        error_log('Posted data:' . print_r($meta, 1));
+        $useCase->parseContentAndInsertToDatabase($posted_data, $meta);
     }
 }

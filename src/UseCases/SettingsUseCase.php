@@ -310,7 +310,7 @@ class SettingsUseCase {
                     break;
 
                 case Option::OPTION_EMAIL_FIELD:
-                        $optionValue = 'email';
+                        $optionValue = 'your-email';
 
                     break;
             }

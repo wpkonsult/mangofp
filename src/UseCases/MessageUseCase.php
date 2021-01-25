@@ -8,11 +8,6 @@ use MangoFp\Entities\Message;
 use MangoFp\Entities\Option;
 
 class MessageUseCase {
-    private $attributeMapping = [
-        'name' => 'your-name',
-        'email' => 'your-email',
-        'form' => '_wpcf7',
-    ];
     private $blacklistedAttributes = [
         '_wpcf7_version',
         '_wpcf7_locale',
@@ -51,13 +46,38 @@ class MessageUseCase {
         return $newLabel;
     }
 
-    public function parseContentAndInsertToDatabase(array $content) {
+    public function getParsingOptions() {
+        $settingsUC = new SettingsUseCase(
+            $this->output,
+            $this->storage
+        );
+
+        return [
+            'label' => $settingsUC->getOptionObj(Option::OPTION_LABEL_FIELD)->get('value'),
+            'email' => $settingsUC->getOptionObj(Option::OPTION_EMAIL_FIELD)->get('value'),
+            'name' => 'your-name',
+            'form' => '_wpcf7',
+        ];
+    }
+
+    public function parseContentAndInsertToDatabase(array $content, array $meta = []) {
         $data = [];
         $secondaries = [];
-        $primaries = \array_flip($this->attributeMapping);
         $label = null;
-        $labelTag = $this->storage->getLabelTag();
 
+        $optionsData = $this->getParsingOptions();
+        $labelTag = $optionsData['label'];
+        $metaLabel = $this->getShortCodeName($labelTag);
+
+        if ('pageTitle' == $metaLabel) {
+            $labelValue = $this->storage->getDefaultLabel($meta);
+            $label = $this->fetchExistingOrCreateNewLabelByName($labelValue);
+        } elseif (isset($meta[$metaLabel])) {
+            $labelValue = $meta[$metaLabel];
+            $label = $this->fetchExistingOrCreateNewLabelByName($labelValue);
+        }
+
+        $primaries = \array_flip($optionsData);
         foreach ($content as $key => $value) {
             if ($key === $labelTag) {
                 $label = $this->fetchExistingOrCreateNewLabelByName($value);
@@ -326,5 +346,16 @@ class MessageUseCase {
         }
 
         return $success;
+    }
+
+    private function getShortCodeName($shortCode) {
+        if (
+            '[' == $shortCode[0]
+            && ']' == $shortCode[\strlen($shortCode) - 1]
+        ) {
+            return \substr($shortCode, 1, \strlen($shortCode) - 2);
+        }
+
+        return false;
     }
 }
