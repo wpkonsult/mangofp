@@ -2,139 +2,140 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the mangofp package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: mangofp 0.0.2\n"
+"Project-Id-Version: mangofp 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-01-29 17:46+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2021-01-29 16:05+0000\n"
+"Last-Translator: \n"
+"Language-Team: Eesti\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.4.0; wp-5.6"
 
 #: mangofp.php:85 stage/mangofp.php:85
 msgid "MangoFP Contacts"
-msgstr ""
+msgstr "MangoFP Kontaktid"
 
 #: mangofp.php:93 stage/mangofp.php:93
 msgid "MangoFp Contacts"
-msgstr ""
+msgstr "MangoFp Kontaktid"
 
 #: mangofp.php:94 stage/mangofp.php:94
 msgid "Contacts"
-msgstr ""
+msgstr "Kontaktid"
 
 #: mangofp.php:101 stage/mangofp.php:101
 msgid "MangoFp Settings"
-msgstr ""
+msgstr "MangoFp Seaded"
 
 #: mangofp.php:102 stage/mangofp.php:102
 msgid "Settings"
-msgstr ""
+msgstr "Seaded"
 
 #: mangofp.php:117 stage/mangofp.php:117
 msgid ""
 "Mango Form Processor works only when Contact Form 7 is installed and "
 "activated."
-msgstr ""
+msgstr "Mango Form Processor töötab ainult koos pluginaga Contact Form 7"
 
 #: node_modules/grunt-pot/test/fixtures/some-file.php:3
 msgid "I'm a translatable string."
-msgstr ""
+msgstr "tõlgitav tekst - ignoreeri"
 
 #: node_modules/grunt-pot/test/fixtures/some-other-file.php:4
 msgid "Me too"
-msgstr ""
+msgstr "Mina kah"
 
 #: node_modules/grunt-pot/test/fixtures/some-other-file.php:7
 #, php-format
 msgid "I have %d apple"
 msgid_plural "I have %d apples"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "on õun"
+msgstr[1] "on õunu"
 
-#. / TRANSLATORS: This should be translated as a shorthand for YEAR-MONTH-DAY using 4, 2 and 2 digits.
+#. TRANSLATORS: This should be translated as a shorthand for YEAR-MONTH-DAY using 4, 2 and 2 digits.
 #: node_modules/grunt-pot/test/fixtures/some-other-file.php:16
 msgid "yyyy-mm-dd"
-msgstr ""
+msgstr "dd-mm-yyyy"
 
 #: src/Adapters/Localization.php:7 stage/src/Adapters/Localization.php:7
 msgid "Send"
-msgstr ""
+msgstr "Saada"
 
 #: src/Adapters/Localization.php:8 stage/src/Adapters/Localization.php:8
 msgid "State"
-msgstr ""
+msgstr "Olek"
 
 #: src/Adapters/Localization.php:9 stage/src/Adapters/Localization.php:9
 msgid "All"
-msgstr ""
+msgstr "Kõik"
 
 #: src/Adapters/Localization.php:10 src/Adapters/Localization.php:26
 #: stage/src/Adapters/Localization.php:10
 #: stage/src/Adapters/Localization.php:26
 msgid "Confirm"
-msgstr ""
+msgstr "Kinnita"
 
 #: src/Adapters/Localization.php:11 src/Adapters/Localization.php:27
 #: stage/src/Adapters/Localization.php:11
 #: stage/src/Adapters/Localization.php:27
 msgid "Confirm and send"
-msgstr ""
+msgstr "Kinnita ja saada"
 
 #: src/Adapters/Localization.php:12 stage/src/Adapters/Localization.php:12
 msgid "Date"
-msgstr ""
+msgstr "Kuupäev"
 
 #: src/Adapters/Localization.php:13 stage/src/Adapters/Localization.php:13
 msgid "Status"
-msgstr ""
+msgstr "Olek"
 
 #: src/Adapters/Localization.php:14 stage/src/Adapters/Localization.php:14
 msgid "Label"
-msgstr ""
+msgstr "Teema"
 
 #: src/Adapters/Localization.php:15 stage/src/Adapters/Localization.php:15
 msgid "Note"
-msgstr ""
+msgstr "Märkus"
 
 #: src/Adapters/Localization.php:16 stage/src/Adapters/Localization.php:16
 msgid "Name"
-msgstr ""
+msgstr "Nimi"
 
 #: src/Adapters/Localization.php:17 stage/src/Adapters/Localization.php:17
 msgid "Email"
-msgstr ""
+msgstr "Email"
 
 #: src/Adapters/Localization.php:18 stage/src/Adapters/Localization.php:18
 msgid "Updated"
-msgstr ""
+msgstr "Muudetud"
 
 #: src/Adapters/Localization.php:19 stage/src/Adapters/Localization.php:19
 msgid "Change"
-msgstr ""
+msgstr "Muuda"
 
 #: src/Adapters/Localization.php:20 stage/src/Adapters/Localization.php:20
 msgid "Subject"
-msgstr ""
+msgstr "Teema"
 
 #: src/Adapters/Localization.php:28 stage/src/Adapters/Localization.php:28
 msgid "MangoFp settings"
-msgstr ""
+msgstr "MangoFp seaded"
 
 #: src/Adapters/Localization.php:29 stage/src/Adapters/Localization.php:29
 msgid "Process"
-msgstr ""
+msgstr "Protsess"
 
 #: src/Adapters/Localization.php:30 stage/src/Adapters/Localization.php:30
 msgid "Parameters"
-msgstr ""
+msgstr "Parameetrid"
 
 #: src/Entities/Option.php:28 stage/src/Entities/Option.php:28
 msgid "name of the page where submitted form is located"
@@ -146,11 +147,11 @@ msgstr ""
 
 #: src/Entities/Option.php:30 stage/src/Entities/Option.php:30
 msgid "name of the submitted form"
-msgstr ""
+msgstr "saadetud kontaktivormi nimetus"
 
 #: src/Entities/Option.php:31 stage/src/Entities/Option.php:31
 msgid "id of the submitted form"
-msgstr ""
+msgstr "kontaktivormi id"
 
 #: src/Entities/Option.php:35 stage/src/Entities/Option.php:35
 msgid ""
@@ -164,7 +165,7 @@ msgstr ""
 
 #: src/Entities/Option.php:44 stage/src/Entities/Option.php:44
 msgid "Email field"
-msgstr ""
+msgstr "Email"
 
 #: src/Entities/Option.php:46 stage/src/Entities/Option.php:46
 msgid ""

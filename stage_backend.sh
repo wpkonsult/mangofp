@@ -9,5 +9,5 @@ cp -rv ../mangofp/autoload.php ../mangofp/stage/
 
 echo 'Copying language resources'
 mkdir -p  ../mangofp/stage/languages
-cp -rv /var/www/html/wpdev/wp-content/languages/loco/plugins/*.po ../mangofp/stage/languages/
-cp -rv /var/www/html/wpdev/wp-content/languages/loco/plugins/*.mo ../mangofp/stage/languages/
+cp -rv ../mangofp/languages/*.po ../mangofp/stage/languages/
+cp -rv ../mangofp/languages/*.mo ../mangofp/stage/languages/
