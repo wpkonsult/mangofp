@@ -296,7 +296,7 @@ class SettingsUseCase {
 
         $optionObj = $this->storage->fetchOption($optionKey);
         $optionValue = '';
-
+        
         if (!$optionObj) {
             switch ($optionKey) {
                 case Option::OPTION_REPLY_EMAIL:
@@ -311,6 +311,10 @@ class SettingsUseCase {
 
                 case Option::OPTION_EMAIL_FIELD:
                         $optionValue = 'your-email';
+
+                    break;
+                case Option::OPTION_REPLY_EMAIL_NAME:
+                        $optionValue = 'MangoFp';
 
                     break;
             }

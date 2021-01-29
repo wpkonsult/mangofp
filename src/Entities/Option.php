@@ -8,9 +8,10 @@ class Option extends BaseEntity {
     const OPTION_REPLY_EMAIL = 'reply_email';
     const OPTION_EMAIL_FIELD = 'email_field';
     const OPTION_LABEL_FIELD = 'label_field';
+    const OPTION_REPLY_EMAIL_NAME = 'reply_email_name';
 
     const OPTION_TYPE_EMAIL = 'EMAIL';
-    const OPTION_TYPE_text = 'TEXT';
+    const OPTION_TYPE_TEXT = 'TEXT';
 
     public function __construct($data = []) {
         parent::__construct();
@@ -39,7 +40,7 @@ class Option extends BaseEntity {
         return [
             Option::OPTION_EMAIL_FIELD => [
             "label" => Option::OPTION_EMAIL_FIELD,
-            "type" => Option::OPTION_TYPE_text,
+            "type" => Option::OPTION_TYPE_TEXT,
             "name" => __("Email field"),
             "hint" => __(
                 "Name of the Email field on Contact Form(s) that will be used as contact's email for contact records in Mango Contacts. Default: email",
@@ -47,7 +48,7 @@ class Option extends BaseEntity {
             ],
             Option::OPTION_LABEL_FIELD => [
                 "label" => Option::OPTION_LABEL_FIELD,
-                "type" => Option::OPTION_TYPE_text,
+                "type" => Option::OPTION_TYPE_TEXT,
                 "name" => __("Label field"),
                 "hint" => $labelHint,
             ],
@@ -59,8 +60,15 @@ class Option extends BaseEntity {
                     "Email address for replies to emails sent from MangoFp. Premium emails add-on plugin enables receiving and management of replies directly in MangoFp",
                 ),
             ],
+            Option::OPTION_REPLY_EMAIL_NAME => [
+                "label" => Option::OPTION_REPLY_EMAIL_NAME,
+                "type" => Option::OPTION_TYPE_TEXT,
+                "name" => __("Reply email name"),
+                "hint" => __(
+                    "Email address's owners name for replies to emails sent from MangoFp.",
+                ),
+            ],
         ];
-
     }
 
     public static function getListOfAllOptions() {
