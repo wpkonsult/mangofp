@@ -18,8 +18,8 @@ class Steps extends Option {
 		return [
 [
                 'code' => 'NEW',
-                'state' => 'New',
-                'action' => 'Set as new',
+                'state' => __('New'),
+                'action' => __('Set as new'),
                 'next' => [
                     'INPROGRESS',
                     'DECLINED',
@@ -28,8 +28,8 @@ class Steps extends Option {
             ],
             [
                 'code' => 'INPROGRESS',
-                'state' => 'In progress',
-                'action' => 'Start working',
+                'state' => __('In progress'),
+                'action' => __('Start working'),
                 'next' => [
                     'DECLINED',
                     'ACCEPTED',
@@ -38,8 +38,8 @@ class Steps extends Option {
             ],
             [
                 'code' => 'ACCEPTED',
-                'state' => 'Accpeted',
-                'action' => 'Accept',
+                'state' => __('Accepted'),
+                'action' => __('Accept'),
                 'next' => [
                     'NEW',
                     'DECLINED',
@@ -48,8 +48,8 @@ class Steps extends Option {
             ],
             [
                 'code' => 'DECLINED',
-                'state' => 'Declined',
-                'action' => 'Decline',
+                'state' => __('Declined'),
+                'action' => __('Decline'),
                 'next' => [
                     'NEW',
                     'ARCHIVED',
@@ -57,8 +57,8 @@ class Steps extends Option {
             ],
             [
                 'code' => 'ARCHIVED',
-                'state' => 'Archived',
-                'action' => 'Archive',
+                'state' => __('Archived'),
+                'action' => __('Archive'),
                 'next' => [
                     'NEW',
                 ],
@@ -126,7 +126,8 @@ class Steps extends Option {
 
     public function moveStep(string $code, string $direction) {
         if (!\in_array($direction, [Steps::ORDER_DOWN, Steps::ORDER_UP])) {
-            throw new \Exception('Order '.$order.' not allowed');
+            throw new \Exception(sprintf('Order %s not allowed', $order)
+        );
         }
 
         $stepIndex = $this->findStepIndex($code);

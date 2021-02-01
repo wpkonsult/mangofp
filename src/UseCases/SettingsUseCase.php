@@ -185,9 +185,9 @@ class SettingsUseCase {
             $templateData = $this->getTemplateDataForOutput($templateObj);
         } elseif (
             !$templateObj
-            && isset($templates[$templateCode])
+            && isset(Template::getDefaultTemplates()[$templateCode])
         ) {
-            $templateData = $templates[$templateCode];
+            $templateData = Template::getDefaultTemplates()[$templateCode];
         }
 
         if ($templateData) {
