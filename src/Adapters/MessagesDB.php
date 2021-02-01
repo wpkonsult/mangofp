@@ -18,15 +18,14 @@ class MessagesDB implements iStorage {
     const TABLE_OPTIONS = 'mangofp_options';
     const TABLE_TEMPLATES = 'mangofp_templates';
 
-    public static function installDatabase() {
+    public static function installOrUpdateDatabase() {
         global $wpdb;
-        if (self::VERSION == get_site_option(self::VERSION_PARAM_NAME, '0.0.0')) {
-            error_log('Database version: '.get_site_option(self::VERSION_PARAM_NAME, '0.0.0'));
-            error_log('Installed database allready up-to-date');
-
+        $mangoVersion = \getVersion();
+        $actualVersion = get_site_option(self::VERSION_PARAM_NAME, '0.0.0');
+        if ($mangoVersion == $actualVersion) {
             return;
         }
-        error_log('installing database version '.self::VERSION);
+        error_log(sprintf('installing database version %s -> %s', $actualVersion, $mangoVersion));
 
         require_once ABSPATH.'wp-admin/includes/upgrade.php';
         $charset_collate = $wpdb->get_charset_collate();
@@ -98,7 +97,7 @@ class MessagesDB implements iStorage {
         ) {$charset_collate};";
         dbDelta($createSql);
 
-        update_option(self::VERSION_PARAM_NAME, self::VERSION);
+        update_option(self::VERSION_PARAM_NAME, $mangoVersion);
     }
 
     public static function removeDatabase() {

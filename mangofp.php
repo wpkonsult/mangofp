@@ -8,10 +8,12 @@
  *  @since              0.0.1
  *  @package            MangoFp
  *  Author:             Andres Järviste
- *  Version:            0.0.7
+ *  Version:            0.1.0
  *  Author URI:         https://mangofp.net
  *  Domain Path:        /languages
  */
+
+const MANGOFP_VERSION = "0.1.0";
 
 function isDebug() {
     return ( defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG );
@@ -21,12 +23,16 @@ function keepDbOnUninstall() {
     return defined('MANGO_FP_KEEP_TABLES') && MANGO_FP_KEEP_TABLES;
 }
 
-function getJsVersion() {
-    if (isDebug()) {
+function getVersion() {
+    return getJsVersion(true);
+}
+
+function getJsVersion($debugCheck = false) {
+    if (isDebug() && !$debugCheck) {
         return time();
     }
 
-    return "0.1.2";
+    return MANGOFP_VERSION;
 }
 
 //Register Scripts to use
@@ -133,7 +139,7 @@ function getResources() {
 	$resources = [
             'nonce' => wp_create_nonce('wp_rest'),
 			'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
-			'version' => ['main' => 'v.0.0.1'],
+			'version' => ['main' => 'v.' . getVersion()],
 			'strings' => MangoFp\Localization::getContactsStrings()
 	];
 
@@ -143,7 +149,7 @@ function getContactResources() {
 	$resources = [
             'nonce' => wp_create_nonce('wp_rest'),
 			'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
-			'version' => ['main' => 'v.0.0.6'],
+			'version' => ['main' => 'v.' . getVersion() ],
 			'strings' => MangoFp\Localization::getContactsStrings(),
 	];
 
@@ -179,15 +185,15 @@ function registerRestRoutes() {
 }
 
 function activateMFP() {
-    MangoFp\MessagesDB::installDatabase();
+    MangoFp\MessagesDB::installOrUpdateDatabase();
 }
 
 function checkForDatabaseUpdates() {
-    MangoFp\MessagesDB::installDatabase();
+    MangoFp\MessagesDB::installOrUpdateDatabase();
 }
 
 function deactivateMFP() {
-
+  //nothing here atm
 }
 
 function onUninstallMFP() {
@@ -206,7 +212,7 @@ require_once plugin_dir_path(__FILE__) . 'autoload.php';
 add_action('admin_menu', 'makeMangoFpAdminMenuPage');
 add_action('wpcf7_before_send_mail','actionCF7Submit');
 add_action('rest_api_init', 'registerRestRoutes' );
-//add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
+add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
 add_action( 'init', 'loadTranslations');
 
 register_activation_hook( __FILE__, 'activateMFP' );
