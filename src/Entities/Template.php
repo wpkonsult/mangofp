@@ -23,6 +23,11 @@ class Template extends BaseEntity {
                 'addresses' => [],
                 'template' => "<p>Hi,</p><p><br></p><p>Thank you for your interest in our services.</p><p>Here's what we can do:</p><p><em>&lt;describe your services&gt;</em></p><p><br></p><p>Pricelist of our services:</p><p><em>&lt;insert pricelist of your services</em>&gt;</p><p><br></p><p><br></p><p>kind regards,</p><p><em>&lt;Insert Your name&gt;</em></p><p><br></p>",
             ],
+            'ACCEPTED' => [
+                'mainAddresses' => ['[contactEmail]'],
+                'addresses' => [],
+                'template' => "<p>Hi,</p><p><br></p><p>Thank you for your order. </p><p><em>&lt;Add relevant information&gt;</em></p><p><br></p><p>kind regards,</p><p><em>&lt;Insert Your name&gt;</em></p>",
+            ],
         ];
 	}
 }
