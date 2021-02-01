@@ -55,7 +55,6 @@ function registerVueScripts($page) {
 
     wp_enqueue_style('vuetify_styles_font', 'https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900');
     wp_enqueue_style('vuetify_styles', 'https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css');
-    //wp_enqueue_style('vuetify_styles', 'https://fonts.googleapis.com/icon?family=Material+Icons');
     wp_enqueue_script('mangofp_vue_vendors');
 
     if (!isDebug()) {
@@ -128,8 +127,9 @@ function loadSettingsJs() {
 
 function getResources() {
 	$resources = [
+            'nonce' => wp_create_nonce('wp_rest'),
 			'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
-			'version' => ['main' => 'v.0.0.6'],
+			'version' => ['main' => 'v.0.0.1'],
 			'strings' => MangoFp\Localization::getContactsStrings()
 	];
 
@@ -137,6 +137,7 @@ function getResources() {
 }
 function getContactResources() {
 	$resources = [
+            'nonce' => wp_create_nonce('wp_rest'),
 			'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
 			'version' => ['main' => 'v.0.0.6'],
 			'strings' => MangoFp\Localization::getContactsStrings(),
