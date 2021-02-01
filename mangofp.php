@@ -17,6 +17,10 @@ function isDebug() {
     return ( defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG );
 }
 
+function keepDbOnUninstall() {
+    return defined('MANGO_FP_KEEP_TABLES') && MANGO_FP_KEEP_TABLES;
+}
+
 function getJsVersion() {
     if (isDebug()) {
         return time();
@@ -183,6 +187,10 @@ function checkForDatabaseUpdates() {
 }
 
 function deactivateMFP() {
+
+}
+
+function onUninstallMFP() {
     MangoFp\MessagesDB::removeDatabase();
 }
 
@@ -203,3 +211,5 @@ add_action( 'init', 'loadTranslations');
 
 register_activation_hook( __FILE__, 'activateMFP' );
 register_deactivation_hook( __FILE__, 'deactivateMFP' );
+register_uninstall_hook(__FILE__, 'onUninstallMFP');
+

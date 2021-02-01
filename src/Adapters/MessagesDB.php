@@ -102,19 +102,29 @@ class MessagesDB implements iStorage {
     }
 
     public static function removeDatabase() {
-        return true;
-        //global $wpdb;
-        //
-        //$table_name = $wpdb->prefix . self::TABLE_MESSAGES;
-        //$sql = "DROP TABLE IF EXISTS $table_name";
-        //$wpdb->query($sql);
-        //$table_name = $wpdb->prefix . self::TABLE_LABELS;
-        //$sql = "DROP TABLE IF EXISTS $table_name";
-        //$wpdb->query($sql);
-        //$table_history = $wpdb->prefix . self::TABLE_HISTORY;
-        //$sql = "DROP TABLE IF EXISTS $table_history";
-        //$wpdb->query($sql);
-        //delete_option( self::VERSION_PARAM_NAME );
+        global $wpdb;
+
+        if (keepDbOnUninstall())  {
+            return;
+        }
+
+        $table_name = $wpdb->prefix.self::TABLE_MESSAGES;
+        $sql = "DROP TABLE IF EXISTS {$table_name}";
+        $wpdb->query($sql);
+        $table_name = $wpdb->prefix.self::TABLE_LABELS;
+        $sql = "DROP TABLE IF EXISTS {$table_name}";
+        $wpdb->query($sql);
+        $table_history = $wpdb->prefix.self::TABLE_HISTORY;
+        $sql = "DROP TABLE IF EXISTS {$table_history}";
+        $wpdb->query($sql);
+        $table_name = $wpdb->prefix.self::TABLE_OPTIONS;
+        $sql = "DROP TABLE IF EXISTS {$table_name}";
+        $wpdb->query($sql);
+        $table_history = $wpdb->prefix.self::TABLE_TEMPLATES;
+        $sql = "DROP TABLE IF EXISTS {$table_history}";
+        $wpdb->query($sql);
+
+        delete_option(self::VERSION_PARAM_NAME);
     }
 
     //TODO: remove
