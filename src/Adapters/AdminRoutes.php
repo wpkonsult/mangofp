@@ -38,12 +38,14 @@ class AdminRoutes implements iOutput {
                 [
                     'methods' => $route['method'],
                     'callback' => [$this, $route['callback']],
-                    //'permission_callback' => function () {
-                    //    return current_user_can( 'edit_others_posts' );
-                    //}
+                    'permission_callback' => [$this, 'isAuthenticated'],
                 ]
             );
         }
+    }
+
+    public function isAuthenticated() {
+        return current_user_can('edit_posts');
     }
 
     public function getLabels() {
