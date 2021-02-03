@@ -267,11 +267,11 @@ class MessageUseCase {
             $this->storage
         );
         $optionReplyEmail = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL);
-        $optionReplyEmailName = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL);
+        $optionReplyEmailName = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL_NAME);
 
         //TODO: filter premiumi jaoks
         return sprintf(
-            'Reply-To: %s<%s>',
+            'Reply-To: %s <%s>',
             $optionReplyEmailName->get('value'),
             $optionReplyEmail->get('value')
         );
@@ -283,11 +283,11 @@ class MessageUseCase {
             $this->storage
         );
         $optionReplyEmail = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL);
-        $optionReplyEmailName = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL);
+        $optionReplyEmailName = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL_NAME);
 
         //TODO: filter premiumi jaoks
         return sprintf(
-            'From: %s<%s>',
+            'From: %s <%s>',
             $optionReplyEmailName->get('value'),
             $optionReplyEmail->get('value')
         );
