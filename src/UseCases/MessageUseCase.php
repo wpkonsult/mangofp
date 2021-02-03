@@ -277,6 +277,22 @@ class MessageUseCase {
         );
     }
 
+    protected function getFromAddressAsEmailHeader() {
+        $settingsUC = new SettingsUseCase(
+            $this->output,
+            $this->storage
+        );
+        $optionReplyEmail = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL);
+        $optionReplyEmailName = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL);
+
+        //TODO: filter premiumi jaoks
+        return sprintf(
+            'From: %s<%s>',
+            $optionReplyEmailName->get('value'),
+            $optionReplyEmail->get('value')
+        );
+    }
+
     protected function submitEmail($emailData, $id, $code = 'none') {
         $to = $emailData['addresses'];
         $subject = $emailData['subject'];
@@ -304,6 +320,7 @@ class MessageUseCase {
 
         $headers = ['Content-Type: text/html; charset=UTF-8'];
         $headers[] = $this->getReplyAddressAsEmailHeader();
+        $headers[] = $this->getFromAddressAsEmailHeader();
         $ccForHistory = '';
         if (isset($emailData['ccAddresses']) && is_array($emailData['ccAddresses'])) {
             foreach ($emailData['ccAddresses'] as $email) {

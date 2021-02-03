@@ -25,7 +25,12 @@ class MessagesDB implements iStorage {
         if ($mangoVersion == $actualVersion) {
             return;
         }
-        error_log(sprintf('installing database version %s -> %s', $actualVersion, $mangoVersion));
+        error_log(
+            sprintf(
+                'installing database version %s -> %s', 
+                $actualVersion, $mangoVersion
+                )
+            );
 
         require_once ABSPATH.'wp-admin/includes/upgrade.php';
         $charset_collate = $wpdb->get_charset_collate();

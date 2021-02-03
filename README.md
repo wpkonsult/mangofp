@@ -37,5 +37,10 @@ To ensures that local front end projects (mangofp-front and mangofp-settings) ar
 
 	define( 'MANGO_FP_DEBUG', true );
 
+## Database and option removal
+By default database and options will not be removed during unistall of the plugin. To remove all plugin data during unistall add to the wp-config.php:
+
+	define( 'MANGO_FP_REMOVE_TABLES_ON_UNINSTALL', true );
+
 ## Prepare for staging
 Script **stage_backend.sh** prepares all stageables (code, language resources from translation plugin). Try not to use it directly. It should be used through **../mangofp-front/make_stage.sh**

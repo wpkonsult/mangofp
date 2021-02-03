@@ -8,19 +8,22 @@
  *  @since              0.0.1
  *  @package            MangoFp
  *  Author:             Andres Järviste
- *  Version:            0.1.0
+ *  Version:            0.1.1
  *  Author URI:         https://mangofp.net
  *  Domain Path:        /languages
  */
 
-const MANGOFP_VERSION = "0.1.0";
+const MANGOFP_VERSION = "0.1.1";
 
 function isDebug() {
     return ( defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG );
 }
 
 function keepDbOnUninstall() {
-    return defined('MANGO_FP_KEEP_TABLES') && MANGO_FP_KEEP_TABLES;
+    if (defined('MANGO_FP_REMOVE_TABLES_ON_UNINSTALL') && MANGO_FP_REMOVE_TABLES_ON_UNINSTALL) {
+        return false;
+    }
+    return true;
 }
 
 function getVersion() {
