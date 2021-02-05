@@ -37,7 +37,7 @@ class Option extends BaseEntity {
             implode('', $rowElems)
         );
 
-        return [
+        $allOptions = [
             Option::OPTION_EMAIL_FIELD => [
             "label" => Option::OPTION_EMAIL_FIELD,
             "type" => Option::OPTION_TYPE_TEXT,
@@ -55,26 +55,30 @@ class Option extends BaseEntity {
             Option::OPTION_REPLY_EMAIL => [
                 "label" => Option::OPTION_REPLY_EMAIL,
                 "type" => Option::OPTION_TYPE_EMAIL,
-                "name" => __("Reply email"),
+                "name" => __("From email"),
                 "hint" => __(
-                    "Email address for replies to emails sent from MangoFp. Premium emails add-on plugin enables receiving and management of replies directly in MangoFp",
+                    "Email address of the sender. Used also for replies to emails sent from MangoFp. Premium emails add-on plugin enables receiving and management of replies directly in MangoFp",
                 ),
             ],
             Option::OPTION_REPLY_EMAIL_NAME => [
                 "label" => Option::OPTION_REPLY_EMAIL_NAME,
                 "type" => Option::OPTION_TYPE_TEXT,
-                "name" => __("Reply email name"),
+                "name" => __("Email sender name"),
                 "hint" => __(
-                    "Email address's owners name for replies to emails sent from MangoFp.",
+                    "Email sender's name for emails sent from MangoFp.",
                 ),
             ],
         ];
+
+        error_log('Getting options ...');
+
+        $allOptions = apply_filters('mangofp_emails_options_defs', $allOptions);
+        return $allOptions;
     }
 
     public static function getListOfAllOptions() {
         $allowedOptions = array_keys(Option::getAllOptionsDefinitions());
         $allowedOptions[] = Option::OPTION_STEPS;
-        //TODO: Add filter for email plugin
         return $allowedOptions;
     }
 

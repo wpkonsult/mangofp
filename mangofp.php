@@ -8,12 +8,12 @@
  *  @since              0.0.1
  *  @package            MangoFp
  *  Author:             Andres Järviste
- *  Version:            0.1.1
+ *  Version:            0.1.2
  *  Author URI:         https://mangofp.net
  *  Domain Path:        /languages
  */
 
-const MANGOFP_VERSION = "0.1.1";
+const MANGOFP_VERSION = "0.1.2";
 
 function isDebug() {
     return ( defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG );

@@ -140,6 +140,7 @@ class AdminRoutes implements iOutput {
     }
 
     public function getOptions($request) {
+        \error_log('Options');
         $params = json_decode(json_encode($request->get_params()), true);
         $option = $params['option'] ?? false;
 
