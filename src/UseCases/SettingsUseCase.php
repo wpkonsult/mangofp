@@ -290,10 +290,6 @@ class SettingsUseCase {
     }
 
     public function getOptionObj(string $optionKey) {
-        if (!Option::isValidOption($optionKey)) {
-            throw new \Exception(sprintf(__('%s is not valid option'), $optionKey));
-        }
-
         $optionObj = $this->storage->fetchOption($optionKey);
         $optionValue = '';
         

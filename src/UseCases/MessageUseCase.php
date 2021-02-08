@@ -115,10 +115,25 @@ class MessageUseCase {
     }
 
     public function fetchAllMessagesToOutput() {
-        $messages = $this->storage->fetchMessages();
+        $retData = $this->storage->fetchMessages();
+        
+        if (!\is_array($retData)) {
+            return $this->output->outputError(
+                'No valid result received', 
+                iOutput::ERROR_FAILED
+            );
+            
+        }
+        $messages = isset($retData['messages']) ? $retData['messages'] : false;
+        $errors = isset($retData['errors']) ? $retData['errors'] : [];
 
         if (!\is_array($messages)) {
-            return $this->output->outputError('ERROR: unable to read messages list', iOutput::ERROR_FAILED);
+            $errors = !is_array($errors) ? [$errors] : $errors; 
+            
+            return $this->output->outputError(
+                implode(", ", $errors), 
+                iOutput::ERROR_FAILED
+            );
         }
 
         $data = [];
@@ -126,7 +141,11 @@ class MessageUseCase {
             $data[] = $this->makeMessageOutputData($message);
         }
 
-        return $this->output->outputResult(['messages' => $data]);
+        return $this->output->outputResult([
+                'messages' => $data,
+                'errors' => $errors,
+            ]
+        );
     }
 
     public function updateMessageAndReturnChangedMessage($params) {

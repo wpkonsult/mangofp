@@ -222,18 +222,19 @@ class MessagesDB implements iStorage {
             ",
             ARRAY_A
         );
-        $modifiedMessages = apply_filters('mangofp_fetch_additional_messages', $messageRows);
 
-        if (is_array($modifiedMessages)) {
-            $messageRows = $modifiedMessages;
-        }
+        $messagesData = [
+            'messages' => $messageRows,
+            'errors' => [],
+        ];
+        $messagesData = apply_filters('mangofp_fetch_additional_messages', $messagesData);
 
         $allMessages = [];
-        foreach ($messageRows as $messageRow) {
+        foreach ($messagesData['messages'] as $messageRow) {
             $allMessages[] = $this->makeMessageWithDbData($messageRow);
         }
 
-        return $allMessages;
+        return ['messages' => $allMessages, 'errors' => $messagesData['errors']];
     }
 
     public function insertLabel(Label $label) {
