@@ -1,0 +1,3 @@
+sql for history items:
+
+select id, item_id, change_type, is_unread, create_time  from k8sz_mangofp_history where item_id = "e3fc30f9-3dab-419b-ab91-0c2fe3202537" order by create_time desc;čmysql> select id, item_id, chand_type, is_unread, create_time  from k8sz_order by create_time desc;

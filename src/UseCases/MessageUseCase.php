@@ -1,15 +1,13 @@
 <?php
+
 namespace MangoFp\UseCases;
-use MangoFp\Entities\Message;
-use MangoFp\Entities\Label;
+
 use MangoFp\Entities\HistoryItem;
+use MangoFp\Entities\Label;
+use MangoFp\Entities\Message;
+use MangoFp\Entities\Option;
 
 class MessageUseCase {
-    private $attributeMapping = [
-        'name' => 'your-name',
-        'email' => 'your-email',
-        'form' => '_wpcf7'
-    ];
     private $blacklistedAttributes = [
         '_wpcf7_version',
         '_wpcf7_locale',
@@ -25,10 +23,10 @@ class MessageUseCase {
         'acceptance-824',
         'acceptance-383',
         'acceptance-231',
-        'acceptance-689'
+        'acceptance-689',
     ];
 
-    function __construct(iOutput $output, iStorage $storage) {
+    public function __construct(iOutput $output, iStorage $storage) {
         $this->output = $output;
         $this->storage = $storage;
     }
@@ -39,30 +37,57 @@ class MessageUseCase {
             return $label;
         }
 
-        $newLabel = (new Label())->setDataAsArray(['labelName' => $labelName]);
+        $newLabel = (new Label())->setDataFromArray(['labelName' => $labelName]);
         $result = $this->storage->insertLabel($newLabel);
         if (!$result) {
             return null;
         }
+
         return $newLabel;
     }
 
-    public function parseContentAndInsertToDatabase(array $content) {
+    public function getParsingOptions() {
+        $settingsUC = new SettingsUseCase(
+            $this->output,
+            $this->storage
+        );
+
+        return [
+            'label' => $settingsUC->getOptionObj(Option::OPTION_LABEL_FIELD)->get('value'),
+            'email' => $settingsUC->getOptionObj(Option::OPTION_EMAIL_FIELD)->get('value'),
+            'name' => 'your-name',
+            'form' => '_wpcf7',
+        ];
+    }
+
+    public function parseContentAndInsertToDatabase(array $content, array $meta = []) {
         $data = [];
         $secondaries = [];
-        $primaries = \array_flip($this->attributeMapping);
         $label = null;
-        $labelTag = $this->storage->getLabelTag();
 
+        $optionsData = $this->getParsingOptions();
+        $labelTag = $optionsData['label'];
+        $metaLabel = $this->getShortCodeName($labelTag);
+
+        if ('pageTitle' == $metaLabel) {
+            $labelValue = $this->storage->getDefaultLabel($meta);
+            $label = $this->fetchExistingOrCreateNewLabelByName($labelValue);
+        } elseif (isset($meta[$metaLabel])) {
+            $labelValue = $meta[$metaLabel];
+            $label = $this->fetchExistingOrCreateNewLabelByName($labelValue);
+        }
+
+        $primaries = \array_flip($optionsData);
         foreach ($content as $key => $value) {
             if ($key === $labelTag) {
                 $label = $this->fetchExistingOrCreateNewLabelByName($value);
+
                 continue;
             }
 
             if (
-                \in_array($key, $this->blacklistedAttributes) ||
-                !$value
+                \in_array($key, $this->blacklistedAttributes)
+                || !$value
                 ) {
                 continue;
             }
@@ -77,7 +102,7 @@ class MessageUseCase {
         $data['content'] = \json_encode($secondaries);
         $data['raw_data'] = \json_encode($content);
         $data['labelId'] = $label ? $label->get('id') : '';
-        $message = (new Message())->setDataAsArray($data);
+        $message = (new Message())->setDataFromArray($data);
 
         $res = $this->storage->insertMessage($message);
         if (!$res) {
@@ -90,17 +115,37 @@ class MessageUseCase {
     }
 
     public function fetchAllMessagesToOutput() {
-        $messages = $this->storage->fetchMessages();
+        $retData = $this->storage->fetchMessages();
+
+        if (!\is_array($retData)) {
+            return $this->output->outputError(
+                'No valid result received',
+                iOutput::ERROR_FAILED
+            );
+
+        }
+        $messages = isset($retData['messages']) ? $retData['messages'] : false;
+        $errors = isset($retData['errors']) ? $retData['errors'] : [];
 
         if (!\is_array($messages)) {
-            return $this->output->outputError('ERROR: unable to read messages list', iOutput::ERROR_FAILED);
+            $errors = !is_array($errors) ? [$errors] : $errors;
+
+            return $this->output->outputError(
+                implode(", ", $errors),
+                iOutput::ERROR_FAILED
+            );
         }
 
         $data = [];
         foreach ($messages as $message) {
             $data[] = $this->makeMessageOutputData($message);
         }
-        return $this->output->outputResult(['messages' => $data]);
+
+        return $this->output->outputResult([
+                'messages' => $data,
+                'errors' => $errors,
+            ]
+        );
     }
 
     public function updateMessageAndReturnChangedMessage($params) {
@@ -108,7 +153,8 @@ class MessageUseCase {
             'labelId' => 'labelId',
             'email' => 'email',
             'code' => 'statusCode',
-            'note' => 'note'
+            'name' => 'name',
+            'note' => 'note',
         ];
 
         if (!isset($params['uuid'])) {
@@ -119,15 +165,15 @@ class MessageUseCase {
             return $this->output->outputError('No data to be updated in the request', iOutput::ERROR_VALIDATION);
         }
 
-        $messageObj =  $this->storage->fetchMessage($params['uuid']);
+        $messageObj = $this->storage->fetchMessage($params['uuid']);
         if (!$messageObj) {
-             return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
+            return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
         }
 
         $messageData = $messageObj->getDataAsArray();
         $paramsMessage = $params['message'];
         $updatesHistory = [];
-        foreach($UPDATEABLE_FIELDS as $key => $field) {
+        foreach ($UPDATEABLE_FIELDS as $key => $field) {
             if (isset($paramsMessage[$key])) {
                 $updatesHistory[] = (new HistoryItem())->setMessageChanges(
                     $messageObj->get('id'), // item id
@@ -141,8 +187,8 @@ class MessageUseCase {
             }
         }
 
-        $messageObj->setDataAsArray($messageData);
-        \error_log('Will update message: ' . print_r($messageObj->getDataAsArray(), 1));
+        $messageObj->setDataFromArray($messageData);
+        \error_log('Will update message: '.print_r($messageObj->getDataAsArray(), 1));
 
         $updatedMessage = $this->storage->storeMessage($messageObj);
         if (!$updatedMessage) {
@@ -153,35 +199,61 @@ class MessageUseCase {
             //TODO - add error  handling???
             $this->storage->insertHistoryItem($item);
         }
+
         return $this->output->outputResult($this->makeOneMessageOutputData($updatedMessage));
     }
 
     public function getMessageDetailsAndReturn($params) {
-        $messageObj =  $this->storage->fetchMessage($params['uuid']);
+        \error_log(print_r($params, 1));
+        $messageObj = $this->storage->fetchMessage($params['uuid']);
         if (!$messageObj) {
-             return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
+            return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
         }
+
         return $this->output->outputResult($this->makeOneMessageOutputData($messageObj));
     }
 
+    public function setHistoryItemReadIndAndReturnResult($historyItemId, $isUnread) {
+        $historyItem = $this->storage->fetchHistoryItemById($historyItemId);
+        if (!$historyItem) {
+            return $this->output->outputError('History item with this id is not found', iOutput::ERROR_FAILED);
+        }
+
+        error_log('created history item');
+        error_log(print_r($historyItem,1));
+
+        $historyItem->setUnread($isUnread ? true : false);
+        try {
+            $this->storage->storeHistoryItemIsUnread($historyItem);
+            return $this->output->outputResult(['updated' => true]);
+        } catch(\Exception $err) {
+            return $this->output->outputError(
+                'Error updating unread for message history item: '.$err->getMessage(),
+                iOutput::ERROR_FAILED
+            );
+        }
+    }
+
     public function sendEmailAndReturnMessage($emailData, $id) {
-       if (
-           !isset($emailData['content']) ||
-           !isset($emailData['addresses']) ||
-           !isset($emailData['subject'])
+        if (
+           !isset($emailData['content'])
+           || !isset($emailData['addresses'])
+           || !isset($emailData['subject'])
         ) {
-            \error_log('Unable to send email - email field(s) missing. Submitted: ' . \wp_json_encode( $emailData ));
+            \error_log('Unable to send email - email field(s) missing. Submitted: '.\wp_json_encode($emailData));
+
             return $this->output->outputError('Unable to send email - email field(s) missing', iOutput::ERROR_FAILED);
         }
 
-        $messageObj =  $this->storage->fetchMessage($id);
+        $messageObj = $this->storage->fetchMessage($id);
         if (!$messageObj) {
-             return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
+            return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
         }
 
         $isSuccess = $this->submitEmail($emailData, $id);
         if (!$isSuccess) {
-            \error_log('Unable to send email. Submitted: ' . \wp_json_encode( $emailData ));
+            \error_log('Unable to send email. Submitted: '.\wp_json_encode($emailData));
+
             return $this->output->outputError('Sending email failed', iOutput::ERROR_FAILED);
         }
 
@@ -189,18 +261,20 @@ class MessageUseCase {
     }
 
     public function sendEmailAndUpdateMessageAndReturnChangedMessage($emailData, $params) {
-       if (
-           !isset($emailData['content']) ||
-           !isset($emailData['addresses']) ||
-           !isset($emailData['subject'])
+        if (
+           !isset($emailData['content'])
+           || !isset($emailData['addresses'])
+           || !isset($emailData['subject'])
         ) {
-            \error_log('Unable to send email - email field(s) missing. Submitted: ' . \wp_json_encode( $emailData ));
+            \error_log('Unable to send email - email field(s) missing. Submitted: '.\wp_json_encode($emailData));
+
             return $this->output->outputError('Unable to send email - email field(s) missing', iOutput::ERROR_FAILED);
         }
         $code = isset($params['message']['code']) ? $params['message']['code'] : 'none';
         $isSuccess = $this->submitEmail($emailData, $params['uuid'], $code);
         if (!$isSuccess) {
-            \error_log('Unable to send email. Submitted: ' . \wp_json_encode( $emailData ));
+            \error_log('Unable to send email. Submitted: '.\wp_json_encode($emailData));
+
             return $this->output->outputError('Sending email failed', iOutput::ERROR_FAILED);
         }
 
@@ -209,77 +283,153 @@ class MessageUseCase {
 
     protected function makeOneMessageOutputData(Message $message) {
         return [
-            'message' => $this->makeMessageOutputData($message)
+            'message' => $this->makeMessageOutputData($message),
         ];
     }
 
     protected function makeMessageOutputData(Message $message) {
-         return [
+        $historyList = $this->storage->fetchItemHistory($message->get('id'));
+
+        $isUnread = false;
+        foreach ($historyList as $hItem) {
+            if ($hItem['isUnread']) {
+                $isUnread = true;
+                break;
+            }
+        }
+        //Lisa isUnread = true kui mõni history item  isUnread
+        return [
             'id' => $message->get('id'),
             'form' => $message->get('form'),
             'code' => $message->get('statusCode'),
             'content' => $message->get('content'),
-            'labelId' =>  $message->get('labelId'),
+            'labelId' => $message->get('labelId'),
             'email' => $message->get('email'),
             'name' => $message->get('name'),
             'note' => $message->get('note'),
+            'isUnread' => $isUnread,
             'lastUpdated' => $message->lastUpdated(),
-            'changeHistory' => $this->storage->fetchItemHistory($message->get('id'))
+            'changeHistory' => $historyList,
         ];
+    }
+
+    protected function getReplyAddressAsEmailHeader($id) {
+        $settingsUC = new SettingsUseCase(
+            $this->output,
+            $this->storage
+        );
+        $optionReplyEmail = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL);
+        $optionReplyEmailName = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL_NAME);
+        $replyToHeader = sprintf(
+            '%s <%s>',
+            $optionReplyEmailName->get('value'),
+            $optionReplyEmail->get('value')
+        );
+        return \apply_filters('mangofp_emails_update', [
+                'contactId' => $id,
+                'replyToHeader' => $replyToHeader
+            ]
+        );
+    }
+
+    protected function getFromAddressAsEmailHeader() {
+        $settingsUC = new SettingsUseCase(
+            $this->output,
+            $this->storage
+        );
+        $optionReplyEmail = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL);
+        $optionReplyEmailName = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL_NAME);
+
+        //TODO: filter premiumi jaoks
+        return sprintf(
+            'From: %s <%s>',
+            $optionReplyEmailName->get('value'),
+            $optionReplyEmail->get('value')
+        );
     }
 
     protected function submitEmail($emailData, $id, $code = 'none') {
         $to = $emailData['addresses'];
         $subject = $emailData['subject'];
         $body = $emailData['content'];
-		$attachments = [];
-		$urls = [];
-		if (isset($emailData['attachments'])) {
-			foreach($emailData['attachments'] as $attachmentId) {
-				$url = \wp_get_attachment_url($attachmentId);
-				$filePath = \get_attached_file($attachmentId);
-				if (!$filePath) {
-					$email = $emailData['email'];
-					error_log("No file found for attachment $attachmentId while attempting to send email to $email");
-					return false;
-				}
-				$attachments[] = $filePath;
-				$urls[] = $url;
-			}
-		}
-		$success = false;
+        $attachments = [];
+        $urls = [];
+        if (isset($emailData['attachments'])) {
+            foreach ($emailData['attachments'] as $attachmentId) {
+                $url = \wp_get_attachment_url($attachmentId);
+                $filePath = \get_attached_file($attachmentId);
+                if (!$filePath) {
+                    $email = $emailData['email'];
+                    error_log("No file found for attachment {$attachmentId} while attempting to send email to {$email}");
 
-		//TODO: refactor email sending to the Adapter level
-		//do not send email from development environment
-		if (defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG) {
+                    return false;
+                }
+                $attachments[] = $filePath;
+                $urls[] = $url;
+            }
+        }
+        $success = false;
+
+        //TODO: refactor email sending to the Adapter level
+        //do not send email from development environment
+
+        $headers = ['Content-Type: text/html; charset=UTF-8'];
+        $headers[] = $this->getFromAddressAsEmailHeader($id);
+        //$headers[] = 'From: ' . $this->getReplyAddressAsEmailHeader($id);
+        $headers[] = 'Reply-To: ' . $this->getReplyAddressAsEmailHeader($id);
+        $ccForHistory = '';
+        if (isset($emailData['ccAddresses']) && is_array($emailData['ccAddresses'])) {
+            foreach ($emailData['ccAddresses'] as $email) {
+                $headers[] = 'Cc: '.$email;
+            }
+            $ccForHistory = implode(', ', $emailData['ccAddresses']);
+        }
+
+        if (defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG) {
             $success = true;
+            error_log(print_r($headers, true));
         } else {
-			$success = wp_mail(
-				$to,
-				$subject,
-				$body,
-				'', //TODO - add header to set reply address for incoming emails. e.g:  'Reply-To: Person Name <person.name@example.com>',
-				$attachments
-			);
-		}
+            error_log('Headers for sending email:');
+            error_log(print_r($headers, true));
+            $success = wp_mail(
+                $to,
+                $subject,
+                $body,
+                $headers, //TODO - add header to set reply address for incoming emails. e.g:  'Reply-To: Person Name <person.name@example.com>',
+                $attachments
+            );
+        }
 
-		if ($success) {
+        if ($success) {
             $historyItem = (new HistoryItem())->setEmailSent(
-                        $id, // item id
-                        'admin', //account
-                        $code, //change type
-                        [ // emailData
-                            'to' => $to,
-                            'subject' => $subject,
-                            'message' => $body . "\r\n\r\n" . "Attachments:\r\n" . implode(
-                                "\r\n", $urls
-                            ),
-                            'attachments' => json_encode($attachments)
-                        ]
-                    );
+                $id, // item id
+                'admin', //account
+                $code, //change type
+                [ // emailData
+                    'to' => $to,
+                    'cc' => $ccForHistory,
+                    'subject' => $subject,
+                    'message' => $body."\r\n\r\n"."Attachments:\r\n".implode(
+                        "\r\n",
+                        $urls
+                    ),
+                    'attachments' => json_encode($attachments),
+                ]
+            );
             $this->storage->insertHistoryItem($historyItem);
         }
 
         return $success;
+    }
+
+    private function getShortCodeName($shortCode) {
+        if (
+            '[' == $shortCode[0]
+            && ']' == $shortCode[\strlen($shortCode) - 1]
+        ) {
+            return \substr($shortCode, 1, \strlen($shortCode) - 2);
+        }
+
+        return false;
     }
 }
