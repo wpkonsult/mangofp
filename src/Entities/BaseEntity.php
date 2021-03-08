@@ -41,6 +41,10 @@ class BaseEntity {
 		 return $this;
 	}
 
+    public function className() {
+        return $this->className;
+    }
+
     public function getDataAsArray() : array {
         return $this->data;
     }
