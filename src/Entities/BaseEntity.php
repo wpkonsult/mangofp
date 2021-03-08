@@ -31,19 +31,44 @@ class BaseEntity {
             'id' => $this->generateUuid(),
             'create_time' => (new \DateTime())->format('Y-m-d H:i:s '),
         ];
+        //object properties as converted from json-string to object when data is set from database to this object
+        $this->objectProperties = [];
         $this->className = 'Base';
+	}
+
+	protected function refreshModifiedTime() {
+		 $this->data['modify_time'] = (new \DateTime())->format('Y-m-d H:i:s ');
+		 return $this;
+	}
+
+    public function className() {
+        return $this->className;
     }
 
     public function getDataAsArray() : array {
         return $this->data;
     }
 
-    public function setDataAsArray($newData, $loading = false) {
+    public function setDataFromArray($newData, $loading = false) {
 		$modified = false;
 		foreach($this->data as $key => $value) {
             if (isset($newData[$key])) {
                 $modified = true;
-                $this->data[$key] = $newData[$key];
+
+                $newCurrentValue = $newData[$key];
+                if (
+                    $this->objectProperties &&
+                    $newCurrentValue &&
+                    in_array($key, $this->objectProperties) &&
+                    !is_array($newCurrentValue)
+                ) {
+                    try {
+                        $newCurrentValue = json_decode($newCurrentValue, true);
+                    } catch (\Exception $err) {
+                        error_log('Unable to convert json to object: ' . $err->getMessage());
+                    }
+                }
+                $this->data[$key] = $newCurrentValue;
             }
         }
         if ($modified && !$loading) {

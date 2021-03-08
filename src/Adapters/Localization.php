@@ -16,7 +16,8 @@ class Localization {
             'Name' => esc_html__('Name', $MANGOFP),
             'Email' => esc_html__('Email', $MANGOFP),
             'Updated' => esc_html__('Updated', $MANGOFP),
-            'Change' => esc_html__('Change', $MANGOFP)
+            'Change' => esc_html__('Change', $MANGOFP),
+            'Subject' => esc_html__('Subject', $MANGOFP)
         ];
     }
     static public function getSettingsStrings() {

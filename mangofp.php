@@ -3,18 +3,39 @@
 //namespace MangoFp;
 /**
  *  Plugin name: Mango Form Processing
- *  Description: Manage Contact Form 7 contacts by process you define
- *  @link               http://fpmango.com
- *  @since              0.0.1
+ *  Description: Manage Contact Form 7 messages directly in WordPress like leads in CRM system.
+ *  @link               http://mangofp.net
+ *  @since              5.2
  *  @package            MangoFp
  *  Author:             Andres Järviste
- *  Version:            0.0.3
+ *  Version:            0.1.7
  *  Author URI:         https://mangofp.net
  *  Domain Path:        /languages
  */
 
+const MANGOFP_VERSION = "0.1.8";
+
 function isDebug() {
     return ( defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG );
+}
+
+function keepDbOnUninstall() {
+    if (defined('MANGO_FP_REMOVE_TABLES_ON_UNINSTALL') && MANGO_FP_REMOVE_TABLES_ON_UNINSTALL) {
+        return false;
+    }
+    return true;
+}
+
+function getVersion() {
+    return getJsVersion(true);
+}
+
+function getJsVersion($debugCheck = false) {
+    if (isDebug() && !$debugCheck) {
+        return time();
+    }
+
+    return MANGOFP_VERSION;
 }
 
 //Register Scripts to use
@@ -34,29 +55,41 @@ function registerVueScripts($page) {
 		'mangofp_vue_vendors',
 		$chunk_vendors_js,
 		false, //no dependencies
-		'0.0.1',
+		getJsVersion(),
 		true //in the footer otherwise Vue triggers it too early
 	);
 	wp_register_script(
 		'mangofp_vuejs',
 		$app_js,
 		['mangofp_vue_vendors'],
-		'0.0.1',
+		getJsVersion(),
 		true //in the footer otherwise Vue triggers it too early
 	);
 
-	wp_enqueue_script('mangofp_vue_vendors');
-	wp_enqueue_script('mangofp_vuejs');
+    wp_enqueue_style('vuetify_styles_font', 'https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900');
+    wp_enqueue_style('vuetify_styles', 'https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css');
+    wp_enqueue_script('mangofp_vue_vendors');
 
     if (!isDebug()) {
-        wp_register_style( 'vue-vendor-styles',  plugin_dir_url( __FILE__ ) . 'assets/css/chunk-vendors.css' );
+        wp_register_style(
+            'vue-vendor-styles',
+            plugin_dir_url( __FILE__ ) . 'assets' . $page . '/css/chunk-vendors.css',
+            [],
+            getJsVersion()
+         );
         wp_enqueue_style( 'vue-vendor-styles' );
-        wp_register_style( 'vue-app-styles',  plugin_dir_url( __FILE__ ) . 'assets/css/app.css' );
+
+        wp_register_style(
+            'vue-app-styles',
+            plugin_dir_url( __FILE__ ) . 'assets' . $page . '/css/app.css',
+            ['vue-vendor-styles'],
+            getJsVersion()
+         );
         wp_enqueue_style( 'vue-app-styles' );
     }
 
-    wp_enqueue_style('vuetify_styles_font', 'https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900');
-    wp_enqueue_style('vuetify_styles', 'https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css');
+    wp_enqueue_script('mangofp_vuejs');
+
 }
 
 function makeMangoFpAdminMenuPage() {
@@ -107,9 +140,20 @@ function loadSettingsJs() {
 
 function getResources() {
 	$resources = [
+            'nonce' => wp_create_nonce('wp_rest'),
 			'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
-			'version' => ['main' => 'v.0.0.5'],
-            'strings' => MangoFp\Localization::getSettingsStrings()
+			'version' => ['main' => 'v.' . getVersion()],
+			'strings' => MangoFp\Localization::getContactsStrings()
+	];
+
+	return apply_filters('mangofp_resources', $resources);
+}
+function getContactResources() {
+	$resources = [
+            'nonce' => wp_create_nonce('wp_rest'),
+			'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
+			'version' => ['main' => 'v.' . getVersion() ],
+			'strings' => MangoFp\Localization::getContactsStrings(),
 	];
 
 	return apply_filters('mangofp_resources', $resources);
@@ -121,7 +165,7 @@ function initContactsPage() {
     wp_localize_script(
         'mangofp_vuejs',
         'MANGOFP_RESOURCES',
-        getResources(),
+        getContactResources(),
     );
 }
 function initSettingsPage() {
@@ -144,30 +188,23 @@ function registerRestRoutes() {
 }
 
 function activateMFP() {
-    MangoFp\MessagesDB::installDatabase();
+    MangoFp\MessagesDB::installOrUpdateDatabase();
 }
 
 function checkForDatabaseUpdates() {
-    MangoFp\MessagesDB::installDatabase();
+    MangoFp\MessagesDB::installOrUpdateDatabase();
 }
 
 function deactivateMFP() {
+  //nothing here atm
+}
+
+function onUninstallMFP() {
     MangoFp\MessagesDB::removeDatabase();
 }
 
 function loadTranslations() {
     load_plugin_textdomain( 'mangofp', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-}
-
-function defaultSenderEmail( $original_email_address ) {
-	//TODO: Change before release
-	return 'info@nort.ee';
-}
-
-// Function to change sender name
-function defaultSenderEmailName( $original_email_from ) {
-	//TODO: Change before release
-    return 'NORT Koolitus';
 }
 
 require_once(ABSPATH . 'wp-admin/includes/image.php');
@@ -178,11 +215,10 @@ require_once plugin_dir_path(__FILE__) . 'autoload.php';
 add_action('admin_menu', 'makeMangoFpAdminMenuPage');
 add_action('wpcf7_before_send_mail','actionCF7Submit');
 add_action('rest_api_init', 'registerRestRoutes' );
-//add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
+add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
 add_action( 'init', 'loadTranslations');
-
-add_filter( 'wp_mail_from', 'defaultSenderEmail' );
-add_filter( 'wp_mail_from_name', 'defaultSenderEmailName' );
 
 register_activation_hook( __FILE__, 'activateMFP' );
 register_deactivation_hook( __FILE__, 'deactivateMFP' );
+register_uninstall_hook(__FILE__, 'onUninstallMFP');
+
