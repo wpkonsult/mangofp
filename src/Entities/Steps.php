@@ -8,6 +8,7 @@ class Steps extends Option {
 
     public function __construct($data = []) {
         parent::__construct($data);
+        $this->className = "Steps";
         $this->data = \array_merge($this->data, [
             'key' => Option::OPTION_STEPS,
             'value' => $data['value'] ?? [],

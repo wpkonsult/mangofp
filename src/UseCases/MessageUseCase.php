@@ -116,22 +116,22 @@ class MessageUseCase {
 
     public function fetchAllMessagesToOutput() {
         $retData = $this->storage->fetchMessages();
-        
+
         if (!\is_array($retData)) {
             return $this->output->outputError(
-                'No valid result received', 
+                'No valid result received',
                 iOutput::ERROR_FAILED
             );
-            
+
         }
         $messages = isset($retData['messages']) ? $retData['messages'] : false;
         $errors = isset($retData['errors']) ? $retData['errors'] : [];
 
         if (!\is_array($messages)) {
-            $errors = !is_array($errors) ? [$errors] : $errors; 
-            
+            $errors = !is_array($errors) ? [$errors] : $errors;
+
             return $this->output->outputError(
-                implode(", ", $errors), 
+                implode(", ", $errors),
                 iOutput::ERROR_FAILED
             );
         }
@@ -204,12 +204,34 @@ class MessageUseCase {
     }
 
     public function getMessageDetailsAndReturn($params) {
+        \error_log(print_r($params, 1));
         $messageObj = $this->storage->fetchMessage($params['uuid']);
         if (!$messageObj) {
             return $this->output->outputError('Message not found', iOutput::ERROR_NOTFOUND);
         }
 
         return $this->output->outputResult($this->makeOneMessageOutputData($messageObj));
+    }
+
+    public function setHistoryItemReadIndAndReturnResult($historyItemId, $isUnread) {
+        $historyItem = $this->storage->fetchHistoryItemById($historyItemId);
+        if (!$historyItem) {
+            return $this->output->outputError('History item with this id is not found', iOutput::ERROR_FAILED);
+        }
+
+        error_log('created history item');
+        error_log(print_r($historyItem,1));
+
+        $historyItem->setUnread($isUnread ? true : false);
+        try {
+            $this->storage->storeHistoryItemIsUnread($historyItem);
+            return $this->output->outputResult(['updated' => true]);
+        } catch(\Exception $err) {
+            return $this->output->outputError(
+                'Error updating unread for message history item: '.$err->getMessage(),
+                iOutput::ERROR_FAILED
+            );
+        }
     }
 
     public function sendEmailAndReturnMessage($emailData, $id) {
@@ -266,6 +288,16 @@ class MessageUseCase {
     }
 
     protected function makeMessageOutputData(Message $message) {
+        $historyList = $this->storage->fetchItemHistory($message->get('id'));
+
+        $isUnread = false;
+        foreach ($historyList as $hItem) {
+            if ($hItem['isUnread']) {
+                $isUnread = true;
+                break;
+            }
+        }
+        //Lisa isUnread = true kui mõni history item  isUnread
         return [
             'id' => $message->get('id'),
             'form' => $message->get('form'),
@@ -275,24 +307,28 @@ class MessageUseCase {
             'email' => $message->get('email'),
             'name' => $message->get('name'),
             'note' => $message->get('note'),
+            'isUnread' => $isUnread,
             'lastUpdated' => $message->lastUpdated(),
-            'changeHistory' => $this->storage->fetchItemHistory($message->get('id')),
+            'changeHistory' => $historyList,
         ];
     }
 
-    protected function getReplyAddressAsEmailHeader() {
+    protected function getReplyAddressAsEmailHeader($id) {
         $settingsUC = new SettingsUseCase(
             $this->output,
             $this->storage
         );
         $optionReplyEmail = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL);
         $optionReplyEmailName = $settingsUC->getOptionObj(Option::OPTION_REPLY_EMAIL_NAME);
-
-        //TODO: filter premiumi jaoks
-        return sprintf(
-            'Reply-To: %s <%s>',
+        $replyToHeader = sprintf(
+            '%s <%s>',
             $optionReplyEmailName->get('value'),
             $optionReplyEmail->get('value')
+        );
+        return \apply_filters('mangofp_emails_update', [
+                'contactId' => $id,
+                'replyToHeader' => $replyToHeader
+            ]
         );
     }
 
@@ -338,8 +374,9 @@ class MessageUseCase {
         //do not send email from development environment
 
         $headers = ['Content-Type: text/html; charset=UTF-8'];
-        $headers[] = $this->getReplyAddressAsEmailHeader();
-        $headers[] = $this->getFromAddressAsEmailHeader();
+        $headers[] = $this->getFromAddressAsEmailHeader($id);
+        //$headers[] = 'From: ' . $this->getReplyAddressAsEmailHeader($id);
+        $headers[] = 'Reply-To: ' . $this->getReplyAddressAsEmailHeader($id);
         $ccForHistory = '';
         if (isset($emailData['ccAddresses']) && is_array($emailData['ccAddresses'])) {
             foreach ($emailData['ccAddresses'] as $email) {
@@ -366,18 +403,18 @@ class MessageUseCase {
         if ($success) {
             $historyItem = (new HistoryItem())->setEmailSent(
                 $id, // item id
-                        'admin', //account
-                        $code, //change type
-                        [ // emailData
-                            'to' => $to,
-                            'cc' => $ccForHistory,
-                            'subject' => $subject,
-                            'message' => $body."\r\n\r\n"."Attachments:\r\n".implode(
-                                "\r\n",
-                                $urls
-                            ),
-                            'attachments' => json_encode($attachments),
-                        ]
+                'admin', //account
+                $code, //change type
+                [ // emailData
+                    'to' => $to,
+                    'cc' => $ccForHistory,
+                    'subject' => $subject,
+                    'message' => $body."\r\n\r\n"."Attachments:\r\n".implode(
+                        "\r\n",
+                        $urls
+                    ),
+                    'attachments' => json_encode($attachments),
+                ]
             );
             $this->storage->insertHistoryItem($historyItem);
         }

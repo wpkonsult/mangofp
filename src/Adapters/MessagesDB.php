@@ -11,7 +11,6 @@ use MangoFp\UseCases\iStorage;
 
 class MessagesDB implements iStorage {
     const VERSION_PARAM_NAME = 'mangofp_db_version';
-    const VERSION = '4.93';
     const TABLE_MESSAGES = 'mangofp_messages';
     const TABLE_LABELS = 'mangofp_labels';
     const TABLE_HISTORY = 'mangofp_history';
@@ -27,10 +26,11 @@ class MessagesDB implements iStorage {
         }
         error_log(
             sprintf(
-                'installing database version %s -> %s', 
-                $actualVersion, $mangoVersion
-                )
-            );
+                'installing database version %s -> %s',
+                $actualVersion,
+                $mangoVersion
+            )
+        );
 
         require_once ABSPATH.'wp-admin/includes/upgrade.php';
         $charset_collate = $wpdb->get_charset_collate();
@@ -62,12 +62,13 @@ class MessagesDB implements iStorage {
             note varchar(4000),
             content varchar(4000),
             rawdata varchar(4000),
+            is_unread tinyint(1) DEFAULT 0
             UNIQUE KEY id (id)
         ) {$charset_collate};";
         dbDelta($createSql);
 
         $createSql = "CREATE TABLE {$table_history} (
-            id varchar(50) NOT NULL,
+            id varchar(100) NOT NULL,
             create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             item_id varchar(100),
             change_type varchar(30),
@@ -75,6 +76,7 @@ class MessagesDB implements iStorage {
             original_content varchar(4000),
             user_account varchar(100),
             content varchar(4000),
+            is_unread tinyint(1) DEFAULT 0,
             UNIQUE KEY id (id),
             KEY user_account (user_account)
         ) {$charset_collate};";
@@ -108,7 +110,7 @@ class MessagesDB implements iStorage {
     public static function removeDatabase() {
         global $wpdb;
 
-        if (keepDbOnUninstall())  {
+        if (keepDbOnUninstall()) {
             return;
         }
 
@@ -124,9 +126,6 @@ class MessagesDB implements iStorage {
         $table_name = $wpdb->prefix.self::TABLE_OPTIONS;
         $sql = "DROP TABLE IF EXISTS {$table_name}";
         $wpdb->query($sql);
-        $table_history = $wpdb->prefix.self::TABLE_TEMPLATES;
-        $sql = "DROP TABLE IF EXISTS {$table_history}";
-        $wpdb->query($sql);
 
         delete_option(self::VERSION_PARAM_NAME);
     }
@@ -141,11 +140,12 @@ class MessagesDB implements iStorage {
         //Can be overriden by defining label field with the name of the contact form field
         if (\is_front_page() || \is_home()) {
             return \get_bloginfo('name');
-        } else if (isset($meta['pageId'])) {
-           $post = get_post($meta['pageId']);
-           if ($post) {
-               return esc_html($post->post_title);
-           }
+        }
+        if (isset($meta['pageId'])) {
+            $post = get_post($meta['pageId']);
+            if ($post) {
+                return esc_html($post->post_title);
+            }
         }
 
         return \wp_title('');
@@ -198,7 +198,7 @@ class MessagesDB implements iStorage {
         global $wpdb;
         $table_name = $wpdb->prefix.self::TABLE_MESSAGES;
         $request = $wpdb->prepare(
-            "SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata, note
+            "SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata, note, is_unread
             FROM {$table_name}
             WHERE id = '%s';
             ",
@@ -216,7 +216,7 @@ class MessagesDB implements iStorage {
         global $wpdb;
         $table_name = $wpdb->prefix.self::TABLE_MESSAGES;
         $messageRows = $wpdb->get_results(
-            "  SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata, note
+            "  SELECT id, create_time, modify_time, delete_time, label_id, status_code, email, person_name, content, rawdata, note, is_unread
                 FROM {$table_name}
                 ORDER BY status_code, create_time desc;
             ",
@@ -323,6 +323,7 @@ class MessagesDB implements iStorage {
         );
         if (1 != $result) {
             error_log('ERROR: History item insert failed with data: '.\json_encode($this->parseHistoryItemToDbData($historyItem)));
+            error_log('Last error: '.$wpdb->last_error);
 
             return false;
         }
@@ -334,7 +335,7 @@ class MessagesDB implements iStorage {
         global $wpdb;
         $table_name = $wpdb->prefix.self::TABLE_HISTORY;
         $request = $wpdb->prepare(
-            "SELECT id, create_time, item_id, change_type, change_subtype, original_content, content, user_account
+            "SELECT id, create_time, item_id, change_type, change_subtype, original_content, content, user_account, is_unread
             FROM {$table_name}
             WHERE item_id = '%s'
             ORDER BY create_time DESC;
@@ -352,6 +353,51 @@ class MessagesDB implements iStorage {
         }
 
         return $history;
+    }
+
+    public function fetchHistoryItemById(string $historyItemId) {
+        global $wpdb;
+        $table_name = $wpdb->prefix.self::TABLE_HISTORY;
+
+        $request = $wpdb->prepare(
+            "SELECT
+                id,
+                create_time,
+                item_id,
+                change_type,
+                change_subtype,
+                original_content,
+                content,
+                user_account,
+                is_unread
+            FROM {$table_name}
+            WHERE id = '%s';
+            ",
+            [$historyItemId]
+        );
+
+        $row = $wpdb->get_row($request, ARRAY_A);
+        if (!$row) {
+            return null;
+        }
+
+        return $this->makeHistoryItemWithDbData($row);
+    }
+
+    public function storeHistoryItemIsUnread(HistoryItem $historyItem) {
+        global $wpdb;
+        $table_name = $wpdb->prefix.self::TABLE_HISTORY;
+
+        $result = $wpdb->update(
+            $wpdb->prefix.self::TABLE_HISTORY,
+            ['is_unread' => $historyItem->get('isUnread') ? 1 : 0],
+            ['id' => $historyItem->get('id')]
+        );
+        
+        if ($result > 1) {
+            throw new \Error('More than one histroy item was updated!!!!');
+        }
+        return true;
     }
 
     public function storeTemplate(Template $emailTemplate) {
@@ -447,7 +493,7 @@ class MessagesDB implements iStorage {
             'person_name' => $message->get('name'),
             'content' => $message->get('content'),
             'rawdata' => $message->get('rawData'),
-            'note' => $message->get('note'),
+            'note' => $message->get('note')
         ];
     }
 
@@ -461,6 +507,7 @@ class MessagesDB implements iStorage {
             'original_content' => $historyItem->get('originalContent'),
             'content' => $historyItem->get('content'),
             'user_account' => $historyItem->get('userAccount'),
+            'is_unread' => $historyItem->get('isUnread') ? 1 : 0,
         ];
     }
 
@@ -545,7 +592,7 @@ class MessagesDB implements iStorage {
     }
 
     protected function makeHistoryItemWithDbData($data) {
-        return new HistoryItem([
+        $createdItem =  new HistoryItem([
             'id' => $data['id'],
             'create_time' => $data['create_time'],
             'itemId' => $data['item_id'],
@@ -554,6 +601,9 @@ class MessagesDB implements iStorage {
             'originalContent' => $data['original_content'],
             'content' => $data['content'],
             'userAccount' => $data['user_account'],
+            'isUnread' => $data['is_unread'] ? true : false,
         ]);
+
+        return $createdItem;
     }
 }

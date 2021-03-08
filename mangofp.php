@@ -3,17 +3,17 @@
 //namespace MangoFp;
 /**
  *  Plugin name: Mango Form Processing
- *  Description: Manage Contact Form 7 contacts by process you define
- *  @link               http://fpmango.com
- *  @since              0.0.1
+ *  Description: Manage Contact Form 7 messages directly in WordPress like leads in CRM system.
+ *  @link               http://mangofp.net
+ *  @since              5.2
  *  @package            MangoFp
  *  Author:             Andres Järviste
- *  Version:            0.1.2
+ *  Version:            0.1.7
  *  Author URI:         https://mangofp.net
  *  Domain Path:        /languages
  */
 
-const MANGOFP_VERSION = "0.1.2";
+const MANGOFP_VERSION = "0.1.8";
 
 function isDebug() {
     return ( defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG );

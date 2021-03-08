@@ -14,10 +14,12 @@ class AdminRoutes implements iOutput {
             ['endpoint' => '/templates/(?P<templateCode>[a-zA-Z0-9-]+)', 'method' => 'GET', 'callback' => 'getTemplate'],
             ['endpoint' => '/templates/(?P<templateCode>[a-zA-Z0-9-]+)', 'method' => 'POST', 'callback' => 'updateOrInsertTemplate'],
             ['endpoint' => '/messages', 'method' => 'GET', 'callback' => 'getMessages'],
+            ['endpoint' => '/test2', 'method' => 'GET', 'callback' => 'getTest'],
             ['endpoint' => '/messages', 'method' => 'POST', 'callback' => 'postMessage'],
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)/emails', 'method' => 'POST', 'callback' => 'sendEmail'],
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'POST', 'callback' => 'changeMessage'],
             ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)', 'method' => 'GET', 'callback' => 'getMessageDetails'],
+            ['endpoint' => '/messages/(?P<uuid>[a-zA-Z0-9-]+)/history/(?P<historyItemId>[^ /]+)', 'method' => 'POST', 'callback' => 'changeHistoryItem'],
             ['endpoint' => '/attachments', 'method' => 'POST', 'callback' => 'addAttachments'],
             ['endpoint' => '/steps', 'method' => 'GET', 'callback' => 'getSteps'],
             ['endpoint' => '/steps/(?P<code>[a-zA-Z0-9-]+)', 'method' => 'POST', 'callback' => 'updateOrInsertSteps'],
@@ -77,11 +79,12 @@ class AdminRoutes implements iOutput {
     }
 
     public function getTemplate($request) {
-		$params = json_decode(json_encode($request->get_params()), true);
+        $params = json_decode(json_encode($request->get_params()), true);
         $useCase = new UseCases\SettingsUseCase(
             $this,
             new MessagesDB()
         );
+
         return $useCase->fetchTemplateToOutput($params['templateCode']);
     }
 
@@ -251,6 +254,29 @@ class AdminRoutes implements iOutput {
         );
 
         return $useCase->getMessageDetailsAndReturn($params);
+    }
+
+    public function changeHistoryItem($request) {
+        $params = json_decode(json_encode($request->get_params()), true);
+
+
+        $useCase = new UseCases\MessageUseCase(
+            $this,
+            new MessagesDB()
+        );
+
+        error_log('About to change history item for ');
+        error_log(print_r($params, 1));
+
+        return $useCase->setHistoryItemReadIndAndReturnResult($params['historyItemId'], $params['isUnread']);
+    }
+
+    public function getTest($request) {
+        $params = json_decode(json_encode($request->get_params()), true);
+
+        return [
+            'params' => $params,
+        ];
     }
 
     public function outputResult(array $data) {

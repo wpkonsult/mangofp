@@ -5,6 +5,7 @@ const HISTORY_ITEM_MSGCREATE = 'MSG_CREATED';
 const HISTORY_ITEM_LBLCREATE = 'LBL_CREATED';
 const HISTORY_ITEM_MSGCHANGE = 'MSG_CHANGED';
 const HISTORY_ITEM_EMAILSENT = 'EMAIL_SENT';
+const HISTORY_ITEM_EMAILRECEIVED = 'EMAIL_RECEIVED';
 
 const HISTORY_ITEM_MSGCHANGE_STATUS = 'STATUS_CODE';
 const HISTORY_ITEM_MSGCHANGE_LABELID = 'LABEL_ID';
@@ -14,7 +15,14 @@ const HISTORY_ITEM_MSGCHANGE_CONTENT = 'CONTENT';
 class HistoryItem extends BaseEntity {
     function __construct($data = []) {
         parent::__construct();
+        $this->className = "HistoryItem";
+        $this->data['isUnread'] = 0;
+        $this->data['userAccount'] = "";
         if ($data) {
+            if (isset($data['id'])) {
+                $this->data['id'] = $data['id'];
+            }
+
             $this->data = \array_merge( $this->data, [
                 'itemId' => $data['itemId'],
                 'create_time' => $data['create_time'],
@@ -22,13 +30,21 @@ class HistoryItem extends BaseEntity {
                 'changeSubType' => $data['changeSubType'] ?? '',
                 'originalContent' => $data['originalContent'] ?? '',
                 'content' => $data['content'],
-                'userAccount' => $data['userAccount']
+                'userAccount' => $data['userAccount'],
+                'isUnread' => (isset($data['isUnread']) && $data['isUnread']) ? true : false
             ]);
         }
+
+        $this->emailId = "";
     }
 
     function  setDataFromArray($newData, $loading = false) {
-        throw new Exception("History items should not be changed after creation", 1);
+        throw new Exception("History items should not be changed after creation (except for read/unread setting)", 1);
+    }
+
+    function setUnread($isUnread) {
+        $this->data['isUnread'] = $isUnread;
+        return $this;
     }
 
     function setCreateMessage(string $itemId, string $account, string $subtype, array $content) {
@@ -100,6 +116,15 @@ class HistoryItem extends BaseEntity {
         ]);
 
         return $this;
+    }
+
+    //Email Id of new - just downloaded email. Not stored in database as data 
+    function setEmailId($emailId) {
+        $this->emailId = $emailId;
+    }
+
+    function getEmailId() {
+        return $this->emailId;
     }
 
 }
