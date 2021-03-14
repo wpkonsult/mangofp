@@ -8,15 +8,15 @@ Plugin subscribes to Contact Form 7 hooks to store messages information in its o
 Plugin code is divided to front end components and common back-end comopent. Front end components are made in Vue. Initial source-code of comopents is in separate GitHub repositories. Clone then to seprate folders in one commonn projects folders (.e.g. in ~/project). In your projects folder: 
 * **mangofp** - plugin main back-end code, plugin building tools:
 ```
-	git clone ***
+	git clone https://github.com/wpkonsult/mangofp.git
 ```
 * **mangofp-front** - ui in Admin Area for message management:
 ```
-	git clone ***
+	git clone https://github.com/wpkonsult/mangofp-front.git
 ```
 * **mangofp-settings-ts** - ui in Admin Area for settings and configuration:
 ```
-	git clone ***
+	git clone https://github.com/wpkonsult/mangofp-settings-ts.git
 ```
 
 ### Prepare plugin for local Wordpress server
