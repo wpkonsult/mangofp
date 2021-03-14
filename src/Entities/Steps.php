@@ -2,6 +2,8 @@
 
 namespace MangoFp\Entities;
 
+
+
 class Steps extends Option {
     const ORDER_UP = 'up';
     const ORDER_DOWN = 'down';
@@ -19,8 +21,8 @@ class Steps extends Option {
 		return [
 [
                 'code' => 'NEW',
-                'state' => __('New'),
-                'action' => __('Set as new'),
+                'state' => gettext('New'),
+                'action' => \gettext('Set as new'),
                 'next' => [
                     'INPROGRESS',
                     'DECLINED',
@@ -29,8 +31,8 @@ class Steps extends Option {
             ],
             [
                 'code' => 'INPROGRESS',
-                'state' => __('In progress'),
-                'action' => __('Start working'),
+                'state' => ('In progress'),
+                'action' => ('Start working'),
                 'next' => [
                     'DECLINED',
                     'ACCEPTED',
@@ -39,8 +41,8 @@ class Steps extends Option {
             ],
             [
                 'code' => 'ACCEPTED',
-                'state' => __('Accepted'),
-                'action' => __('Accept'),
+                'state' => gettext('Accepted'),
+                'action' => gettext('Accept'),
                 'next' => [
                     'NEW',
                     'DECLINED',
@@ -49,8 +51,8 @@ class Steps extends Option {
             ],
             [
                 'code' => 'DECLINED',
-                'state' => __('Declined'),
-                'action' => __('Decline'),
+                'state' => gettext('Declined'),
+                'action' => gettext('Decline'),
                 'next' => [
                     'NEW',
                     'ARCHIVED',
@@ -58,8 +60,8 @@ class Steps extends Option {
             ],
             [
                 'code' => 'ARCHIVED',
-                'state' => __('Archived'),
-                'action' => __('Archive'),
+                'state' => gettext('Archived'),
+                'action' => gettext('Archive'),
                 'next' => [
                     'NEW',
                 ],

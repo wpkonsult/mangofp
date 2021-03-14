@@ -22,6 +22,8 @@ class MessagesUseCaseTest extends TestCase {
         $this->storage->method('insertMessage')->willReturn(true);
         $this->storage->method('storeMessage')->willReturn(true);
         $this->storage->method('getLabelTag')->willReturn('post_title');
+        $this->storage->method('getDefaultLabel')->willReturn('test-label');
+        $this->storage->method('fetchItemHistory')->willReturn([]);
 
         $useCase = new MessageUseCase($this->output, $this->storage);
         $content = [
@@ -51,10 +53,12 @@ class MessagesUseCaseTest extends TestCase {
                 'name' => 'Test Name',
 				'note' => '',
 				'lastUpdated' => 'do not check',
-                'changeHistory' => null,
+                'isUnread' => false,
+                'changeHistory' => [],
                 'content' => json_encode([
                     'your-phone' => '+341234 12341234 1234123',
                     'your-message' => 'Test message',
+                    'post_title'=> 'Test Label'
                 ])
             ]
         );
@@ -71,6 +75,7 @@ class MessagesUseCaseTest extends TestCase {
         ]);
         $this->storage->method('fetchLabelByName')->willReturn($label);
         $this->storage->method('insertMessage')->willReturn(false);
+        $this->storage->method('getDefaultLabel')->willReturn('test-label');
 
         $useCase = new MessageUseCase($this->output, $this->storage);
         $content = [

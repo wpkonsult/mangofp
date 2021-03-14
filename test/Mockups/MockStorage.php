@@ -57,5 +57,8 @@ class MockStorage implements iStorage {
     public function fetchTemplate(string $code) {
         return isset($this->expectedResult['fetchTemplate']) ? $this->expectedResult['fetchTemplate'] : [];
     }
+    public function getDefaultLabel($meta) {
+        return isset($this->expectedResult['getDefaultLabel']) ? $this->expectedResult['getDefaultLabel'] : [];
+    }
 
 }

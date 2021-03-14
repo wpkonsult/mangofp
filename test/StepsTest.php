@@ -109,7 +109,7 @@ class StepsTest extends TestCase {
 
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Can not delete step NEW It is in use for states:In progress, Accpeted, Declined, Archived');
+        $this->expectExceptionMessage('Can not delete step NEW It is in use for states:In progress, Accepted, Declined, Archived');
 		$stepsEntity->deleteStep('NEW');
     }
 

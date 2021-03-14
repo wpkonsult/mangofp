@@ -22,4 +22,5 @@ interface iStorage {
 	public function fetchOption(string $code);
 	public function storeTemplate(Template $emailTemplate);
 	public function fetchTemplate(string $code);
+    public function getDefaultLabel($meta);
 }

@@ -17,8 +17,18 @@ class TemplateTest extends TestCase {
 			'template' => 'Test template'
         ]);
         $templateData = $templateObj->getDataAsArray();
+        $templateData['id'] = 'test-id';
+        $templateData['create_time'] = 'test-time';
         $this->assertEquals(
-            [],
+            [
+                'id' => 'test-id',
+                'create_time' => 'test-time',
+                'code' => 'TESTCODE',
+                'modify_time' => '',
+                'addresses' => Array ('test@test.ee', 'test2@test.ee'),
+                'mainAddresses' => Array (),
+                'template' => 'Test template'                ,
+            ],
             $templateData,
         );
 
