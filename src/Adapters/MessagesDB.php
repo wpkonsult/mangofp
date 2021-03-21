@@ -62,7 +62,7 @@ class MessagesDB implements iStorage {
             note varchar(4000),
             content varchar(4000),
             rawdata varchar(4000),
-            is_unread tinyint(1) DEFAULT 0
+            is_unread tinyint(1) DEFAULT 0,
             UNIQUE KEY id (id)
         ) {$charset_collate};";
         dbDelta($createSql);
