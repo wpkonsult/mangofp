@@ -9,6 +9,7 @@ echo 'Staging backend'
 cp -rv ../mangofp/src ../mangofp/stage/
 cp -rv ../mangofp/mangofp.php ../mangofp/stage/
 cp -rv ../mangofp/autoload.php ../mangofp/stage/
+cp -rv ../mangofp/readme.txt ../mangofp/stage/
 
 echo 'Copying language resources'
 mkdir -p  ../mangofp/stage/languages
