@@ -20,7 +20,7 @@ class MessagesDB implements iStorage {
     public static function installOrUpdateDatabase() {
         global $wpdb;
         $mangoVersion = getVersion();
-        $actualVersion = get_site_option(self::VERSION_PARAM_NAME, '0.0.0');
+        $actualVersion = get_site_option($wpdb->prefix.self::VERSION_PARAM_NAME, '0.0.0');
         if ($mangoVersion == $actualVersion) {
             return;
         }
@@ -104,7 +104,7 @@ class MessagesDB implements iStorage {
         ) {$charset_collate};";
         dbDelta($createSql);
 
-        update_option(self::VERSION_PARAM_NAME, $mangoVersion);
+        update_option($wpdb->prefix.self::VERSION_PARAM_NAME, $mangoVersion);
     }
 
     public static function removeDatabase() {
@@ -126,8 +126,11 @@ class MessagesDB implements iStorage {
         $table_name = $wpdb->prefix.self::TABLE_OPTIONS;
         $sql = "DROP TABLE IF EXISTS {$table_name}";
         $wpdb->query($sql);
+        $table_name = $wpdb->prefix.self::TABLE_TEMPLATES;
+        $sql = "DROP TABLE IF EXISTS {$table_name}";
+        $wpdb->query($sql);
 
-        delete_option(self::VERSION_PARAM_NAME);
+        delete_option($wpdb->prefix.self::VERSION_PARAM_NAME);
     }
 
     //TODO: remove
