@@ -1,19 +1,20 @@
 <?php
 
-//namespace MangoFp;
+namespace MangoFp;
 /**
- *  Plugin name: Mango Form Processing
+ *  Plugin name: MangoFP
  *  Description: Manage Contact Form 7 messages directly in WordPress like leads in CRM system.
  *  @link               http://mangofp.net
  *  @since              5.2
  *  @package            MangoFp
  *  Author:             Andres Järviste
- *  Version:            0.1.9
- *  Author URI:         https://mangofp.net
- *  Domain Path:        /languages
+ *  Version:            1.0.0
+ *  License: GPLv2 or later
+ *  Author URI:         https://github.com/wpkonsult/mangofp.git
+ *  Domain Path:        /mangofp
  */
 
-const MANGOFP_VERSION = "0.1.91";
+const MANGOFP_VERSION = "1.0.0";
 
 function isDebug() {
     return ( defined('MANGO_FP_DEBUG') && MANGO_FP_DEBUG );
@@ -98,7 +99,7 @@ function makeMangoFpAdminMenuPage() {
 		'MangoFp',
 		'manage_options',
 		'mangofp-admin',
-		'renderAdmin'
+		'\MangoFp\renderAdmin'
 	);
     add_submenu_page(
         'mangofp-admin',
@@ -106,7 +107,7 @@ function makeMangoFpAdminMenuPage() {
         __('Contacts'),
         'manage_options',
         'mangofp-admin',
-        'renderAdmin'
+        '\MangoFp\renderAdmin'
     );
     $contactMenuSuffix = add_submenu_page(
         'mangofp-admin',
@@ -114,10 +115,10 @@ function makeMangoFpAdminMenuPage() {
         __('Settings'),
         'manage_options',
         'mangofp-contact',
-        'renderAdmin'
+        '\MangoFp\renderAdmin'
     );
-	add_action( "load-{$pageHookSuffix}", 'loadContactsJs' );
-	add_action( "load-{$contactMenuSuffix}", 'loadSettingsJs' );
+	add_action( "load-{$pageHookSuffix}", '\MangoFp\loadContactsJs' );
+	add_action( "load-{$contactMenuSuffix}", '\MangoFp\loadSettingsJs' );
 }
 
 function renderAdmin(){
@@ -131,11 +132,11 @@ function renderAdmin(){
 }
 
 function loadContactsJs() {
-    add_action('admin_enqueue_scripts', 'initContactsPage');
+    add_action('admin_enqueue_scripts', '\MangoFp\initContactsPage');
 }
 
 function loadSettingsJs() {
-    add_action('admin_enqueue_scripts', 'initSettingsPage');
+    add_action('admin_enqueue_scripts', '\MangoFp\initSettingsPage');
 }
 
 function getResources() {
@@ -143,7 +144,7 @@ function getResources() {
             'nonce' => wp_create_nonce('wp_rest'),
 			'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
 			'version' => ['main' => 'v.' . getVersion()],
-			'strings' => MangoFp\Localization::getContactsStrings()
+			'strings' => \MangoFp\Localization::getContactsStrings()
 	];
 
 	return apply_filters('mangofp_resources', $resources);
@@ -153,7 +154,7 @@ function getContactResources() {
             'nonce' => wp_create_nonce('wp_rest'),
 			'adminUrl' => get_rest_url( null, '/mangofp', 'rest'),
 			'version' => ['main' => 'v.' . getVersion() ],
-			'strings' => MangoFp\Localization::getContactsStrings(),
+			'strings' => \MangoFp\Localization::getContactsStrings(),
 	];
 
 	return apply_filters('mangofp_resources', $resources);
@@ -179,20 +180,20 @@ function initSettingsPage() {
 }
 
 function actionCF7Submit( $result ) {
-    return MangoFp\CF7Connector::actionCF7Submit($result);
+    return CF7Connector::actionCF7Submit($result);
 }
 
 function registerRestRoutes() {
-    $adminRoutes = new MangoFp\AdminRoutes();
+    $adminRoutes = new AdminRoutes();
     $adminRoutes->registerRestRoutes();
 }
 
 function activateMFP() {
-    MangoFp\MessagesDB::installOrUpdateDatabase();
+    MessagesDB::installOrUpdateDatabase();
 }
 
 function checkForDatabaseUpdates() {
-    MangoFp\MessagesDB::installOrUpdateDatabase();
+    MessagesDB::installOrUpdateDatabase();
 }
 
 function deactivateMFP() {
@@ -200,7 +201,7 @@ function deactivateMFP() {
 }
 
 function onUninstallMFP() {
-    MangoFp\MessagesDB::removeDatabase();
+    MessagesDB::removeDatabase();
 }
 
 function loadTranslations() {
@@ -212,13 +213,13 @@ require_once(ABSPATH . 'wp-admin/includes/file.php');
 require_once(ABSPATH . 'wp-admin/includes/media.php');
 require_once plugin_dir_path(__FILE__) . 'autoload.php';
 
-add_action('admin_menu', 'makeMangoFpAdminMenuPage');
-add_action('wpcf7_before_send_mail','actionCF7Submit');
-add_action('rest_api_init', 'registerRestRoutes' );
-add_action( 'plugins_loaded', 'checkForDatabaseUpdates' );
-add_action( 'init', 'loadTranslations');
+add_action('admin_menu', '\MangoFp\makeMangoFpAdminMenuPage');
+add_action('wpcf7_before_send_mail','\MangoFp\actionCF7Submit');
+add_action('rest_api_init', '\MangoFp\registerRestRoutes' );
+add_action( 'plugins_loaded', '\MangoFp\checkForDatabaseUpdates' );
+add_action( 'init', 'MangoFp\loadTranslations');
 
-register_activation_hook( __FILE__, 'activateMFP' );
-register_deactivation_hook( __FILE__, 'deactivateMFP' );
-register_uninstall_hook(__FILE__, 'onUninstallMFP');
+register_activation_hook( __FILE__, '\MangoFp\activateMFP' );
+register_deactivation_hook( __FILE__, '\MangoFp\deactivateMFP' );
+register_uninstall_hook(__FILE__, '\MangoFp\onUninstallMFP');
 

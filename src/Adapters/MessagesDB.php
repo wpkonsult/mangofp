@@ -19,7 +19,7 @@ class MessagesDB implements iStorage {
 
     public static function installOrUpdateDatabase() {
         global $wpdb;
-        $mangoVersion = \getVersion();
+        $mangoVersion = getVersion();
         $actualVersion = get_site_option(self::VERSION_PARAM_NAME, '0.0.0');
         if ($mangoVersion == $actualVersion) {
             return;

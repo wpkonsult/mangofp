@@ -3,6 +3,8 @@ Manage Contact Form 7 messages directly in WordPress like leads in CRM system.
 
 Plugin subscribes to Contact Form 7 hooks to store messages information in its own database. The plugin provides messages management UI in Wordpress Admin Area. There is separate settings view for plugin configuration and for messages management process.
 
+Plugin description and installation instructions are [here](https://mangofp.net)
+
 ## Prepare development environment
 ### Clone plugin components
 Plugin code is divided to front end components and common back-end comopent. Front end components are made in Vue. Initial source-code of comopents is in separate GitHub repositories. Clone then to seprate folders in one commonn projects folders (.e.g. in ~/project). In your projects folder: 
