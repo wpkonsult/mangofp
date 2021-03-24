@@ -11,11 +11,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Manage Contact Form 7 messages directly in WordPress like leads in the CRM system.
 
 == Description ==
-MangoFp allows managing Contact Form 7 form submissions directly in WordPress. They will be handled like messages or leads in the CRM system. Information and service requests, various registration forms - all can be managed according to the tailor-made process that is best for you.
+Manage Contact Form 7 messages directly in WordPress. Like leads in the CRM system.  You can manage service requests and other form submissions using a customized process that is best for your team.
 
 All incoming form submissions (messages) are gathered in one place. Each lead is always assigned to a process step. Initially, it is **New**. Then you decide what action is needed with the lead and it can move to the step **In Progress** or **Accepted** or something else specific to your process.
 
-Reply via email to form submissions directly from MangoFp. Your replies can be based on pre-defined email templates.
+Reply via email to customer requests and -orders directly from MangoFp.  Replies that move lead to the next process step can be based on pre-defined email templates. 
 
 
 == Installation ==
